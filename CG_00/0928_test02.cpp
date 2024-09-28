@@ -226,7 +226,15 @@ void Mouse(int button, int state, int x, int y)
 		// 좌상단
 		if (-1.0f <= mX && mX <= 0.0f && 0.0f <= mY && mY <= 1.0f)
 		{
-
+			if (r1.midX - r1.size <= mX && mX <= r1.midX + r1.size &&
+				r1.midY - r1.size <= mY && mY <= r1.midY + r1.size)
+			{	// 내부
+				r1.size -= 0.02f;
+			}
+			else 
+			{	// 외부
+				r1.size += 0.02f;
+			}
 		}
 		// 우상단
 		else if (0.0f <= mX && mX <= 1.0f && 0.0f <= mY && mY <= 1.0f)
