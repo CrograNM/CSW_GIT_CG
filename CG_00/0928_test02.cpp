@@ -4,10 +4,9 @@
 #include <gl/freeglut_ext.h>
 #include <random>
 
-GLclampf Red = 1.0f;
-GLclampf Green = 1.0f;
-GLclampf Blue = 1.0f;
-int timerOnOff = 0;
+GLclampf clientRed = 1.0f;
+GLclampf clientGreen = 1.0f;
+GLclampf clientBlue = 1.0f;
 
 // 랜덤 실수값(0.0f ~ 1.0f) 반환 함수
 std::random_device rd;
@@ -21,7 +20,36 @@ float generateRandomFloat()
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
-void TimerFunction(int value);
+
+float size = 1.0f;
+float middleX = 0.0f, middleY = 0.0f;
+typedef struct RECTANGLE
+{
+	float r;
+	float g;
+	float b;
+	float size;
+}rect;
+rect r1 = { 1.0f, 0.0f, 0.0f, 0.5f };		// 좌상단(r, g, b, size)
+rect r2 = { 0.0f, 1.0f, 0.0f, 0.5f };		// 우상단(r, g, b, size)
+rect r3 = { 0.0f, 0.0f, 1.0f, 0.5f };		// 좌하단(r, g, b, size)
+rect r4 = { 1.0f, 1.0f, 0.0f, 0.5f };		// 우하단(r, g, b, size)
+
+void drawRect() {
+	// 각 사각형의 중앙좌표에서 size만큼 늘림.
+	// 좌상단
+	glColor3f(r1.r, r1.g, r1.b);
+	glRectf(-0.5f - r1.size, 0.5f + r1.size, -0.5f + r1.size, 0.5f - r1.size);
+	// 우상단
+	glColor3f(r2.r, r2.g, r2.b);
+	glRectf(0.5f - r2.size, 0.5f + r2.size, 0.5f + r2.size, 0.5f - r2.size);
+	// 좌하단
+	glColor3f(r3.r, r3.g, r3.b);
+	glRectf(-0.5f - r3.size, -0.5f + r3.size, -0.5f + r3.size, -0.5f - r3.size);
+	// 우하단
+	glColor3f(r4.r, r4.g, r4.b);
+	glRectf(0.5f - r4.size, -0.5f + r4.size, 0.5f + r4.size, -0.5f - r4.size);
+}
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -30,7 +58,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);		//--- 디스플레이 모드 설정
 	glutInitWindowPosition(0, 0);						//--- 윈도우의 위치 지정
 	glutInitWindowSize(800, 600);						//--- 윈도우의 크기 지정
-	glutCreateWindow("test 01");						//--- 윈도우 생성(윈도우 이름)
+	glutCreateWindow("test 02");						//--- 윈도우 생성(윈도우 이름)
 
 	//--- GLEW 초기화하기
 	glewExperimental = GL_TRUE;
@@ -39,7 +67,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 		std::cerr << "Unable to initialize GLEW" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	else
+	else 
 		std::cout << "GLEW Initialized\n";
 
 	glutDisplayFunc(drawScene);					//--- 출력 콜백함수의 지정
@@ -51,91 +79,23 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 {
 	//--- 변경된 배경색 설정
-	glClearColor(Red, Green, Blue, 1.0f);			//--- 바탕색을 변경
-	glClear(GL_COLOR_BUFFER_BIT);					//--- 설정된 색으로 전체를 칠하기
-	glutSwapBuffers();								//--- 화면에 출력하기
+	glClearColor(clientRed, clientGreen, clientBlue, 1.0f);			//--- 바탕색을 변경
+	glClear(GL_COLOR_BUFFER_BIT);									//--- 설정된 색으로 전체를 칠하기
+
+	drawRect();
+	glutSwapBuffers();												//--- 화면에 출력하기
 }
 GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
 {
 	glViewport(0, 0, w, h);
 }
-void TimerFunction(int value)
-{
-	Red = generateRandomFloat();
-	Green = generateRandomFloat();
-	Blue = generateRandomFloat();
-	glutPostRedisplay(); // 화면 재 출력
-	if (timerOnOff == 1)
-	{
-		glutTimerFunc(100, TimerFunction, 1); // 타이머함수 재 설정
-	}
-}
-
 GLvoid Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'c':		// 배경색을 청록색으로 설정
-	{
-		Red = 0.0f;
-		Green = 1.0f;
-		Blue = 1.0f;
-		break;
-	}
-	case 'm':		// 배경색을 자홍색으로 설정
-	{
-		Red = 1.0f;
-		Green = 0.0f;
-		Blue = 1.0f;
-		break;
-	}
-	case 'y':		// 배경색을 노랑색으로 설정
-	{
-		Red = 1.0f;
-		Green = 1.0f;
-		Blue = 0.0f;
-		break;
-	}
-	case 'a':		// 배경색을 랜덤으로 설정
-	{
-		Red = generateRandomFloat();
-		Green = generateRandomFloat();
-		Blue = generateRandomFloat();
-		break;
-	}
-	case 'w':		// 배경색을 백색으로 설정
-	{
-		Red = 1.0f;
-		Green = 1.0f;
-		Blue = 1.0f;
-		break;
-	}
-	case 'k':		// 배경색을 흑색으로 설정
-	{
-		Red = 0.0f;
-		Green = 0.0f;
-		Blue = 0.0f;
-		break;
-	}
-	case 't':		// 타이머 시작
-	{
-		if (timerOnOff == 0)
-		{
-			timerOnOff = 1;
-			glutTimerFunc(100, TimerFunction, 1);
-		}
-		break;
-	}
-	case 's':		// 타이머 종료
-	{
-		timerOnOff = 0;
-		break;
-	}
 	case 'q':		// 프로그램 종료
-	{
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
 		break;
-	}
 	}
 	glutPostRedisplay(); //--- 배경색이 바뀔 때마다 출력 콜백 함수를 호출하여 화면을 refresh 한다
 }
