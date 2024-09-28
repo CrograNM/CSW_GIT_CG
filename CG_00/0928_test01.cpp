@@ -7,6 +7,7 @@
 GLclampf Red = 1.0f;
 GLclampf Green = 1.0f;
 GLclampf Blue = 1.0f;
+int timerOnOff = 0;
 
 // 랜덤 실수값(0.0f ~ 1.0f) 반환 함수
 std::random_device rd;
@@ -16,7 +17,6 @@ float generateRandomFloat()
 	std::uniform_real_distribution<float> dis(0.0f, 1.0f);	// (0.0f ~ 1.0f) 범위 설정
 	return dis(gen);
 }
-
 
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
@@ -42,11 +42,10 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 	else
 		std::cout << "GLEW Initialized\n";
 
-	glutDisplayFunc(drawScene); //--- 출력 콜백함수의 지정
-	glutReshapeFunc(Reshape); //--- 다시 그리기 콜백함수 지정
-	glutKeyboardFunc(Keyboard); //--- 키보드 입력 콜백함수 지정
-	glutTimerFunc(100, TimerFunction, 1);
-	glutMainLoop(); //--- 이벤트 처리 시작
+	glutDisplayFunc(drawScene);					//--- 출력 콜백함수의 지정
+	glutReshapeFunc(Reshape);					//--- 다시 그리기 콜백함수 지정
+	glutKeyboardFunc(Keyboard);					//--- 키보드 입력 콜백함수 지정
+	glutMainLoop();								//--- 이벤트 처리 시작
 }
 
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
@@ -62,8 +61,14 @@ GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
 }
 void TimerFunction(int value)
 {
+	Red = generateRandomFloat();
+	Green = generateRandomFloat();
+	Blue = generateRandomFloat();
 	glutPostRedisplay(); // 화면 재 출력
-	glutTimerFunc(100, TimerFunction, 1); // 타이머함수 재 설정
+	if(timerOnOff == 1)
+	{
+		glutTimerFunc(100, TimerFunction, 1); // 타이머함수 재 설정
+	}
 }
 
 GLvoid Keyboard(unsigned char key, int x, int y)
@@ -110,14 +115,27 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		Red = 0.0f;
 		Green = 0.0f;
 		Blue = 0.0f;
+		break;
 	}
-		break; 
-	case 't':		// 타이머를 설정해 일정시간마다 랜덤색으로 계속 바뀌게
-		break; 
+	case 't':		// 타이머 시작
+	{
+		if (timerOnOff == 0)
+		{
+			timerOnOff = 1;
+			glutTimerFunc(100, TimerFunction, 1);
+		}
+		break;
+	}
 	case 's':		// 타이머 종료
-		break;	
+	{
+		timerOnOff = 0;
+		break;
+	}
 	case 'q':		// 프로그램 종료
-		break; 
+	{
+		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
+		break;
+	}
 	}
 	glutPostRedisplay(); //--- 배경색이 바뀔 때마다 출력 콜백 함수를 호출하여 화면을 refresh 한다
 }
