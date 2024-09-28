@@ -21,8 +21,8 @@ GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
 
-float size = 1.0f;
-float middleX = 0.0f, middleY = 0.0f;
+#define MAX_SIZE 0.5f
+#define MIN_SIZE 0.1f
 typedef struct RECTANGLE
 {
 	float r;
@@ -30,24 +30,56 @@ typedef struct RECTANGLE
 	float b;
 	float size;
 }rect;
-rect r1 = { 1.0f, 0.0f, 0.0f, 0.5f };		// 좌상단(r, g, b, size)
-rect r2 = { 0.0f, 1.0f, 0.0f, 0.5f };		// 우상단(r, g, b, size)
-rect r3 = { 0.0f, 0.0f, 1.0f, 0.5f };		// 좌하단(r, g, b, size)
-rect r4 = { 1.0f, 1.0f, 0.0f, 0.5f };		// 우하단(r, g, b, size)
+rect r1 = { 1.0f, 0.0f, 0.0f, MAX_SIZE };		// 좌상단(r, g, b, size)
+rect r2 = { 0.0f, 1.0f, 0.0f, MAX_SIZE };		// 우상단(r, g, b, size)
+rect r3 = { 0.0f, 0.0f, 1.0f, MAX_SIZE };		// 좌하단(r, g, b, size)
+rect r4 = { 1.0f, 1.0f, 0.0f, MAX_SIZE };		// 우하단(r, g, b, size)
 
 void drawRect() {
 	// 각 사각형의 중앙좌표에서 size만큼 늘림.
 	// 좌상단
 	glColor3f(r1.r, r1.g, r1.b);
+	if (r1.size > MAX_SIZE)
+	{
+		r1.size = MAX_SIZE;
+	}
+	else if (r1.size < MIN_SIZE)
+	{
+		r1.size = MIN_SIZE;
+	}
 	glRectf(-0.5f - r1.size, 0.5f + r1.size, -0.5f + r1.size, 0.5f - r1.size);
 	// 우상단
 	glColor3f(r2.r, r2.g, r2.b);
+	if (r2.size > MAX_SIZE)
+	{
+		r2.size = MAX_SIZE;
+	}
+	else if (r2.size < MIN_SIZE)
+	{
+		r2.size = MIN_SIZE;
+	}
 	glRectf(0.5f - r2.size, 0.5f + r2.size, 0.5f + r2.size, 0.5f - r2.size);
 	// 좌하단
 	glColor3f(r3.r, r3.g, r3.b);
+	if (r3.size > MAX_SIZE)
+	{
+		r3.size = MAX_SIZE;
+	}
+	else if (r3.size < MIN_SIZE)
+	{
+		r3.size = MIN_SIZE;
+	}
 	glRectf(-0.5f - r3.size, -0.5f + r3.size, -0.5f + r3.size, -0.5f - r3.size);
 	// 우하단
 	glColor3f(r4.r, r4.g, r4.b);
+	if (r4.size > MAX_SIZE)
+	{
+		r4.size = MAX_SIZE;
+	}
+	else if (r4.size < MIN_SIZE)
+	{
+		r4.size = MIN_SIZE;
+	}
 	glRectf(0.5f - r4.size, -0.5f + r4.size, 0.5f + r4.size, -0.5f - r4.size);
 }
 
@@ -95,6 +127,12 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	{
 	case 'q':		// 프로그램 종료
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
+		break;
+	case 'a':
+		r4.size -= 0.02f;
+		break;
+	case 's':
+		r4.size += 0.02f;
 		break;
 	}
 	glutPostRedisplay(); //--- 배경색이 바뀔 때마다 출력 콜백 함수를 호출하여 화면을 refresh 한다
