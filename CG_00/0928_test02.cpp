@@ -239,17 +239,41 @@ void Mouse(int button, int state, int x, int y)
 		// 우상단
 		else if (0.0f <= mX && mX <= 1.0f && 0.0f <= mY && mY <= 1.0f)
 		{
-
+			if (r2.midX - r2.size <= mX && mX <= r2.midX + r2.size &&
+				r2.midY - r2.size <= mY && mY <= r2.midY + r2.size)
+			{	// 내부
+				r2.size -= 0.02f;
+			}
+			else
+			{	// 외부
+				r2.size += 0.02f;
+			}
 		}
 		// 좌하단
 		else if (-1.0f <= mX && mX <= 0.0f && -1.0f <= mY && mY <= 0.0f)
 		{
-
+			if (r3.midX - r3.size <= mX && mX <= r3.midX + r3.size &&
+				r3.midY - r3.size <= mY && mY <= r3.midY + r3.size)
+			{	// 내부
+				r3.size -= 0.02f;
+			}
+			else
+			{	// 외부
+				r3.size += 0.02f;
+			}
 		}
 		// 우하단
 		else if (0.0f <= mX && mX <= 1.0f && -1.0f <= mY && mY <= 0.0f)
 		{
-
+			if (r4.midX - r4.size <= mX && mX <= r4.midX + r4.size &&
+				r4.midY - r4.size <= mY && mY <= r4.midY + r4.size)
+			{	// 내부
+				r4.size -= 0.02f;
+			}
+			else
+			{	// 외부
+				r4.size += 0.02f;
+			}
 		}
 	}
 	glutPostRedisplay(); // refresh
