@@ -44,6 +44,7 @@ float Win_to_GL_Y(int y)
 #define MAX_RECT 5
 typedef struct RECTANGLES
 {
+	bool exist;
 	float midX;
 	float midY;
 	float r, g, b;
@@ -52,12 +53,31 @@ typedef struct RECTANGLES
 }RECTS;
 int rect_count = 0;
 RECTS rt[MAX_RECT];
+RECTS tempRect[MAX_RECT];
 
 // 사각형 만들기 및 초기화 (최대 10)
+void initRect()
+{
+	for (int i = 0; i < MAX_RECT; i++)
+	{
+		rt[i].exist		= false;
+		rt[i].midX		= 0;
+		rt[i].midY		= 0;
+		rt[i].r			= 0;
+		rt[i].g			= 0;
+		rt[i].b			= 0;
+		rt[i].width		= 0;
+		rt[i].height	= 0;
+
+		tempRect[i] = rt[i];
+	}
+	rect_count = 0;
+}
 void makeRect(float mx, float my)
 {
-	if (rect_count < MAX_RECT)
+	if (rt[rect_count].exist == false && rect_count < MAX_RECT)
 	{
+		rt[rect_count].exist = true;
 		rt[rect_count].midX = mx;
 		rt[rect_count].midY = my;
 		rt[rect_count].r = generateRandomFloat(0.0f, 1.0f);
@@ -65,6 +85,8 @@ void makeRect(float mx, float my)
 		rt[rect_count].b = generateRandomFloat(0.0f, 1.0f);
 		rt[rect_count].width = 0.15f;
 		rt[rect_count].height = 0.2f;
+
+		tempRect[rect_count] = rt[rect_count];
 		rect_count++;
 	}
 	else
@@ -78,9 +100,12 @@ void drawRect()
 {
 	for (int i = 0; i < rect_count; i++)
 	{
-		glColor3f(rt[i].r, rt[i].g, rt[i].b);
-		glRectf(rt[i].midX - (rt[i].width / 2), rt[i].midY - (rt[i].height / 2),
-			rt[i].midX + (rt[i].width / 2), rt[i].midY + (rt[i].height / 2));
+		if(rt[i].exist == true)
+		{
+			glColor3f(rt[i].r, rt[i].g, rt[i].b);
+			glRectf(rt[i].midX - (rt[i].width / 2), rt[i].midY - (rt[i].height / 2),
+					rt[i].midX + (rt[i].width / 2), rt[i].midY + (rt[i].height / 2));
+		}
 	}
 }
 
@@ -136,6 +161,22 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	{
 	case 'q':		// 프로그램 종료
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
+		break;
+	case 's':		// 모든 애니메이션 정지
+		break;		
+	case 'm':		// 원래 그린 위치로 사각형 이동
+		break;
+	case 'r':		// 타이머 중지, 사각형 초기화 및 재입력
+		initRect();
+		break;
+	// 모든 애니메이션들은 각각 실행 및 정지가 가능
+	case '1':		// 대각선 이동, 벽에 닿으면 튕기기 
+		break;
+	case '2':		// 지그재그 이동
+		break;
+	case '3':		// 사각형의 크기가 커졌다 작아졌다 반복
+		break;
+	case '4':		// 사각형의 색깔이 그라데이션? 으로 변하게
 		break;
 	}
 	glutPostRedisplay(); //--- refresh
