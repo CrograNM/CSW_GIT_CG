@@ -1,189 +1,109 @@
-#include <iostream>
-#include <gl/glew.h> //--- ÇÊ¿äÇÑ Çì´õÆÄÀÏ include
+ï»¿#include <iostream>
+#include <gl/glew.h> //--- í•„ìš”í•œ í—¤ë”íŒŒì¼ include
 #include <gl/freeglut.h>
 #include <gl/freeglut_ext.h>
 #include <random>
 
-// Å¬¶óÀÌ¾ğÆ® Å©±â
+// í´ë¼ì´ì–¸íŠ¸ í¬ê¸°
 #define clientWidth 800
 #define clientHeight 600
 
-// Å¬¶óÀÌ¾ğÆ® ¹è°æ»ö
-GLclampf clientRed = 0.2f;
-GLclampf clientGreen = 0.2f;
-GLclampf clientBlue = 0.2f;
+// í´ë¼ì´ì–¸íŠ¸ ë°°ê²½ìƒ‰
+GLclampf clientRed = 1.0f;
+GLclampf clientGreen = 1.0f;
+GLclampf clientBlue = 1.0f;
 
-// ·£´ı ½Ç¼ö°ª(min ~ max) ¹İÈ¯ ÇÔ¼ö
+// ëœë¤ ì‹¤ìˆ˜ê°’(min ~ max) ë°˜í™˜ í•¨ìˆ˜
 std::random_device rd;
-std::mt19937 gen(rd()); // Mersenne Twister ¿£Áø
+std::mt19937 gen(rd()); // Mersenne Twister ì—”ì§„
 float generateRandomFloat(float min, float max)
 {
-	std::uniform_real_distribution<float> dis(min, max);	// ÀÎÀÚ·Î ¹üÀ§ ¼³Á¤
+	std::uniform_real_distribution<float> dis(min, max);	// ì¸ìë¡œ ë²”ìœ„ ì„¤ì •
 	return dis(gen);
 }
 
-//ÁÂÇ¥ º¯È¯ ÇÔ¼ö
+//ì¢Œí‘œ ë³€í™˜ í•¨ìˆ˜
 int GL_to_Win_X(float x)
 {
-	return (x + 1) * (clientWidth / 2.0f);  // 2.0f·Î ½Ç¼ö ³ª´°¼À
+	return (x + 1) * (clientWidth / 2.0f);  // 2.0fë¡œ ì‹¤ìˆ˜ ë‚˜ëˆ—ì…ˆ
 }
 int GL_to_Win_Y(float y)
 {
-	return (1 - y) * (clientHeight / 2.0f);  // 2.0f·Î ½Ç¼ö ³ª´°¼À
+	return (1 - y) * (clientHeight / 2.0f);  // 2.0fë¡œ ì‹¤ìˆ˜ ë‚˜ëˆ—ì…ˆ
 }
 float Win_to_GL_X(int x)
 {
-	return (x / (float)clientWidth) * 2 - 1;  // Á¤¼ö ³ª´°¼À ¹æÁö
+	return (x / (float)clientWidth) * 2 - 1;  // ì •ìˆ˜ ë‚˜ëˆ—ì…ˆ ë°©ì§€
 }
 float Win_to_GL_Y(int y)
 {
-	return 1 - (y / (float)clientHeight) * 2;  // Á¤¼ö ³ª´°¼À ¹æÁö
+	return 1 - (y / (float)clientHeight) * 2;  // ì •ìˆ˜ ë‚˜ëˆ—ì…ˆ ë°©ì§€
 }
 
-// »ç°¢Çü ±¸Á¶Ã¼ (¹è¿­)
-#define MAX_RECT 5
+// ì‚¬ê°í˜• êµ¬ì¡°ì²´ (ë°°ì—´)
+#define MIN_RECT 20
+#define MAX_RECT 40
+int create_rect_count = 0;
 typedef struct RECTANGLES
 {
-	bool exist;
 	float midX;
 	float midY;
 	float r, g, b;
 	float width;
 	float height;
-	float dx;
-	float dy;
-	int xCount;		//TIMER 3¿¡¼­ È°¿ë
-
-	// ÀÌµ¿ °ü·Ã º¯¼öµé
-	bool	isMovingHorizontally; // °¡·Î·Î ÀÌµ¿ ÁßÀÎÁö ¼¼·Î·Î ÀÌµ¿ ÁßÀÎÁö	//false
-	float	horizontalDirection; // °¡·Î ÀÌµ¿ ¹æÇâ (1: ¿À¸¥ÂÊ, -1: ¿ŞÂÊ)	//1
-	float	verticalDirection;   // ¼¼·Î ÀÌµ¿ ¹æÇâ (1: À§ÂÊ, -1: ¾Æ·¡ÂÊ)	//1
-	int		verticalMoveCount;     // ¼¼·Î·Î ÀÌµ¿ÇÒ È½¼ö (50¹ø ¹İº¹ ÈÄ º¯°æ)	//0
 }RECTS;
 int rect_count = 0;
 RECTS rt[MAX_RECT];
-RECTS tempRect[MAX_RECT];
+RECTS eraser;
 
-// »ç°¢Çü ¸¸µé±â ¹× ÃÊ±âÈ­ (ÃÖ´ë 10)
-void initRect()
+// ì‚¬ê°í˜• ë§Œë“¤ê¸° ë° ì´ˆê¸°í™” (ìµœëŒ€ 10)
+void setRects()
 {
-	std::cout << "init rect\n";
+	std::cout << "set rects\n";
 	for (int i = 0; i < MAX_RECT; i++)
 	{
-		rt[i].exist = false;
-		rt[i].midX = 0;
-		rt[i].midY = 0;
-		rt[i].r = 0;
-		rt[i].g = 0;
-		rt[i].b = 0;
-		rt[i].width = 0;
-		rt[i].height = 0;
-		rt[i].dx = 0;
-		rt[i].dy = 0;
-		rt[i].xCount = 0;
-		rt[i].isMovingHorizontally = false;
-		rt[i].horizontalDirection = 1;
-		rt[i].verticalDirection = 1;
-		rt[i].verticalMoveCount = 0;
-		tempRect[i] = rt[i];
+
 	}
 	rect_count = 0;
 }
-void makeRect(float mx, float my)
-{
-	std::cout << "make rect\n";
-	if (rt[rect_count].exist == false && rect_count < MAX_RECT)
-	{
-		rt[rect_count].exist = true;
-		rt[rect_count].midX = mx;
-		rt[rect_count].midY = my;
-		rt[rect_count].r = generateRandomFloat(0.0f, 1.0f);
-		rt[rect_count].g = generateRandomFloat(0.0f, 1.0f);
-		rt[rect_count].b = generateRandomFloat(0.0f, 1.0f);
-		rt[rect_count].width = 0.15f;
-		rt[rect_count].height = 0.2f;
-		rt[rect_count].dx = 0.01f;
-		rt[rect_count].dy = 0.01f;
-		rt[rect_count].xCount = 0;
-		rt[rect_count].isMovingHorizontally = false;
-		rt[rect_count].horizontalDirection = 1;
-		rt[rect_count].verticalDirection = 1;
-		rt[rect_count].verticalMoveCount = 0;
-		tempRect[rect_count] = rt[rect_count];
-		rect_count++;
-	}
-	else
-	{
-		std::cout << "»ç°¢Çü °³¼ö ÃÊ°ú" << std::endl;
-	}
-}
-void backToSave()
-{
-	std::cout << "back to save\n";
-	for (int i = 0; i < rect_count; i++)
-	{
-		rt[i] = tempRect[i];
-	}
-}
 
-// ÇöÀç Á¸ÀçÇÏ´Â »ç°¢Çü ¸ğµÎ Ãâ·Â
+// í˜„ì¬ ì¡´ì¬í•˜ëŠ” ì‚¬ê°í˜• ëª¨ë‘ ì¶œë ¥
 void drawRect()
 {
 	for (int i = 0; i < rect_count; i++)
 	{
-		if (rt[i].exist == true)
-		{
-			glColor3f(rt[i].r, rt[i].g, rt[i].b);
-			glRectf(rt[i].midX - (rt[i].width / 2), rt[i].midY - (rt[i].height / 2),
+		glColor3f(rt[i].r, rt[i].g, rt[i].b);
+		glRectf(rt[i].midX - (rt[i].width / 2), rt[i].midY - (rt[i].height / 2),
 				rt[i].midX + (rt[i].width / 2), rt[i].midY + (rt[i].height / 2));
-		}
 	}
 }
 
-// Å¸ÀÌ¸Ó °ü·Ã
-int timer_1 = false;
-int timer_2 = false;
-int timer_3 = false;
-int timer_4 = false;
-
-void stopTimer()
-{
-	std::cout << "stop timer ALL\n";
-	timer_1 = false;
-	timer_2 = false;
-	timer_3 = false;
-	timer_4 = false;
-}
-
-// ´ë°¢¼± ÀÌµ¿ ¼Óµµ º¯¼ö Ãß°¡
+// ëŒ€ê°ì„  ì´ë™ ì†ë„ ë³€ìˆ˜ ì¶”ê°€
 float dx = 0.01f;
 float dy = 0.01f;
 
-// GL ÀÌº¥Æ® ÇÔ¼ö
+// ì™¼ìª½ ë§ˆìš°ìŠ¤ í´ë¦­ í™•ì¸
+bool left_button = false;
+
+// GL ì´ë²¤íŠ¸ í•¨ìˆ˜
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
 void Motion(int x, int y);
 
-// Å¸ÀÌ¸Ó ÇÔ¼ö
-void TimerFunction1(int value);	// ´ë°¢¼± ÀÌµ¿
-void TimerFunction2(int value);	// Áö±×Àç±× ÀÌµ¿
-void TimerFunction3(int value); // Å©±â º¯È­
-void TimerFunction4(int value); // »ö»ó º¯È­
-
-void main(int argc, char** argv) //--- À©µµ¿ì Ãâ·ÂÇÏ°í Äİ¹éÇÔ¼ö ¼³Á¤
+void main(int argc, char** argv) //--- ìœˆë„ìš° ì¶œë ¥í•˜ê³  ì½œë°±í•¨ìˆ˜ ì„¤ì •
 {
-	//--- À©µµ¿ì »ı¼ºÇÏ±â
-	glutInit(&argc, argv);								//--- glut ÃÊ±âÈ­
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);		//--- µğ½ºÇÃ·¹ÀÌ ¸ğµå ¼³Á¤
-	glutInitWindowPosition(0, 0);						//--- À©µµ¿ìÀÇ À§Ä¡ ÁöÁ¤
-	glutInitWindowSize(clientWidth, clientHeight);		//--- À©µµ¿ìÀÇ Å©±â ÁöÁ¤
-	glutCreateWindow("test 04");						//--- À©µµ¿ì »ı¼º(À©µµ¿ì ÀÌ¸§)
+	//--- ìœˆë„ìš° ìƒì„±í•˜ê¸°
+	glutInit(&argc, argv);								//--- glut ì´ˆê¸°í™”
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);		//--- ë””ìŠ¤í”Œë ˆì´ ëª¨ë“œ ì„¤ì •
+	glutInitWindowPosition(0, 0);						//--- ìœˆë„ìš°ì˜ ìœ„ì¹˜ ì§€ì •
+	glutInitWindowSize(clientWidth, clientHeight);		//--- ìœˆë„ìš°ì˜ í¬ê¸° ì§€ì •
+	glutCreateWindow("test 04");						//--- ìœˆë„ìš° ìƒì„±(ìœˆë„ìš° ì´ë¦„)
 
-	//--- GLEW ÃÊ±âÈ­ÇÏ±â
+	//--- GLEW ì´ˆê¸°í™”í•˜ê¸°
 	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) //--- glew ÃÊ±âÈ­
+	if (glewInit() != GLEW_OK) //--- glew ì´ˆê¸°í™”
 	{
 		std::cerr << "Unable to initialize GLEW" << std::endl;
 		exit(EXIT_FAILURE);
@@ -191,23 +111,24 @@ void main(int argc, char** argv) //--- À©µµ¿ì Ãâ·ÂÇÏ°í Äİ¹éÇÔ¼ö ¼³Á¤
 	else
 		std::cout << "GLEW Initialized\n";
 
-	glutDisplayFunc(drawScene);					// Ãâ·Â Äİ¹éÇÔ¼öÀÇ ÁöÁ¤
-	glutReshapeFunc(Reshape);					// ´Ù½Ã ±×¸®±â Äİ¹éÇÔ¼ö ÁöÁ¤
-	glutKeyboardFunc(Keyboard);					// Å°º¸µå ÀÔ·Â Äİ¹éÇÔ¼ö ÁöÁ¤
-	glutMouseFunc(Mouse);						// ¸¶¿ì½º ÀÔ·Â
-	glutMainLoop();								// ÀÌº¥Æ® Ã³¸® ½ÃÀÛ
+	glutDisplayFunc(drawScene);					// ì¶œë ¥ ì½œë°±í•¨ìˆ˜ì˜ ì§€ì •
+	glutReshapeFunc(Reshape);					// ë‹¤ì‹œ ê·¸ë¦¬ê¸° ì½œë°±í•¨ìˆ˜ ì§€ì •
+	glutKeyboardFunc(Keyboard);					// í‚¤ë³´ë“œ ì…ë ¥ ì½œë°±í•¨ìˆ˜ ì§€ì •
+	glutMouseFunc(Mouse);						// ë§ˆìš°ìŠ¤ ì…ë ¥
+	glutMotionFunc(Motion);						// ë§ˆìš°ìŠ¤ ì›€ì§ì„
+	glutMainLoop();								// ì´ë²¤íŠ¸ ì²˜ë¦¬ ì‹œì‘
 }
 
-GLvoid drawScene() //--- Äİ¹é ÇÔ¼ö: ±×¸®±â Äİ¹é ÇÔ¼ö
+GLvoid drawScene() //--- ì½œë°± í•¨ìˆ˜: ê·¸ë¦¬ê¸° ì½œë°± í•¨ìˆ˜
 {
-	//--- º¯°æµÈ ¹è°æ»ö ¼³Á¤
-	glClearColor(clientRed, clientGreen, clientBlue, 1.0f);			//--- ¹ÙÅÁ»öÀ» º¯°æ
-	glClear(GL_COLOR_BUFFER_BIT);									//--- ¼³Á¤µÈ »öÀ¸·Î ÀüÃ¼¸¦ Ä¥ÇÏ±â
+	//--- ë³€ê²½ëœ ë°°ê²½ìƒ‰ ì„¤ì •
+	glClearColor(clientRed, clientGreen, clientBlue, 1.0f);			//--- ë°”íƒ•ìƒ‰ì„ ë³€ê²½
+	glClear(GL_COLOR_BUFFER_BIT);									//--- ì„¤ì •ëœ ìƒ‰ìœ¼ë¡œ ì „ì²´ë¥¼ ì¹ í•˜ê¸°
 
-	drawRect();	//10°³ÀÇ »ç°¢Çü
-	glutSwapBuffers();												//--- È­¸é¿¡ Ãâ·ÂÇÏ±â
+	drawRect();	//20~40ê°œì˜ ì‚¬ê°í˜•
+	glutSwapBuffers();												//--- í™”ë©´ì— ì¶œë ¥í•˜ê¸°
 }
-GLvoid Reshape(int w, int h) //--- Äİ¹é ÇÔ¼ö: ´Ù½Ã ±×¸®±â Äİ¹é ÇÔ¼ö
+GLvoid Reshape(int w, int h) //--- ì½œë°± í•¨ìˆ˜: ë‹¤ì‹œ ê·¸ë¦¬ê¸° ì½œë°± í•¨ìˆ˜
 {
 	glViewport(0, 0, w, h);
 }
@@ -215,16 +136,15 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'q':		// ÇÁ·Î±×·¥ Á¾·á
+	case 'q':		// í”„ë¡œê·¸ë¨ ì¢…ë£Œ
 	{
 		std::cout << "Quit\n";
-		glutLeaveMainLoop(); // OpenGL ¸ŞÀÎ ·çÇÁ Á¾·á
+		glutLeaveMainLoop(); // OpenGL ë©”ì¸ ë£¨í”„ ì¢…ë£Œ
 		break;
 	}
-	case 'r':		// Å¸ÀÌ¸Ó ÁßÁö, »ç°¢Çü ÃÊ±âÈ­ ¹× ÀçÀÔ·Â
+	case 'r':		// íƒ€ì´ë¨¸ ì¤‘ì§€, ì‚¬ê°í˜• ì´ˆê¸°í™” ë° ì¬ì…ë ¥
 	{
-		stopTimer();
-		initRect();
+		setRects();
 		break;
 	}
 	}
@@ -236,7 +156,21 @@ void Mouse(int button, int state, int x, int y)
 	float mY = Win_to_GL_Y(y);
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		makeRect(mX, mY);
+		
 	}
 	glutPostRedisplay(); // refresh
+}
+void Motion(int x, int y)
+{
+	//ì‚¬ê°í˜• ìœ„ë¥¼ í´ë¦­í•œ ìƒíƒœë©´
+	if (left_button == true)
+	{
+		float mX = Win_to_GL_X(x);
+		float mY = Win_to_GL_Y(y);
+
+		//ë§ˆìš°ìŠ¤ ì¢Œí‘œì— ë”°ë¼ í•´ë‹¹ ì‚¬ê°í˜• ì´ë™ -> midX, midYì— ë§ˆìš°ìŠ¤ ì¢Œí‘œ ëŒ€ì…
+		eraser.midX = mX;
+		eraser.midY = mY;
+		glutPostRedisplay(); // refresh
+	}
 }
