@@ -52,8 +52,13 @@ typedef struct RECTANGLES
 	float height;
 	float dx;
 	float dy;
-	int xCount;
-	int yCount;
+	int xCount;		//TIMER 3에서 활용
+
+	// 이동 관련 변수들
+	bool	isMovingHorizontally; // 가로로 이동 중인지 세로로 이동 중인지	//false
+	float	horizontalDirection; // 가로 이동 방향 (1: 오른쪽, -1: 왼쪽)	//1
+	float	verticalDirection;   // 세로 이동 방향 (1: 위쪽, -1: 아래쪽)	//1
+	int		verticalMoveCount;     // 세로로 이동할 횟수 (50번 반복 후 변경)	//0
 }RECTS;
 int rect_count = 0;
 RECTS rt[MAX_RECT];
@@ -76,7 +81,10 @@ void initRect()
 		rt[i].dx		= 0;
 		rt[i].dy		= 0;
 		rt[i].xCount = 0;
-		rt[i].yCount = 0;
+		rt[i].isMovingHorizontally = false;
+		rt[i].horizontalDirection = 1;
+		rt[i].verticalDirection = 1;
+		rt[i].verticalMoveCount = 0;
 		tempRect[i] = rt[i];
 	}
 	rect_count = 0;
@@ -97,7 +105,10 @@ void makeRect(float mx, float my)
 		rt[rect_count].dx = 0.01f;
 		rt[rect_count].dy = 0.01f;
 		rt[rect_count].xCount = 0;
-		rt[rect_count].yCount = 0;
+		rt[rect_count].isMovingHorizontally = false;
+		rt[rect_count].horizontalDirection = 1;
+		rt[rect_count].verticalDirection = 1;
+		rt[rect_count].verticalMoveCount = 0;
 		tempRect[rect_count] = rt[rect_count];
 		rect_count++;
 	}
@@ -230,6 +241,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	// 모든 애니메이션들은 각각 실행 및 정지가 가능
 	case '1':		// 대각선 이동, 벽에 닿으면 튕기기 
 	{
+		timer_2 = false;
 		if (timer_1 == false)
 		{
 			std::cout << "timer_1 ON\n";
@@ -245,6 +257,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	}
 	case '2':		// 지그재그 이동
 	{
+		timer_1 = false;
 		if (timer_2 == false)
 		{
 			std::cout << "timer_2 ON\n";
@@ -313,23 +326,91 @@ void TimerFunction1(int value)
 			rt[i].midY += rt[i].dy;
 
 			// 경계에 닿으면 반대 방향으로 변경
-			if (rt[i].midX + rt[i].width / 2 > 1.0f || rt[i].midX - rt[i].width / 2 < -1.0f)
-				rt[i].dx = -rt[i].dx; // X 방향 반전
+			if (rt[i].midX + rt[i].width / 2 > 1.0f)
+			{
+				rt[i].midX = 1.0f - rt[i].width / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				rt[i].dx = -rt[i].dx;  // X 방향 반전
+			}
+			else if (rt[i].midX - rt[i].width / 2 < -1.0f)
+			{
+				rt[i].midX = -1.0f + rt[i].width / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				rt[i].dx = -rt[i].dx;  // X 방향 반전
+			}
 
-			if (rt[i].midY + rt[i].height / 2 > 1.0f || rt[i].midY - rt[i].height / 2 < -1.0f)
-				rt[i].dy = -rt[i].dy; // Y 방향 반전
+			if (rt[i].midY + rt[i].height / 2 > 1.0f)
+			{
+				rt[i].midY = 1.0f - rt[i].height / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				rt[i].dy = -rt[i].dy;  // Y 방향 반전
+			}
+			else if (rt[i].midY - rt[i].height / 2 < -1.0f)
+			{
+				rt[i].midY = -1.0f + rt[i].height / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				rt[i].dy = -rt[i].dy;  // Y 방향 반전
+			}
 		}
-		glutPostRedisplay(); // 화면 재출력
-		glutTimerFunc(16, TimerFunction1, 1); // 약 60fps (1000ms/60 ≈ 16ms) 간격으로 타이머 재설정
+		glutPostRedisplay();  // 화면 재출력
+		glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
 	}
 }
-// 지그재그 이동
+// 지그재그 이동 애니메이션
 void TimerFunction2(int value)
 {
 	if (timer_2 == true)
 	{
-		glutPostRedisplay(); // 화면 재출력
-		glutTimerFunc(16, TimerFunction2, 1); // 약 60fps (1000ms/60 ≈ 16ms) 간격으로 타이머 재설정
+		for (int i = 0; i < rect_count; i++)
+		{
+			// 가로로 이동 중일 때
+			if (rt[i].isMovingHorizontally)
+			{
+				rt[i].midX += rt[i].horizontalDirection * 0.01f;
+
+				// 가로로 이동 중 벽에 부딪힌 경우 (좌우 벽 체크)
+				if (rt[i].midX + (rt[i].width / 2) >= 1.0f)
+				{
+					rt[i].midX = 1.0f - rt[i].width / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+					rt[i].isMovingHorizontally = false;
+					rt[i].verticalMoveCount = 50;
+					rt[i].verticalDirection = -1.0f;
+				}
+				else if (rt[i].midX - (rt[i].width / 2) <= -1.0f)
+				{
+					rt[i].midX = -1.0f + rt[i].width / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+					rt[i].isMovingHorizontally = false;
+					rt[i].verticalMoveCount = 50;
+					rt[i].verticalDirection = 1.0f;
+				}
+			}
+			// 세로로 이동 중일 때
+			else
+			{
+				rt[i].midY += rt[i].verticalDirection * 0.01f;
+				rt[i].verticalMoveCount--;
+
+				// 세로 이동 중 벽에 부딪힌 경우 (상하 벽 체크)
+				if (rt[i].midY + (rt[i].height / 2) >= 1.0f)
+				{
+					rt[i].midY = 1.0f - rt[i].height / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+					rt[i].verticalDirection *= -1.0f;
+					rt[i].verticalMoveCount = 0;
+				}
+				else if (rt[i].midY - (rt[i].height / 2) <= -1.0f)
+				{
+					rt[i].midY = -1.0f + rt[i].height / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+					rt[i].verticalDirection *= -1.0f;
+					rt[i].verticalMoveCount = 0;
+				}
+
+				// 세로로 50번 이동한 후 가로 이동으로 전환
+				if (rt[i].verticalMoveCount <= 0)
+				{
+					rt[i].isMovingHorizontally = true;
+					rt[i].horizontalDirection *= -1.0f;
+				}
+			}
+		}
+
+		glutPostRedisplay();  // 화면 재출력
+		glutTimerFunc(16, TimerFunction2, 1);  // 약 60fps 간격으로 타이머 재설정
 	}
 }
 // 크기 변환
@@ -365,7 +446,7 @@ void TimerFunction3(int value)
 			}
 		}
 		glutPostRedisplay(); // 화면 재출력
-		glutTimerFunc(10, TimerFunction3, 1);
+		glutTimerFunc(16, TimerFunction3, 1); // 약 60fps로 타이머 재설정
 	}
 }
 // 색상 변환
@@ -375,9 +456,23 @@ void TimerFunction4(int value)
 	{
 		for (int i = 0; i < rect_count; i++)
 		{
-			
+			// 색상 변화 속도를 각 사각형마다 다르게 설정
+			float changeRateR = generateRandomFloat(0.005f, 0.02f);
+			float changeRateG = generateRandomFloat(0.005f, 0.02f);
+			float changeRateB = generateRandomFloat(0.005f, 0.02f);
+
+			// r, g, b 값이 랜덤하게 증가
+			rt[i].r += changeRateR;
+			rt[i].g += changeRateG;
+			rt[i].b += changeRateB;
+
+			// 색상이 1.0f 이상이면 0으로 되돌리기 (초기 값으로 리셋)
+			if (rt[i].r > 1.0f) rt[i].r = tempRect[i].r + generateRandomFloat(0.0f, 0.2f);
+			if (rt[i].g > 1.0f) rt[i].g = tempRect[i].g + generateRandomFloat(0.0f, 0.2f);
+			if (rt[i].b > 1.0f) rt[i].b = tempRect[i].b + generateRandomFloat(0.0f, 0.2f);
 		}
+
 		glutPostRedisplay(); // 화면 재출력
-		glutTimerFunc(16, TimerFunction4, 1); // 약 60fps (1000ms/60 ≈ 16ms) 간격으로 타이머 재설정
+		glutTimerFunc(16, TimerFunction4, 1); // 약 60fps로 타이머 재설정
 	}
 }
