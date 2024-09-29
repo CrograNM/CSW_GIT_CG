@@ -352,7 +352,7 @@ void TimerFunction1(int value)
 		glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
 	}
 }
-// 지그재그 이동 애니메이션
+// 지그재그 이동 
 void TimerFunction2(int value)
 {
 	if (timer_2 == true)
@@ -437,6 +437,18 @@ void TimerFunction3(int value)
 			}
 			else if (rt[i].xCount < 200)
 			{
+				rt[i].height = rt[i].height - 0.015f;
+				rt[i].xCount++;
+			}
+			else if (rt[i].xCount < 250)
+			{
+				rt[i].width = rt[i].width + 0.01f;
+				rt[i].height = rt[i].height + 0.015f;
+				rt[i].xCount++;
+			}
+			else if (rt[i].xCount < 300)
+			{
+				rt[i].width = rt[i].width - 0.01f;
 				rt[i].height = rt[i].height - 0.015f;
 				rt[i].xCount++;
 			}
