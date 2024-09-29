@@ -41,19 +41,19 @@ float Win_to_GL_Y(int y)
 }
 
 // 사각형 구조체 (배열)
-#define MIN_RECT 5
-#define MAX_RECT 10
+#define MIN_RECT 15
+#define MAX_RECT 30
 #define RECT_SIZE 0.025f // x3, x4으로 width, height 초기화 (eraser는 x6, x8)
 int create_rect_count = 0;
 typedef struct RECTANGLES
 {
+	bool exist;
 	float midX;
 	float midY;
 	float r, g, b;
 	float width;
 	float height;
 }RECTS;
-int rect_count = 0;
 RECTS rt[MAX_RECT];
 RECTS eraser;
 
@@ -63,6 +63,7 @@ void setRects()
 	// init Rect
 	for (int i = 0; i < MAX_RECT; i++)
 	{
+		rt[i].exist = false;
 		rt[i].midX	= 0;
 		rt[i].midY	= 0;
 		rt[i].r		= 0;
@@ -72,10 +73,11 @@ void setRects()
 		rt[i].height = 0;
 	}
 
-	std::cout << "set rects\n";
+	std::cout << "--set rects--\n";
 	create_rect_count = (int)generateRandomFloat(MIN_RECT, MAX_RECT);
 	for (int i = 0; i < create_rect_count; i++)
 	{
+		rt[i].exist = true;
 		rt[i].midX		= generateRandomFloat(-1.0f, 1.0f);
 		rt[i].midY		= generateRandomFloat(-1.0f, 1.0f);
 		rt[i].r			= generateRandomFloat(0.0f, 1.0f);
@@ -84,7 +86,7 @@ void setRects()
 		rt[i].width		= RECT_SIZE * 3.0f;
 		rt[i].height	= RECT_SIZE * 4.0f;
 	}
-	rect_count = 0;
+	std::cout << "rects : " << create_rect_count << std::endl;
 }
 // 지우개 초기화 함수
 void initEraser()
@@ -98,9 +100,10 @@ void initEraser()
 	eraser.width = 0;
 	eraser.height = 0;
 }
+// 지우개 생성 함수
 void makeEraser(float mx, float my)
 {
-	std::cout << "make Eraser\n";
+	std::cout << "--make Eraser--\n";
 	eraser.midX		= mx;
 	eraser.midY		= my;
 	eraser.r		= 0.0f;
@@ -108,6 +111,40 @@ void makeEraser(float mx, float my)
 	eraser.b		= 0.0f;
 	eraser.width	= RECT_SIZE * 6.0f;
 	eraser.height	= RECT_SIZE * 8.0f;
+}
+// 사각형 지우기
+void eraseRect()
+{
+	//충돌체크
+	for (int i = 0; i < create_rect_count; i++)
+	{
+		if(rt[i].exist == true)
+		{
+			if (eraser.midX - eraser.width / 2 < rt[i].midX + rt[i].width / 2 &&
+				eraser.midX + eraser.width / 2 > rt[i].midX - rt[i].width / 2 &&
+				eraser.midY - eraser.height / 2 < rt[i].midY + rt[i].height / 2 &&
+				eraser.midY + eraser.height / 2 > rt[i].midY - rt[i].height / 2)
+			{
+				std::cout << "ERASE! [" << i << "]\n";
+				// 색 흡수
+				eraser.r = rt[i].r;
+				eraser.g = rt[i].g;
+				eraser.b = rt[i].b;
+				eraser.width += 0.03f;
+				eraser.height += 0.04f;
+
+				// 사각형 삭제
+				rt[i].exist = false;
+				rt[i].midX = 0;
+				rt[i].midY = 0;
+				rt[i].r = 0;
+				rt[i].g = 0;
+				rt[i].b = 0;
+				rt[i].width = 0;
+				rt[i].height = 0;
+			}
+		}
+	}
 }
 
 // 현재 존재하는 사각형 모두 출력
@@ -120,6 +157,7 @@ void drawRect()
 				rt[i].midX + (rt[i].width / 2), rt[i].midY + (rt[i].height / 2));
 	}
 }
+// 지우개 출력
 void drawEraser()
 {
 	glColor3f(eraser.r, eraser.g, eraser.b);
@@ -156,6 +194,8 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	else
 		std::cout << "GLEW Initialized\n";
 
+	setRects();
+
 	glutDisplayFunc(drawScene);					// 출력 콜백함수의 지정
 	glutReshapeFunc(Reshape);					// 다시 그리기 콜백함수 지정
 	glutKeyboardFunc(Keyboard);					// 키보드 입력 콜백함수 지정
@@ -191,7 +231,6 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case 'r':		// 타이머 중지, 사각형 초기화 및 재입력
 	{
 		setRects();
-		std::cout << "rects : " << create_rect_count << std::endl;
 		break;
 	}
 	}
@@ -224,6 +263,9 @@ void Motion(int x, int y)
 		//마우스 좌표에 따라 해당 사각형 이동 -> midX, midY에 마우스 좌표 대입
 		eraser.midX = mX; 
 		eraser.midY = mY;
+
+		//매 이동마다 모든 사각형들과 충돌체크 필요함
+		eraseRect();
 		glutPostRedisplay(); // refresh
 	}
 }
