@@ -73,7 +73,7 @@ void drawRect()
 		r1.size = MIN_SIZE;
 	}
 	glRectf(r1.midX - r1.size, r1.midY + r1.size,
-		r1.midX + r1.size, r1.midY - r1.size);
+			r1.midX + r1.size, r1.midY - r1.size);
 
 	// 우상단
 	glColor3f(r2.r, r2.g, r2.b);
@@ -86,7 +86,7 @@ void drawRect()
 		r2.size = MIN_SIZE;
 	}
 	glRectf(r2.midX - r2.size, r2.midY + r2.size,
-		r2.midX + r2.size, r2.midY - r2.size);
+			r2.midX + r2.size, r2.midY - r2.size);
 
 	// 좌하단
 	glColor3f(r3.r, r3.g, r3.b);
@@ -99,7 +99,7 @@ void drawRect()
 		r3.size = MIN_SIZE;
 	}
 	glRectf(r3.midX - r3.size, r3.midY + r3.size,
-		r3.midX + r3.size, r3.midY - r3.size);
+			r3.midX + r3.size, r3.midY - r3.size);
 
 	// 우하단
 	glColor3f(r4.r, r4.g, r4.b);
@@ -112,7 +112,7 @@ void drawRect()
 		r4.size = MIN_SIZE;
 	}
 	glRectf(r4.midX - r4.size, r4.midY + r4.size,
-		r4.midX + r4.size, r4.midY - r4.size);
+			r4.midX + r4.size, r4.midY - r4.size);
 }
 
 // GL 이벤트 함수

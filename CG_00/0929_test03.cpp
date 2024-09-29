@@ -13,12 +13,12 @@ GLclampf clientRed = 1.0f;
 GLclampf clientGreen = 1.0f;
 GLclampf clientBlue = 1.0f;
 
-// 랜덤 실수값(0.0f ~ 1.0f) 반환 함수
+// 랜덤 실수값(min ~ max) 반환 함수
 std::random_device rd;
 std::mt19937 gen(rd()); // Mersenne Twister 엔진
-float generateRandomFloat()
+float generateRandomFloat(float min, float max)
 {
-	std::uniform_real_distribution<float> dis(0.0f, 1.0f);	// (0.0f ~ 1.0f) 범위 설정
+	std::uniform_real_distribution<float> dis(min, max);	// 인자로 범위 설정
 	return dis(gen);
 }
 
@@ -40,13 +40,50 @@ float Win_to_GL_Y(int y)
 	return 1 - (y / (float)clientHeight) * 2;  // 정수 나눗셈 방지
 }
 
-// 최대 10개 사각형 그리기 함수
-void drawRect() {
+// 사각형 구조체 (배열)
+#define MAX_RECT 10
+typedef struct RECTANGLES
+{
+	float midX;
+	float midY;
+	float r, g, b;
+	float width;
+	float height;
+}RECTS;
+int rect_count = 0;
+RECTS rt[MAX_RECT];
 
+// 함수 만들기 및 초기화 (최대 10)
+void makeRect()
+{
+	if(rect_count < MAX_RECT)
+	{
+		rt[rect_count].midX = generateRandomFloat(-1.0f, 1.0f);
+		rt[rect_count].midY = generateRandomFloat(-1.0f, 1.0f);
+		rt[rect_count].r = generateRandomFloat(0.0f, 1.0f);
+		rt[rect_count].g = generateRandomFloat(0.0f, 1.0f);
+		rt[rect_count].b = generateRandomFloat(0.0f, 1.0f);
+		rt[rect_count].width = generateRandomFloat(0.1f, 0.3f);
+		rt[rect_count].height = generateRandomFloat(0.1f, 0.4f);
+		rect_count++;
+	}
+	else
+	{
+		std::cout << "사각형 개수 초과" << std::endl;
+	}
+}
+// 현재 존재하는 사각형 모두 출력
+void drawRect() {
+	for (int i = 0; i < rect_count; i++) {
+		glColor3f(rt[i].r, rt[i].g, rt[i].b);
+		glRectf(rt[i].midX - (rt[i].width / 2), rt[i].midY - (rt[i].height / 2),
+				rt[i].midX + (rt[i].width / 2), rt[i].midY + (rt[i].height / 2));
+	}
 }
 
 // 왼쪽 마우스 클릭 확인
-bool left_button;
+bool left_button = false;
+int click_index = 0;
 
 // GL 이벤트 함수
 GLvoid drawScene(GLvoid);
@@ -74,12 +111,12 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	else
 		std::cout << "GLEW Initialized\n";
 
-	glutDisplayFunc(drawScene);					//--- 출력 콜백함수의 지정
-	glutReshapeFunc(Reshape);					//--- 다시 그리기 콜백함수 지정
-	glutKeyboardFunc(Keyboard);					//--- 키보드 입력 콜백함수 지정
-	glutMouseFunc(Mouse);
-	glutMotionFunc(Motion);
-	glutMainLoop();								//--- 이벤트 처리 시작
+	glutDisplayFunc(drawScene);					// 출력 콜백함수의 지정
+	glutReshapeFunc(Reshape);					// 다시 그리기 콜백함수 지정
+	glutKeyboardFunc(Keyboard);					// 키보드 입력 콜백함수 지정
+	glutMouseFunc(Mouse);						// 마우스 입력
+	glutMotionFunc(Motion);						// 마우스 움직임
+	glutMainLoop();								// 이벤트 처리 시작
 }
 
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
@@ -104,6 +141,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	case 'a':
 		// 화면의 랜덤한 위치에 다른 색상의 사각형 생성 -> 최대 10개
+		makeRect();
 		break;
 	}
 	glutPostRedisplay(); //--- refresh
@@ -112,9 +150,26 @@ void Mouse(int button, int state, int x, int y)
 {
 	float mX = Win_to_GL_X(x);
 	float mY = Win_to_GL_Y(y);
-	if (button == GLUT_LEFT_BUTTON) {
-		//if 사각형 위를 클릭했으면
-		left_button = true;
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		//if문 사각형 뒤쪽 인덱스부터 검사 (위에 있는 사각형부터 검사)
+		if (left_button == false)
+		{
+			for (int i = rect_count - 1; i >= 0; i--)
+			{
+				if (rt[i].midX - rt[i].width / 2 < mX && mX < rt[i].midX + rt[i].width / 2 &&
+					rt[i].midY - rt[i].height / 2 < mY && mY < rt[i].midY + rt[i].height / 2)
+				{
+					click_index = i;		// 인덱스 저장
+					left_button = true;		// MouseMotion 활성
+					break;					// for문 탈출
+				}
+			}
+		}
+	}
+	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+	{
+		left_button = false;
+		// 클릭된 사각형이 놓인 자리 검사
 	}
 	glutPostRedisplay(); // refresh
 }
@@ -123,8 +178,13 @@ void Motion(int x, int y)
 	//사각형 위를 클릭한 상태면
 	if (left_button == true)
 	{
-		//마우스 좌표에 따라 해당 사각형 이동
-		std::cout << "x = " << x << "y = " << y << std::endl;
+		float mX = Win_to_GL_X(x);
+		float mY = Win_to_GL_Y(y);
+		//std::cout << "x = " << x << "y = " << y << std::endl;
+		//마우스 좌표에 따라 해당 사각형 이동 -> midX, midY에 마우스 좌표 대입
+		rt[click_index].midX = mX;
+		rt[click_index].midY = mY;
+		glutPostRedisplay(); // refresh
 	}
 }
 
