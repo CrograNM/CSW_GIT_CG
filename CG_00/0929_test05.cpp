@@ -204,9 +204,11 @@ void Mouse(int button, int state, int x, int y)
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
 		makeEraser(mX, mY);
+		left_button = true;
 	}
 	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 	{
+		left_button = false;
 		initEraser();
 	}
 	glutPostRedisplay(); // refresh
@@ -220,7 +222,7 @@ void Motion(int x, int y)
 		float mY = Win_to_GL_Y(y);
 
 		//마우스 좌표에 따라 해당 사각형 이동 -> midX, midY에 마우스 좌표 대입
-		eraser.midX = mX;
+		eraser.midX = mX; 
 		eraser.midY = mY;
 		glutPostRedisplay(); // refresh
 	}
