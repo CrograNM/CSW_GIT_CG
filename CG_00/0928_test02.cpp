@@ -1,46 +1,46 @@
-#include <iostream>
-#include <gl/glew.h> //--- ÇÊ¿äÇÑ Çì´õÆÄÀÏ include
+ï»¿#include <iostream>
+#include <gl/glew.h> //--- í•„ìš”í•œ í—¤ë”íŒŒì¼ include
 #include <gl/freeglut.h>
 #include <gl/freeglut_ext.h>
 #include <random>
 
-// Å¬¶óÀÌ¾ğÆ® Å©±â
+// í´ë¼ì´ì–¸íŠ¸ í¬ê¸°
 #define clientWidth 800
 #define clientHeight 600
 
-// Å¬¶óÀÌ¾ğÆ® ¹è°æ»ö
+// í´ë¼ì´ì–¸íŠ¸ ë°°ê²½ìƒ‰
 GLclampf clientRed = 1.0f;
 GLclampf clientGreen = 1.0f;
 GLclampf clientBlue = 1.0f;
 
-// ·£´ı ½Ç¼ö°ª(0.0f ~ 1.0f) ¹İÈ¯ ÇÔ¼ö
+// ëœë¤ ì‹¤ìˆ˜ê°’(0.0f ~ 1.0f) ë°˜í™˜ í•¨ìˆ˜
 std::random_device rd;
-std::mt19937 gen(rd()); // Mersenne Twister ¿£Áø
+std::mt19937 gen(rd()); // Mersenne Twister ì—”ì§„
 float generateRandomFloat()
 {
-	std::uniform_real_distribution<float> dis(0.0f, 1.0f);	// (0.0f ~ 1.0f) ¹üÀ§ ¼³Á¤
+	std::uniform_real_distribution<float> dis(0.0f, 1.0f);	// (0.0f ~ 1.0f) ë²”ìœ„ ì„¤ì •
 	return dis(gen);
 }
 
-//ÁÂÇ¥ º¯È¯ ÇÔ¼ö
+//ì¢Œí‘œ ë³€í™˜ í•¨ìˆ˜
 int GL_to_Win_X(float x)
 {
-	return (x + 1) * (clientWidth / 2.0f);  // 2.0f·Î ½Ç¼ö ³ª´°¼À
+	return (x + 1) * (clientWidth / 2.0f);  // 2.0fë¡œ ì‹¤ìˆ˜ ë‚˜ëˆ—ì…ˆ
 }
 int GL_to_Win_Y(float y)
 {
-	return (1 - y) * (clientHeight / 2.0f);  // 2.0f·Î ½Ç¼ö ³ª´°¼À
+	return (1 - y) * (clientHeight / 2.0f);  // 2.0fë¡œ ì‹¤ìˆ˜ ë‚˜ëˆ—ì…ˆ
 }
 float Win_to_GL_X(int x)
 {
-	return (x / (float)clientWidth) * 2 - 1;  // Á¤¼ö ³ª´°¼À ¹æÁö
+	return (x / (float)clientWidth) * 2 - 1;  // ì •ìˆ˜ ë‚˜ëˆ—ì…ˆ ë°©ì§€
 }
 float Win_to_GL_Y(int y)
 {
-	return 1 - (y / (float)clientHeight) * 2;  // Á¤¼ö ³ª´°¼À ¹æÁö
+	return 1 - (y / (float)clientHeight) * 2;  // ì •ìˆ˜ ë‚˜ëˆ—ì…ˆ ë°©ì§€
 }
 
-// 4°³ÀÇ »ç°¢Çü
+// 4ê°œì˜ ì‚¬ê°í˜•
 #define MAX_SIZE 0.5f
 #define MIN_SIZE 0.1f
 typedef struct RECTANGLE
@@ -48,21 +48,21 @@ typedef struct RECTANGLE
 	float r;
 	float g;
 	float b;
-	float midX;		//»ç°¢ÇüÀÇ Áß¾Ó x
-	float midY;		//»ç°¢ÇüÀÇ Áß¾Ó y
+	float midX;		//ì‚¬ê°í˜•ì˜ ì¤‘ì•™ x
+	float midY;		//ì‚¬ê°í˜•ì˜ ì¤‘ì•™ y
 	float size;
 }rect;
-rect r1 = { 1.0f, 0.0f, 0.0f, -0.5f, 0.5f, MAX_SIZE };		// ÁÂ»ó´Ü(r, g, b, size)
-rect r2 = { 0.0f, 1.0f, 0.0f, 0.5f, 0.5f, MAX_SIZE };		// ¿ì»ó´Ü(r, g, b, size)
-rect r3 = { 0.0f, 0.0f, 1.0f, -0.5f, -0.5f, MAX_SIZE };		// ÁÂÇÏ´Ü(r, g, b, size)
-rect r4 = { 1.0f, 1.0f, 0.0f, 0.5f, -0.5f, MAX_SIZE };		// ¿ìÇÏ´Ü(r, g, b, size)
+rect r1 = { 1.0f, 0.0f, 0.0f, -0.5f, 0.5f, MAX_SIZE };		// ì¢Œìƒë‹¨(r, g, b, size)
+rect r2 = { 0.0f, 1.0f, 0.0f, 0.5f, 0.5f, MAX_SIZE };		// ìš°ìƒë‹¨(r, g, b, size)
+rect r3 = { 0.0f, 0.0f, 1.0f, -0.5f, -0.5f, MAX_SIZE };		// ì¢Œí•˜ë‹¨(r, g, b, size)
+rect r4 = { 1.0f, 1.0f, 0.0f, 0.5f, -0.5f, MAX_SIZE };		// ìš°í•˜ë‹¨(r, g, b, size)
 
-// 4°³ »ç°¢Çü ±×¸®±â ÇÔ¼ö
+// 4ê°œ ì‚¬ê°í˜• ê·¸ë¦¬ê¸° í•¨ìˆ˜
 void drawRect()
 {
-	// °¢ »ç°¢ÇüÀÇ Áß¾ÓÁÂÇ¥¿¡¼­ size¸¸Å­ ´Ã¸².
+	// ê° ì‚¬ê°í˜•ì˜ ì¤‘ì•™ì¢Œí‘œì—ì„œ sizeë§Œí¼ ëŠ˜ë¦¼.
 
-	// ÁÂ»ó´Ü
+	// ì¢Œìƒë‹¨
 	glColor3f(r1.r, r1.g, r1.b);
 	if (r1.size > MAX_SIZE)
 	{
@@ -75,7 +75,7 @@ void drawRect()
 	glRectf(r1.midX - r1.size, r1.midY + r1.size,
 		r1.midX + r1.size, r1.midY - r1.size);
 
-	// ¿ì»ó´Ü
+	// ìš°ìƒë‹¨
 	glColor3f(r2.r, r2.g, r2.b);
 	if (r2.size > MAX_SIZE)
 	{
@@ -88,7 +88,7 @@ void drawRect()
 	glRectf(r2.midX - r2.size, r2.midY + r2.size,
 		r2.midX + r2.size, r2.midY - r2.size);
 
-	// ÁÂÇÏ´Ü
+	// ì¢Œí•˜ë‹¨
 	glColor3f(r3.r, r3.g, r3.b);
 	if (r3.size > MAX_SIZE)
 	{
@@ -101,7 +101,7 @@ void drawRect()
 	glRectf(r3.midX - r3.size, r3.midY + r3.size,
 		r3.midX + r3.size, r3.midY - r3.size);
 
-	// ¿ìÇÏ´Ü
+	// ìš°í•˜ë‹¨
 	glColor3f(r4.r, r4.g, r4.b);
 	if (r4.size > MAX_SIZE)
 	{
@@ -115,24 +115,24 @@ void drawRect()
 		r4.midX + r4.size, r4.midY - r4.size);
 }
 
-// GL ÀÌº¥Æ® ÇÔ¼ö
+// GL ì´ë²¤íŠ¸ í•¨ìˆ˜
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
 
-void main(int argc, char** argv) //--- À©µµ¿ì Ãâ·ÂÇÏ°í Äİ¹éÇÔ¼ö ¼³Á¤
+void main(int argc, char** argv) //--- ìœˆë„ìš° ì¶œë ¥í•˜ê³  ì½œë°±í•¨ìˆ˜ ì„¤ì •
 {
-	//--- À©µµ¿ì »ı¼ºÇÏ±â
-	glutInit(&argc, argv);								//--- glut ÃÊ±âÈ­
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);		//--- µğ½ºÇÃ·¹ÀÌ ¸ğµå ¼³Á¤
-	glutInitWindowPosition(0, 0);						//--- À©µµ¿ìÀÇ À§Ä¡ ÁöÁ¤
-	glutInitWindowSize(clientWidth, clientHeight);		//--- À©µµ¿ìÀÇ Å©±â ÁöÁ¤
-	glutCreateWindow("test 02");						//--- À©µµ¿ì »ı¼º(À©µµ¿ì ÀÌ¸§)
+	//--- ìœˆë„ìš° ìƒì„±í•˜ê¸°
+	glutInit(&argc, argv);								//--- glut ì´ˆê¸°í™”
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);		//--- ë””ìŠ¤í”Œë ˆì´ ëª¨ë“œ ì„¤ì •
+	glutInitWindowPosition(0, 0);						//--- ìœˆë„ìš°ì˜ ìœ„ì¹˜ ì§€ì •
+	glutInitWindowSize(clientWidth, clientHeight);		//--- ìœˆë„ìš°ì˜ í¬ê¸° ì§€ì •
+	glutCreateWindow("test 02");						//--- ìœˆë„ìš° ìƒì„±(ìœˆë„ìš° ì´ë¦„)
 
-	//--- GLEW ÃÊ±âÈ­ÇÏ±â
+	//--- GLEW ì´ˆê¸°í™”í•˜ê¸°
 	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) //--- glew ÃÊ±âÈ­
+	if (glewInit() != GLEW_OK) //--- glew ì´ˆê¸°í™”
 	{
 		std::cerr << "Unable to initialize GLEW" << std::endl;
 		exit(EXIT_FAILURE);
@@ -140,23 +140,23 @@ void main(int argc, char** argv) //--- À©µµ¿ì Ãâ·ÂÇÏ°í Äİ¹éÇÔ¼ö ¼³Á¤
 	else 
 		std::cout << "GLEW Initialized\n";
 
-	glutDisplayFunc(drawScene);					//--- Ãâ·Â Äİ¹éÇÔ¼öÀÇ ÁöÁ¤
-	glutReshapeFunc(Reshape);					//--- ´Ù½Ã ±×¸®±â Äİ¹éÇÔ¼ö ÁöÁ¤
-	glutKeyboardFunc(Keyboard);					//--- Å°º¸µå ÀÔ·Â Äİ¹éÇÔ¼ö ÁöÁ¤
+	glutDisplayFunc(drawScene);					//--- ì¶œë ¥ ì½œë°±í•¨ìˆ˜ì˜ ì§€ì •
+	glutReshapeFunc(Reshape);					//--- ë‹¤ì‹œ ê·¸ë¦¬ê¸° ì½œë°±í•¨ìˆ˜ ì§€ì •
+	glutKeyboardFunc(Keyboard);					//--- í‚¤ë³´ë“œ ì…ë ¥ ì½œë°±í•¨ìˆ˜ ì§€ì •
 	glutMouseFunc(Mouse);
-	glutMainLoop();								//--- ÀÌº¥Æ® Ã³¸® ½ÃÀÛ
+	glutMainLoop();								//--- ì´ë²¤íŠ¸ ì²˜ë¦¬ ì‹œì‘
 }
 
-GLvoid drawScene() //--- Äİ¹é ÇÔ¼ö: ±×¸®±â Äİ¹é ÇÔ¼ö
+GLvoid drawScene() //--- ì½œë°± í•¨ìˆ˜: ê·¸ë¦¬ê¸° ì½œë°± í•¨ìˆ˜
 {
-	//--- º¯°æµÈ ¹è°æ»ö ¼³Á¤
-	glClearColor(clientRed, clientGreen, clientBlue, 1.0f);			//--- ¹ÙÅÁ»öÀ» º¯°æ
-	glClear(GL_COLOR_BUFFER_BIT);									//--- ¼³Á¤µÈ »öÀ¸·Î ÀüÃ¼¸¦ Ä¥ÇÏ±â
+	//--- ë³€ê²½ëœ ë°°ê²½ìƒ‰ ì„¤ì •
+	glClearColor(clientRed, clientGreen, clientBlue, 1.0f);			//--- ë°”íƒ•ìƒ‰ì„ ë³€ê²½
+	glClear(GL_COLOR_BUFFER_BIT);									//--- ì„¤ì •ëœ ìƒ‰ìœ¼ë¡œ ì „ì²´ë¥¼ ì¹ í•˜ê¸°
 
-	drawRect();	// 4°³ÀÇ »ç°¢ÇüÀ» ±×¸®´Â ÇÔ¼ö Ãß°¡
-	glutSwapBuffers();												//--- È­¸é¿¡ Ãâ·ÂÇÏ±â
+	drawRect();	// 4ê°œì˜ ì‚¬ê°í˜•ì„ ê·¸ë¦¬ëŠ” í•¨ìˆ˜ ì¶”ê°€
+	glutSwapBuffers();												//--- í™”ë©´ì— ì¶œë ¥í•˜ê¸°
 }
-GLvoid Reshape(int w, int h) //--- Äİ¹é ÇÔ¼ö: ´Ù½Ã ±×¸®±â Äİ¹é ÇÔ¼ö
+GLvoid Reshape(int w, int h) //--- ì½œë°± í•¨ìˆ˜: ë‹¤ì‹œ ê·¸ë¦¬ê¸° ì½œë°± í•¨ìˆ˜
 {
 	glViewport(0, 0, w, h);
 }
@@ -164,8 +164,8 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'q':		// ÇÁ·Î±×·¥ Á¾·á
-		glutLeaveMainLoop(); // OpenGL ¸ŞÀÎ ·çÇÁ Á¾·á
+	case 'q':		// í”„ë¡œê·¸ë¨ ì¢…ë£Œ
+		glutLeaveMainLoop(); // OpenGL ë©”ì¸ ë£¨í”„ ì¢…ë£Œ
 		break;
 	case 'a':
 		r4.size -= 0.02f;
@@ -182,38 +182,38 @@ void Mouse(int button, int state, int x, int y)
 	float mY = Win_to_GL_Y(y);
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		// »ç°¢Çü ³»ºÎ Å¬¸¯ °¨Áö --> Å¬¸¯ÇÑ »ç°¢Çü »ö»ó ·£´ı º¯°æ
-		// »ç°¢Çü ¿ÜºÎ Å¬¸¯ °¨Áö --> ¹è°æ»ö ·£´ı º¯°æ (4°³ÀÇ »ç°¢ÇüÀÌ ¸ğµÎ Å¬¸¯µÇÁö ¾ÊÀ½)
+		// ì‚¬ê°í˜• ë‚´ë¶€ í´ë¦­ ê°ì§€ --> í´ë¦­í•œ ì‚¬ê°í˜• ìƒ‰ìƒ ëœë¤ ë³€ê²½
+		// ì‚¬ê°í˜• ì™¸ë¶€ í´ë¦­ ê°ì§€ --> ë°°ê²½ìƒ‰ ëœë¤ ë³€ê²½ (4ê°œì˜ ì‚¬ê°í˜•ì´ ëª¨ë‘ í´ë¦­ë˜ì§€ ì•ŠìŒ)
 		if (r1.midX - r1.size <= mX && mX <= r1.midX + r1.size && 
 			r1.midY - r1.size <= mY && mY <= r1.midY + r1.size)
-		{	// ÁÂ»ó´Ü »ç°¢Çü ³»ºÎ
+		{	// ì¢Œìƒë‹¨ ì‚¬ê°í˜• ë‚´ë¶€
 			r1.r = generateRandomFloat();
 			r1.g = generateRandomFloat();
 			r1.b = generateRandomFloat();
 		}
 		else if (r2.midX - r2.size <= mX && mX <= r2.midX + r2.size &&
 				 r2.midY - r2.size <= mY && mY <= r2.midY + r2.size)
-		{	// ¿ì»ó´Ü »ç°¢Çü ³»ºÎ
+		{	// ìš°ìƒë‹¨ ì‚¬ê°í˜• ë‚´ë¶€
 			r2.r = generateRandomFloat();
 			r2.g = generateRandomFloat();
 			r2.b = generateRandomFloat();
 		}
 		else if (r3.midX - r3.size <= mX && mX <= r3.midX + r3.size &&
 				 r3.midY - r3.size <= mY && mY <= r3.midY + r3.size)
-		{	// ÁÂÇÏ´Ü »ç°¢Çü ³»ºÎ
+		{	// ì¢Œí•˜ë‹¨ ì‚¬ê°í˜• ë‚´ë¶€
 			r3.r = generateRandomFloat();
 			r3.g = generateRandomFloat();
 			r3.b = generateRandomFloat();
 		}
 		else if (r4.midX - r4.size <= mX && mX <= r4.midX + r4.size &&
 				 r4.midY - r4.size <= mY && mY <= r4.midY + r4.size)
-		{	// ¿ìÇÏ´Ü »ç°¢Çü ³»ºÎ
+		{	// ìš°í•˜ë‹¨ ì‚¬ê°í˜• ë‚´ë¶€
 			r4.r = generateRandomFloat();
 			r4.g = generateRandomFloat();
 			r4.b = generateRandomFloat();
 		}
 		else
-		{	// ¸ğµç »ç°¢Çü ³»ºÎ°¡ ¾Æ´Ô -> ¹è°æ Å¬¸¯
+		{	// ëª¨ë“  ì‚¬ê°í˜• ë‚´ë¶€ê°€ ì•„ë‹˜ -> ë°°ê²½ í´ë¦­
 			clientRed = generateRandomFloat();
 			clientGreen = generateRandomFloat();
 			clientBlue = generateRandomFloat();
@@ -221,57 +221,57 @@ void Mouse(int button, int state, int x, int y)
 	}
 	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 	{
-		//»ç°¢Çü ³»ºÎ Å¬¸¯ °¨Áö --> Å¬¸¯ÇÑ »ç°¢Çü Å©±â Ãà¼Ò
-		//»ç°¢Çü ¿ÜºÎ Å¬¸¯ °¨Áö --> Å¬¸¯µÈ 4ºĞ¸éÀÇ »ç°¢Çü Å©±â È®´ë
-		// ÁÂ»ó´Ü
+		//ì‚¬ê°í˜• ë‚´ë¶€ í´ë¦­ ê°ì§€ --> í´ë¦­í•œ ì‚¬ê°í˜• í¬ê¸° ì¶•ì†Œ
+		//ì‚¬ê°í˜• ì™¸ë¶€ í´ë¦­ ê°ì§€ --> í´ë¦­ëœ 4ë¶„ë©´ì˜ ì‚¬ê°í˜• í¬ê¸° í™•ëŒ€
+		// ì¢Œìƒë‹¨
 		if (-1.0f <= mX && mX <= 0.0f && 0.0f <= mY && mY <= 1.0f)
 		{
 			if (r1.midX - r1.size <= mX && mX <= r1.midX + r1.size &&
 				r1.midY - r1.size <= mY && mY <= r1.midY + r1.size)
-			{	// ³»ºÎ
+			{	// ë‚´ë¶€
 				r1.size -= 0.02f;
 			}
 			else 
-			{	// ¿ÜºÎ
+			{	// ì™¸ë¶€
 				r1.size += 0.02f;
 			}
 		}
-		// ¿ì»ó´Ü
+		// ìš°ìƒë‹¨
 		else if (0.0f <= mX && mX <= 1.0f && 0.0f <= mY && mY <= 1.0f)
 		{
 			if (r2.midX - r2.size <= mX && mX <= r2.midX + r2.size &&
 				r2.midY - r2.size <= mY && mY <= r2.midY + r2.size)
-			{	// ³»ºÎ
+			{	// ë‚´ë¶€
 				r2.size -= 0.02f;
 			}
 			else
-			{	// ¿ÜºÎ
+			{	// ì™¸ë¶€
 				r2.size += 0.02f;
 			}
 		}
-		// ÁÂÇÏ´Ü
+		// ì¢Œí•˜ë‹¨
 		else if (-1.0f <= mX && mX <= 0.0f && -1.0f <= mY && mY <= 0.0f)
 		{
 			if (r3.midX - r3.size <= mX && mX <= r3.midX + r3.size &&
 				r3.midY - r3.size <= mY && mY <= r3.midY + r3.size)
-			{	// ³»ºÎ
+			{	// ë‚´ë¶€
 				r3.size -= 0.02f;
 			}
 			else
-			{	// ¿ÜºÎ
+			{	// ì™¸ë¶€
 				r3.size += 0.02f;
 			}
 		}
-		// ¿ìÇÏ´Ü
+		// ìš°í•˜ë‹¨
 		else if (0.0f <= mX && mX <= 1.0f && -1.0f <= mY && mY <= 0.0f)
 		{
 			if (r4.midX - r4.size <= mX && mX <= r4.midX + r4.size &&
 				r4.midY - r4.size <= mY && mY <= r4.midY + r4.size)
-			{	// ³»ºÎ
+			{	// ë‚´ë¶€
 				r4.size -= 0.02f;
 			}
 			else
-			{	// ¿ÜºÎ
+			{	// ì™¸ë¶€
 				r4.size += 0.02f;
 			}
 		}

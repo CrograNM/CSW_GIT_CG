@@ -124,5 +124,6 @@ void Motion(int x, int y)
 	if (left_button == true)
 	{
 		//마우스 좌표에 따라 해당 사각형 이동
+		std::cout << "x = " << x << "y = " << y << std::endl;
 	}
 }
