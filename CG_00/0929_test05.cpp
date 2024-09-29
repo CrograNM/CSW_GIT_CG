@@ -41,9 +41,9 @@ float Win_to_GL_Y(int y)
 }
 
 // 사각형 구조체 (배열)
-#define MIN_RECT 20
-#define MAX_RECT 40
-#define RECT_SIZE 0.05f // x3, x4으로 width, height 초기화 (eraser는 x6, x8)
+#define MIN_RECT 5
+#define MAX_RECT 10
+#define RECT_SIZE 0.025f // x3, x4으로 width, height 초기화 (eraser는 x6, x8)
 int create_rect_count = 0;
 typedef struct RECTANGLES
 {
@@ -60,6 +60,18 @@ RECTS eraser;
 // 사각형 만들기 및 초기화 (최대 10)
 void setRects()
 {
+	// init Rect
+	for (int i = 0; i < MAX_RECT; i++)
+	{
+		rt[i].midX	= 0;
+		rt[i].midY	= 0;
+		rt[i].r		= 0;
+		rt[i].g		= 0;
+		rt[i].b		= 0;
+		rt[i].width = 0;
+		rt[i].height = 0;
+	}
+
 	std::cout << "set rects\n";
 	create_rect_count = (int)generateRandomFloat(MIN_RECT, MAX_RECT);
 	for (int i = 0; i < create_rect_count; i++)
