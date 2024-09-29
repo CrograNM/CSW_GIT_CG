@@ -1,46 +1,46 @@
-#include <iostream>
-#include <gl/glew.h> //--- ÇÊ¿äÇÑ Çì´õÆÄÀÏ include
+ï»¿#include <iostream>
+#include <gl/glew.h> //--- í•„ìš”í•œ í—¤ë”íŒŒì¼ include
 #include <gl/freeglut.h>
 #include <gl/freeglut_ext.h>
 #include <random>
 
-// Å¬¶óÀÌ¾ğÆ® Å©±â
+// í´ë¼ì´ì–¸íŠ¸ í¬ê¸°
 #define clientWidth 800
 #define clientHeight 600
 
-// Å¬¶óÀÌ¾ğÆ® ¹è°æ»ö
+// í´ë¼ì´ì–¸íŠ¸ ë°°ê²½ìƒ‰
 GLclampf clientRed = 0.2f;
 GLclampf clientGreen = 0.2f;
 GLclampf clientBlue = 0.2f;
 
-// ·£´ı ½Ç¼ö°ª(min ~ max) ¹İÈ¯ ÇÔ¼ö
+// ëœë¤ ì‹¤ìˆ˜ê°’(min ~ max) ë°˜í™˜ í•¨ìˆ˜
 std::random_device rd;
-std::mt19937 gen(rd()); // Mersenne Twister ¿£Áø
+std::mt19937 gen(rd()); // Mersenne Twister ì—”ì§„
 float generateRandomFloat(float min, float max)
 {
-	std::uniform_real_distribution<float> dis(min, max);	// ÀÎÀÚ·Î ¹üÀ§ ¼³Á¤
+	std::uniform_real_distribution<float> dis(min, max);	// ì¸ìë¡œ ë²”ìœ„ ì„¤ì •
 	return dis(gen);
 }
 
-//ÁÂÇ¥ º¯È¯ ÇÔ¼ö
+//ì¢Œí‘œ ë³€í™˜ í•¨ìˆ˜
 int GL_to_Win_X(float x)
 {
-	return (x + 1) * (clientWidth / 2.0f);  // 2.0f·Î ½Ç¼ö ³ª´°¼À
+	return (x + 1) * (clientWidth / 2.0f);  // 2.0fë¡œ ì‹¤ìˆ˜ ë‚˜ëˆ—ì…ˆ
 }
 int GL_to_Win_Y(float y)
 {
-	return (1 - y) * (clientHeight / 2.0f);  // 2.0f·Î ½Ç¼ö ³ª´°¼À
+	return (1 - y) * (clientHeight / 2.0f);  // 2.0fë¡œ ì‹¤ìˆ˜ ë‚˜ëˆ—ì…ˆ
 }
 float Win_to_GL_X(int x)
 {
-	return (x / (float)clientWidth) * 2 - 1;  // Á¤¼ö ³ª´°¼À ¹æÁö
+	return (x / (float)clientWidth) * 2 - 1;  // ì •ìˆ˜ ë‚˜ëˆ—ì…ˆ ë°©ì§€
 }
 float Win_to_GL_Y(int y)
 {
-	return 1 - (y / (float)clientHeight) * 2;  // Á¤¼ö ³ª´°¼À ¹æÁö
+	return 1 - (y / (float)clientHeight) * 2;  // ì •ìˆ˜ ë‚˜ëˆ—ì…ˆ ë°©ì§€
 }
 
-// »ç°¢Çü ±¸Á¶Ã¼ (¹è¿­)
+// ì‚¬ê°í˜• êµ¬ì¡°ì²´ (ë°°ì—´)
 #define MAX_RECT 5
 typedef struct RECTANGLES
 {
@@ -53,7 +53,7 @@ typedef struct RECTANGLES
 int rect_count = 0;
 RECTS rt[MAX_RECT];
 
-// »ç°¢Çü ¸¸µé±â ¹× ÃÊ±âÈ­ (ÃÖ´ë 10)
+// ì‚¬ê°í˜• ë§Œë“¤ê¸° ë° ì´ˆê¸°í™” (ìµœëŒ€ 10)
 void makeRect(float mx, float my)
 {
 	if (rect_count < MAX_RECT)
@@ -69,11 +69,11 @@ void makeRect(float mx, float my)
 	}
 	else
 	{
-		std::cout << "»ç°¢Çü °³¼ö ÃÊ°ú" << std::endl;
+		std::cout << "ì‚¬ê°í˜• ê°œìˆ˜ ì´ˆê³¼" << std::endl;
 	}
 }
 
-// ÇöÀç Á¸ÀçÇÏ´Â »ç°¢Çü ¸ğµÎ Ãâ·Â
+// í˜„ì¬ ì¡´ì¬í•˜ëŠ” ì‚¬ê°í˜• ëª¨ë‘ ì¶œë ¥
 void drawRect()
 {
 	for (int i = 0; i < rect_count; i++)
@@ -84,25 +84,25 @@ void drawRect()
 	}
 }
 
-// GL ÀÌº¥Æ® ÇÔ¼ö
+// GL ì´ë²¤íŠ¸ í•¨ìˆ˜
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
 void Motion(int x, int y);
 
-void main(int argc, char** argv) //--- À©µµ¿ì Ãâ·ÂÇÏ°í Äİ¹éÇÔ¼ö ¼³Á¤
+void main(int argc, char** argv) //--- ìœˆë„ìš° ì¶œë ¥í•˜ê³  ì½œë°±í•¨ìˆ˜ ì„¤ì •
 {
-	//--- À©µµ¿ì »ı¼ºÇÏ±â
-	glutInit(&argc, argv);								//--- glut ÃÊ±âÈ­
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);		//--- µğ½ºÇÃ·¹ÀÌ ¸ğµå ¼³Á¤
-	glutInitWindowPosition(0, 0);						//--- À©µµ¿ìÀÇ À§Ä¡ ÁöÁ¤
-	glutInitWindowSize(clientWidth, clientHeight);		//--- À©µµ¿ìÀÇ Å©±â ÁöÁ¤
-	glutCreateWindow("test 04");						//--- À©µµ¿ì »ı¼º(À©µµ¿ì ÀÌ¸§)
+	//--- ìœˆë„ìš° ìƒì„±í•˜ê¸°
+	glutInit(&argc, argv);								//--- glut ì´ˆê¸°í™”
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);		//--- ë””ìŠ¤í”Œë ˆì´ ëª¨ë“œ ì„¤ì •
+	glutInitWindowPosition(0, 0);						//--- ìœˆë„ìš°ì˜ ìœ„ì¹˜ ì§€ì •
+	glutInitWindowSize(clientWidth, clientHeight);		//--- ìœˆë„ìš°ì˜ í¬ê¸° ì§€ì •
+	glutCreateWindow("test 04");						//--- ìœˆë„ìš° ìƒì„±(ìœˆë„ìš° ì´ë¦„)
 
-	//--- GLEW ÃÊ±âÈ­ÇÏ±â
+	//--- GLEW ì´ˆê¸°í™”í•˜ê¸°
 	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) //--- glew ÃÊ±âÈ­
+	if (glewInit() != GLEW_OK) //--- glew ì´ˆê¸°í™”
 	{
 		std::cerr << "Unable to initialize GLEW" << std::endl;
 		exit(EXIT_FAILURE);
@@ -110,23 +110,23 @@ void main(int argc, char** argv) //--- À©µµ¿ì Ãâ·ÂÇÏ°í Äİ¹éÇÔ¼ö ¼³Á¤
 	else
 		std::cout << "GLEW Initialized\n";
 
-	glutDisplayFunc(drawScene);					// Ãâ·Â Äİ¹éÇÔ¼öÀÇ ÁöÁ¤
-	glutReshapeFunc(Reshape);					// ´Ù½Ã ±×¸®±â Äİ¹éÇÔ¼ö ÁöÁ¤
-	glutKeyboardFunc(Keyboard);					// Å°º¸µå ÀÔ·Â Äİ¹éÇÔ¼ö ÁöÁ¤
-	glutMouseFunc(Mouse);						// ¸¶¿ì½º ÀÔ·Â
-	glutMainLoop();								// ÀÌº¥Æ® Ã³¸® ½ÃÀÛ
+	glutDisplayFunc(drawScene);					// ì¶œë ¥ ì½œë°±í•¨ìˆ˜ì˜ ì§€ì •
+	glutReshapeFunc(Reshape);					// ë‹¤ì‹œ ê·¸ë¦¬ê¸° ì½œë°±í•¨ìˆ˜ ì§€ì •
+	glutKeyboardFunc(Keyboard);					// í‚¤ë³´ë“œ ì…ë ¥ ì½œë°±í•¨ìˆ˜ ì§€ì •
+	glutMouseFunc(Mouse);						// ë§ˆìš°ìŠ¤ ì…ë ¥
+	glutMainLoop();								// ì´ë²¤íŠ¸ ì²˜ë¦¬ ì‹œì‘
 }
 
-GLvoid drawScene() //--- Äİ¹é ÇÔ¼ö: ±×¸®±â Äİ¹é ÇÔ¼ö
+GLvoid drawScene() //--- ì½œë°± í•¨ìˆ˜: ê·¸ë¦¬ê¸° ì½œë°± í•¨ìˆ˜
 {
-	//--- º¯°æµÈ ¹è°æ»ö ¼³Á¤
-	glClearColor(clientRed, clientGreen, clientBlue, 1.0f);			//--- ¹ÙÅÁ»öÀ» º¯°æ
-	glClear(GL_COLOR_BUFFER_BIT);									//--- ¼³Á¤µÈ »öÀ¸·Î ÀüÃ¼¸¦ Ä¥ÇÏ±â
+	//--- ë³€ê²½ëœ ë°°ê²½ìƒ‰ ì„¤ì •
+	glClearColor(clientRed, clientGreen, clientBlue, 1.0f);			//--- ë°”íƒ•ìƒ‰ì„ ë³€ê²½
+	glClear(GL_COLOR_BUFFER_BIT);									//--- ì„¤ì •ëœ ìƒ‰ìœ¼ë¡œ ì „ì²´ë¥¼ ì¹ í•˜ê¸°
 
-	drawRect();	//10°³ÀÇ »ç°¢Çü
-	glutSwapBuffers();												//--- È­¸é¿¡ Ãâ·ÂÇÏ±â
+	drawRect();	//10ê°œì˜ ì‚¬ê°í˜•
+	glutSwapBuffers();												//--- í™”ë©´ì— ì¶œë ¥í•˜ê¸°
 }
-GLvoid Reshape(int w, int h) //--- Äİ¹é ÇÔ¼ö: ´Ù½Ã ±×¸®±â Äİ¹é ÇÔ¼ö
+GLvoid Reshape(int w, int h) //--- ì½œë°± í•¨ìˆ˜: ë‹¤ì‹œ ê·¸ë¦¬ê¸° ì½œë°± í•¨ìˆ˜
 {
 	glViewport(0, 0, w, h);
 }
@@ -134,8 +134,8 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'q':		// ÇÁ·Î±×·¥ Á¾·á
-		glutLeaveMainLoop(); // OpenGL ¸ŞÀÎ ·çÇÁ Á¾·á
+	case 'q':		// í”„ë¡œê·¸ë¨ ì¢…ë£Œ
+		glutLeaveMainLoop(); // OpenGL ë©”ì¸ ë£¨í”„ ì¢…ë£Œ
 		break;
 	}
 	glutPostRedisplay(); //--- refresh
