@@ -43,6 +43,7 @@ float Win_to_GL_Y(int y)
 // 사각형 구조체 (배열)
 #define MIN_RECT 20
 #define MAX_RECT 40
+#define RECT_SIZE 0.05f // x3, x4으로 width, height 초기화 (eraser는 x6, x8)
 int create_rect_count = 0;
 typedef struct RECTANGLES
 {
@@ -60,9 +61,16 @@ RECTS eraser;
 void setRects()
 {
 	std::cout << "set rects\n";
-	for (int i = 0; i < MAX_RECT; i++)
+	create_rect_count = (int)generateRandomFloat(MIN_RECT, MAX_RECT);
+	for (int i = 0; i < create_rect_count; i++)
 	{
-
+		rt[i].midX = generateRandomFloat(-1.0f, 1.0f);
+		rt[i].midY = generateRandomFloat(-1.0f, 1.0f);
+		rt[i].r = generateRandomFloat(0.0f, 1.0f);
+		rt[i].g = generateRandomFloat(0.0f, 1.0f);
+		rt[i].b = generateRandomFloat(0.0f, 1.0f);
+		rt[i].width = RECT_SIZE * 3.0f;
+		rt[i].height = RECT_SIZE * 4.0f;
 	}
 	rect_count = 0;
 }
@@ -70,7 +78,7 @@ void setRects()
 // 현재 존재하는 사각형 모두 출력
 void drawRect()
 {
-	for (int i = 0; i < rect_count; i++)
+	for (int i = 0; i < create_rect_count; i++)
 	{
 		glColor3f(rt[i].r, rt[i].g, rt[i].b);
 		glRectf(rt[i].midX - (rt[i].width / 2), rt[i].midY - (rt[i].height / 2),
@@ -145,6 +153,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case 'r':		// 타이머 중지, 사각형 초기화 및 재입력
 	{
 		setRects();
+		std::cout << "rects : " << create_rect_count << std::endl;
 		break;
 	}
 	}
