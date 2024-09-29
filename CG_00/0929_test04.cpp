@@ -52,6 +52,8 @@ typedef struct RECTANGLES
 	float height;
 	float dx;
 	float dy;
+	int xCount;
+	int yCount;
 }RECTS;
 int rect_count = 0;
 RECTS rt[MAX_RECT];
@@ -73,6 +75,8 @@ void initRect()
 		rt[i].height	= 0;
 		rt[i].dx		= 0;
 		rt[i].dy		= 0;
+		rt[i].xCount = 0;
+		rt[i].yCount = 0;
 		tempRect[i] = rt[i];
 	}
 	rect_count = 0;
@@ -92,6 +96,8 @@ void makeRect(float mx, float my)
 		rt[rect_count].height = 0.2f;
 		rt[rect_count].dx = 0.01f;
 		rt[rect_count].dy = 0.01f;
+		rt[rect_count].xCount = 0;
+		rt[rect_count].yCount = 0;
 		tempRect[rect_count] = rt[rect_count];
 		rect_count++;
 	}
@@ -128,6 +134,7 @@ int timer_1 = false;
 int timer_2 = false;
 int timer_3 = false;
 int timer_4 = false;
+
 void stopTimer()
 {
 	std::cout << "stop timer ALL\n";
@@ -330,8 +337,35 @@ void TimerFunction3(int value)
 {
 	if (timer_3 == true)
 	{
+		for (int i = 0; i < rect_count; i++)
+		{
+			if (rt[i].xCount < 50)
+			{
+				rt[i].width = rt[i].width + 0.01f;
+				rt[i].xCount++;
+			}
+			else if (rt[i].xCount < 100)
+			{
+				rt[i].width = rt[i].width - 0.01f;
+				rt[i].xCount++;
+			}
+			else if (rt[i].xCount < 150)
+			{
+				rt[i].height = rt[i].height + 0.015f;
+				rt[i].xCount++;
+			}
+			else if (rt[i].xCount < 200)
+			{
+				rt[i].height = rt[i].height - 0.015f;
+				rt[i].xCount++;
+			}
+			else
+			{
+				rt[i].xCount = 0;
+			}
+		}
 		glutPostRedisplay(); // 화면 재출력
-		glutTimerFunc(16, TimerFunction3, 1); // 약 60fps (1000ms/60 ≈ 16ms) 간격으로 타이머 재설정
+		glutTimerFunc(10, TimerFunction3, 1);
 	}
 }
 // 색상 변환
@@ -339,6 +373,10 @@ void TimerFunction4(int value)
 {
 	if (timer_4 == true)
 	{
+		for (int i = 0; i < rect_count; i++)
+		{
+			
+		}
 		glutPostRedisplay(); // 화면 재출력
 		glutTimerFunc(16, TimerFunction4, 1); // 약 60fps (1000ms/60 ≈ 16ms) 간격으로 타이머 재설정
 	}
