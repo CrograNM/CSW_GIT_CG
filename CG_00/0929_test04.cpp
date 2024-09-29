@@ -50,6 +50,8 @@ typedef struct RECTANGLES
 	float r, g, b;
 	float width;
 	float height;
+	float dx;
+	float dy;
 }RECTS;
 int rect_count = 0;
 RECTS rt[MAX_RECT];
@@ -58,6 +60,7 @@ RECTS tempRect[MAX_RECT];
 // 사각형 만들기 및 초기화 (최대 10)
 void initRect()
 {
+	std::cout << "init rect\n";
 	for (int i = 0; i < MAX_RECT; i++)
 	{
 		rt[i].exist		= false;
@@ -68,13 +71,15 @@ void initRect()
 		rt[i].b			= 0;
 		rt[i].width		= 0;
 		rt[i].height	= 0;
-
+		rt[i].dx		= 0;
+		rt[i].dy		= 0;
 		tempRect[i] = rt[i];
 	}
 	rect_count = 0;
 }
 void makeRect(float mx, float my)
 {
+	std::cout << "make rect\n";
 	if (rt[rect_count].exist == false && rect_count < MAX_RECT)
 	{
 		rt[rect_count].exist = true;
@@ -85,13 +90,22 @@ void makeRect(float mx, float my)
 		rt[rect_count].b = generateRandomFloat(0.0f, 1.0f);
 		rt[rect_count].width = 0.15f;
 		rt[rect_count].height = 0.2f;
-
+		rt[rect_count].dx = 0.01f;
+		rt[rect_count].dy = 0.01f;
 		tempRect[rect_count] = rt[rect_count];
 		rect_count++;
 	}
 	else
 	{
 		std::cout << "사각형 개수 초과" << std::endl;
+	}
+}
+void backToSave()
+{
+	std::cout << "back to save\n";
+	for (int i = 0; i < rect_count; i++)
+	{
+		rt[i] = tempRect[i];
 	}
 }
 
@@ -109,12 +123,36 @@ void drawRect()
 	}
 }
 
+// 타이머 관련
+int timer_1 = false;
+int timer_2 = false;
+int timer_3 = false;
+int timer_4 = false;
+void stopTimer()
+{
+	std::cout << "stop timer ALL\n";
+	timer_1 = false;
+	timer_2 = false;
+	timer_3 = false;
+	timer_4 = false;
+}
+
+// 대각선 이동 속도 변수 추가
+float dx = 0.01f;
+float dy = 0.01f;
+
 // GL 이벤트 함수
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
 void Motion(int x, int y);
+
+// 타이머 함수
+void TimerFunction1(int value);	// 대각선 이동
+void TimerFunction2(int value);	// 지그재그 이동
+void TimerFunction3(int value); // 크기 변화
+void TimerFunction4(int value); // 색상 변화
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -160,24 +198,89 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'q':		// 프로그램 종료
+	{
+		std::cout << "Quit\n";
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
 		break;
+	}
 	case 's':		// 모든 애니메이션 정지
-		break;		
-	case 'm':		// 원래 그린 위치로 사각형 이동
+	{
+		stopTimer();
 		break;
+	}
+	case 'm':		// 타이머 중지, 원래 그린 위치로 사각형 이동
+	{
+		stopTimer();
+		backToSave();
+		break;
+	}
 	case 'r':		// 타이머 중지, 사각형 초기화 및 재입력
+	{
+		stopTimer();
 		initRect();
 		break;
+	}
 	// 모든 애니메이션들은 각각 실행 및 정지가 가능
 	case '1':		// 대각선 이동, 벽에 닿으면 튕기기 
+	{
+		if (timer_1 == false)
+		{
+			std::cout << "timer_1 ON\n";
+			timer_1 = true;
+			glutTimerFunc(16, TimerFunction1, 1);
+		}
+		else
+		{
+			std::cout << "timer_1 OFF\n";
+			timer_1 = false;
+		}
 		break;
+	}
 	case '2':		// 지그재그 이동
+	{
+		if (timer_2 == false)
+		{
+			std::cout << "timer_2 ON\n";
+			timer_2 = true;
+			glutTimerFunc(16, TimerFunction2, 1);
+		}
+		else
+		{
+			std::cout << "timer_2 OFF\n";
+			timer_2 = false;
+		}
 		break;
+	}
 	case '3':		// 사각형의 크기가 커졌다 작아졌다 반복
+	{
+		if (timer_3 == false)
+		{
+			std::cout << "timer_3 ON\n";
+			timer_3 = true;
+			glutTimerFunc(16, TimerFunction3, 1);
+		}
+		else
+		{
+			std::cout << "timer_3 OFF\n";
+			timer_3 = false;
+		}
 		break;
+	}
 	case '4':		// 사각형의 색깔이 그라데이션? 으로 변하게
+	{
+		if (timer_4 == false)
+		{
+			std::cout << "timer_4 ON\n";
+			timer_4 = true;
+			glutTimerFunc(16, TimerFunction4, 1);
+		}
+		else
+		{
+			std::cout << "timer_4 OFF\n";
+			timer_4 = false;
+		}
 		break;
+	}
 	}
 	glutPostRedisplay(); //--- refresh
 }
@@ -190,4 +293,53 @@ void Mouse(int button, int state, int x, int y)
 		makeRect(mX, mY);
 	}
 	glutPostRedisplay(); // refresh
+}
+// 대각선 이동
+void TimerFunction1(int value)
+{
+	if (timer_1 == true)
+	{
+		for (int i = 0; i < rect_count; i++)
+		{
+			// 사각형 이동
+			rt[i].midX += rt[i].dx;
+			rt[i].midY += rt[i].dy;
+
+			// 경계에 닿으면 반대 방향으로 변경
+			if (rt[i].midX + rt[i].width / 2 > 1.0f || rt[i].midX - rt[i].width / 2 < -1.0f)
+				rt[i].dx = -rt[i].dx; // X 방향 반전
+
+			if (rt[i].midY + rt[i].height / 2 > 1.0f || rt[i].midY - rt[i].height / 2 < -1.0f)
+				rt[i].dy = -rt[i].dy; // Y 방향 반전
+		}
+		glutPostRedisplay(); // 화면 재출력
+		glutTimerFunc(16, TimerFunction1, 1); // 약 60fps (1000ms/60 ≈ 16ms) 간격으로 타이머 재설정
+	}
+}
+// 지그재그 이동
+void TimerFunction2(int value)
+{
+	if (timer_2 == true)
+	{
+		glutPostRedisplay(); // 화면 재출력
+		glutTimerFunc(16, TimerFunction2, 1); // 약 60fps (1000ms/60 ≈ 16ms) 간격으로 타이머 재설정
+	}
+}
+// 크기 변환
+void TimerFunction3(int value)
+{
+	if (timer_3 == true)
+	{
+		glutPostRedisplay(); // 화면 재출력
+		glutTimerFunc(16, TimerFunction3, 1); // 약 60fps (1000ms/60 ≈ 16ms) 간격으로 타이머 재설정
+	}
+}
+// 색상 변환
+void TimerFunction4(int value)
+{
+	if (timer_4 == true)
+	{
+		glutPostRedisplay(); // 화면 재출력
+		glutTimerFunc(16, TimerFunction4, 1); // 약 60fps (1000ms/60 ≈ 16ms) 간격으로 타이머 재설정
+	}
 }
