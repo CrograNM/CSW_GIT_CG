@@ -170,6 +170,7 @@ void Mouse(int button, int state, int x, int y)
 	{
 		left_button = false;
 		// 클릭된 사각형이 놓인 자리 검사
+		std::cout << "x = " << x << "y = " << y << std::endl;
 	}
 	glutPostRedisplay(); // refresh
 }
