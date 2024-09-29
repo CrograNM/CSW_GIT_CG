@@ -76,15 +76,38 @@ void setRects()
 	create_rect_count = (int)generateRandomFloat(MIN_RECT, MAX_RECT);
 	for (int i = 0; i < create_rect_count; i++)
 	{
-		rt[i].midX = generateRandomFloat(-1.0f, 1.0f);
-		rt[i].midY = generateRandomFloat(-1.0f, 1.0f);
-		rt[i].r = generateRandomFloat(0.0f, 1.0f);
-		rt[i].g = generateRandomFloat(0.0f, 1.0f);
-		rt[i].b = generateRandomFloat(0.0f, 1.0f);
-		rt[i].width = RECT_SIZE * 3.0f;
-		rt[i].height = RECT_SIZE * 4.0f;
+		rt[i].midX		= generateRandomFloat(-1.0f, 1.0f);
+		rt[i].midY		= generateRandomFloat(-1.0f, 1.0f);
+		rt[i].r			= generateRandomFloat(0.0f, 1.0f);
+		rt[i].g			= generateRandomFloat(0.0f, 1.0f);
+		rt[i].b			= generateRandomFloat(0.0f, 1.0f);
+		rt[i].width		= RECT_SIZE * 3.0f;
+		rt[i].height	= RECT_SIZE * 4.0f;
 	}
 	rect_count = 0;
+}
+// 지우개 초기화 함수
+void initEraser()
+{
+	std::cout << "init Eraser\n";
+	eraser.midX = 0;
+	eraser.midY = 0;
+	eraser.r = 0;
+	eraser.g = 0;
+	eraser.b = 0;
+	eraser.width = 0;
+	eraser.height = 0;
+}
+void makeEraser(float mx, float my)
+{
+	std::cout << "make Eraser\n";
+	eraser.midX		= mx;
+	eraser.midY		= my;
+	eraser.r		= 0.0f;
+	eraser.g		= 0.0f;
+	eraser.b		= 0.0f;
+	eraser.width	= RECT_SIZE * 6.0f;
+	eraser.height	= RECT_SIZE * 8.0f;
 }
 
 // 현재 존재하는 사각형 모두 출력
@@ -97,10 +120,12 @@ void drawRect()
 				rt[i].midX + (rt[i].width / 2), rt[i].midY + (rt[i].height / 2));
 	}
 }
-
-// 대각선 이동 속도 변수 추가
-float dx = 0.01f;
-float dy = 0.01f;
+void drawEraser()
+{
+	glColor3f(eraser.r, eraser.g, eraser.b);
+	glRectf(eraser.midX - (eraser.width / 2), eraser.midY - (eraser.height / 2),
+			eraser.midX + (eraser.width / 2), eraser.midY + (eraser.height / 2));
+}
 
 // 왼쪽 마우스 클릭 확인
 bool left_button = false;
@@ -145,7 +170,8 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	glClearColor(clientRed, clientGreen, clientBlue, 1.0f);			//--- 바탕색을 변경
 	glClear(GL_COLOR_BUFFER_BIT);									//--- 설정된 색으로 전체를 칠하기
 
-	drawRect();	//20~40개의 사각형
+	drawRect();		// 20~40개의 사각형
+	drawEraser();	// 지우개 그리기
 	glutSwapBuffers();												//--- 화면에 출력하기
 }
 GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
@@ -177,7 +203,11 @@ void Mouse(int button, int state, int x, int y)
 	float mY = Win_to_GL_Y(y);
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		
+		makeEraser(mX, mY);
+	}
+	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+	{
+		initEraser();
 	}
 	glutPostRedisplay(); // refresh
 }
