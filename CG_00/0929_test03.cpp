@@ -53,7 +53,7 @@ typedef struct RECTANGLES
 int rect_count = 0;
 RECTS rt[MAX_RECT];
 
-// 함수 만들기 및 초기화 (최대 10)
+// 사각형 만들기 및 초기화 (최대 10)
 void makeRect()
 {
 	if(rect_count < MAX_RECT)
@@ -72,6 +72,58 @@ void makeRect()
 		std::cout << "사각형 개수 초과" << std::endl;
 	}
 }
+
+// 사각형 합치기
+RECTS temp1;
+RECTS temp2;
+int temp1_index = 0;
+int temp2_index = 0;
+
+void addRect()
+{
+	float left, right, top, bottom;
+	//left
+	if (temp1.midX - temp1.width / 2 < temp2.midX - temp2.width / 2)
+		left = temp1.midX - temp1.width / 2;
+	else
+		left = temp2.midX - temp2.width / 2;
+	//right
+	if (temp1.midX + temp1.width / 2 < temp2.midX + temp2.width / 2)
+		right = temp2.midX + temp2.width / 2;
+	else
+		right = temp1.midX + temp1.width / 2;
+	//top
+	if (temp1.midY + temp1.height / 2 < temp2.midY + temp2.height / 2)
+		top = temp2.midY + temp2.height / 2;
+	else
+		top = temp1.midY + temp1.height / 2;
+	//bottom
+	if (temp1.midY - temp1.height / 2 < temp2.midY - temp2.height / 2)
+		bottom = temp1.midY - temp1.height / 2;
+	else 
+		bottom = temp2.midY - temp2.height / 2;
+
+	// 기존 두 사각형의 인덱스를 삭제하고, 배열을 앞으로 이동시킴
+	for (int i = temp1_index; i < rect_count - 1; i++)
+		rt[i] = rt[i + 1];
+	for (int i = temp2_index; i < rect_count - 2; i++)
+		rt[i] = rt[i + 1];
+
+	rect_count -= 2; // 두 개의 사각형이 제거되었으므로 카운트를 2 줄임
+	//create
+	if (rect_count < MAX_RECT)
+	{
+		rt[rect_count].midX = (right + left) / 2;
+		rt[rect_count].midY = (top + bottom) / 2;
+		rt[rect_count].r = generateRandomFloat(0.0f, 1.0f);
+		rt[rect_count].g = generateRandomFloat(0.0f, 1.0f);
+		rt[rect_count].b = generateRandomFloat(0.0f, 1.0f);
+		rt[rect_count].width = right - left;
+		rt[rect_count].height = top - bottom;
+		rect_count++;
+	}
+}
+
 // 현재 존재하는 사각형 모두 출력
 void drawRect() {
 	for (int i = 0; i < rect_count; i++) {
@@ -169,8 +221,27 @@ void Mouse(int button, int state, int x, int y)
 	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 	{
 		left_button = false;
-		// 클릭된 사각형이 놓인 자리 검사
-		std::cout << "x = " << x << "y = " << y << std::endl;
+		// 클릭된 사각형이 놓인 자리 검사 -> 합치기 -> 배열 빈공간 없애기
+		// std::cout << "x = " << x << "y = " << y << std::endl; // test
+		for (int i = rect_count - 1; i >= 0; i--)
+		{
+			if(i != click_index)
+			{
+				if (rt[click_index].midX - rt[click_index].width / 2 < rt[i].midX + rt[i].width / 2 &&
+					rt[click_index].midX + rt[click_index].width / 2 > rt[i].midX - rt[i].width / 2 &&
+					rt[click_index].midY - rt[click_index].height / 2 < rt[i].midY + rt[i].height / 2 &&
+					rt[click_index].midY + rt[click_index].height / 2 > rt[i].midY - rt[i].height / 2)
+				{
+					//두 인덱스의 값을 저장 -> 두 인덱스의 값 제거 -> 배열의 빈공간 없게 앞으로 밀기 -> 맨 뒤에 새로운 사각형 생성(합쳐짐)
+					temp1 = rt[click_index];
+					temp2 = rt[i];
+					temp1_index = click_index;
+					temp2_index = i;
+					addRect();
+					break;
+				}
+			}
+		}
 	}
 	glutPostRedisplay(); // refresh
 }
@@ -181,7 +252,7 @@ void Motion(int x, int y)
 	{
 		float mX = Win_to_GL_X(x);
 		float mY = Win_to_GL_Y(y);
-		//std::cout << "x = " << x << "y = " << y << std::endl;
+
 		//마우스 좌표에 따라 해당 사각형 이동 -> midX, midY에 마우스 좌표 대입
 		rt[click_index].midX = mX;
 		rt[click_index].midY = mY;
