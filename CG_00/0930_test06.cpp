@@ -528,13 +528,13 @@ void TimerFunction1(int value)
 			{
 				if (j % 2 == 1)
 				{
-					divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.007f;
-					divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.007f;
+					divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.0035f * 3;
+					divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.0035f * 4;
 				}
 				else
 				{
-					divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.01f;
-					divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.01f;
+					divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.005f * 3;
+					divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.005f * 4;
 				}
 				divRect[i][j].width = divRect[i][j].width * 0.99f;
 				divRect[i][j].height = divRect[i][j].height * 0.99f;
