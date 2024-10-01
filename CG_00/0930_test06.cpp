@@ -43,7 +43,6 @@ float Win_to_GL_Y(int y)
 // 구조체 생성
 #define MIN_RECT 5
 #define MAX_RECT 10
-#define RECT_SIZE 0.025f // x3, x4으로 width, height 초기화 (eraser는 x6, x8)
 int create_rect_count = 0;
 typedef struct RECTANGLES
 {
@@ -75,7 +74,7 @@ void setRects()
 	create_rect_count = (int)generateRandomFloat(MIN_RECT, MAX_RECT);
 	for (int i = 0; i < create_rect_count; i++)
 	{
-		float rect_size = generateRandomFloat(0.025f, 0.1f);
+		float rect_size = generateRandomFloat(0.05f, 0.1f);
 		rt[i].exist = true;
 		rt[i].midX = generateRandomFloat(-1.0f, 1.0f);
 		rt[i].midY = generateRandomFloat(-1.0f, 1.0f);
@@ -87,10 +86,32 @@ void setRects()
 	}
 	std::cout << "rects : " << create_rect_count << std::endl;
 }
-// 사각형 나누기
-void devideRect(float mx, float my)
-{
 
+// 사각형 나누기
+void devideRect(float mX, float mY)
+{
+	//마우스를 클릭하면 사각형 4개로 나눠서 출력
+	//해당 사각형들은 기존 사각형의 색을 유지하며, 각 사각형의 크기는 기존의 절반크기
+	int select_rect = -1;	//select_rect값이 -1이면, 선택에 실패한 것임
+	for (int i = create_rect_count - 1; i >= 0; i--)
+	{
+		if (rt[i].exist == true)
+		{
+			if (rt[i].midX - rt[i].width / 2 < mX && mX < rt[i].midX + rt[i].width / 2 &&
+				rt[i].midY - rt[i].height / 2 < mY && mY < rt[i].midY + rt[i].height / 2)
+			{
+				select_rect = i;		// 인덱스 저장
+				break;					// for문 탈출
+			}
+		}
+	}
+	if (select_rect >= 0)	//선택에 성공한 경우 아래 코드 실행
+	{
+		//1. 4, 좌우상하 이동
+		//2. 4, 대각선 이동
+		//3. 4, 쪼개지고, 한쪽 방향으로 같이 이동
+		//4. 8, 8방향 이동
+	}
 }
 
 // 화면 출력
