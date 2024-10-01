@@ -144,8 +144,8 @@ void divideRect(float mX, float mY)
 	//선택에 성공한 경우 아래 코드 실행
 	if (select_rect >= 0)
 	{
-		int timerNum = rand() % 3;
-		//int timerNum = 1;
+		//int timerNum = rand() % 3;
+		int timerNum = 3;
 		std::cout << "select : timer " << timerNum << "\n";
 		rt[select_rect].exist = false;
 		switch (timerNum)
@@ -343,6 +343,75 @@ void divideRect(float mX, float mY)
 		}
 		case 3:
 			// 4. 8, 8방향 이동
+			for (int i = 0; i < 8; i++)
+			{
+				divRect[div_rect_count][i].timer = 3;
+				//8방향 중 상우하좌 방향(0,2,4,6인덱스)
+				//공통 적용 요소
+				divRect[div_rect_count][i].exist = true;
+				divRect[div_rect_count][i].r = rt[select_rect].r;
+				divRect[div_rect_count][i].g = rt[select_rect].g;
+				divRect[div_rect_count][i].b = rt[select_rect].b;
+				divRect[div_rect_count][i].width = rt[select_rect].width / 2;
+				divRect[div_rect_count][i].height = rt[select_rect].height / 2;
+				//방향에 따라 달라지는 요소들
+				if (i == 0)
+				{	//상
+					divRect[div_rect_count][i].midX = rt[select_rect].midX;
+					divRect[div_rect_count][i].midY = rt[select_rect].midY + rt[select_rect].height / 2;
+					divRect[div_rect_count][i].dx = 0;
+					divRect[div_rect_count][i].dy = 1;
+				}
+				else if (i == 1)
+				{	//우상
+					divRect[div_rect_count][i].midX = rt[select_rect].midX + rt[select_rect].width / 3;
+					divRect[div_rect_count][i].midY = rt[select_rect].midY + rt[select_rect].height / 3;
+					divRect[div_rect_count][i].dx = 1;
+					divRect[div_rect_count][i].dy = 1;
+				}
+				else if (i == 2)
+				{	//우
+					divRect[div_rect_count][i].midX = rt[select_rect].midX + rt[select_rect].width / 2;
+					divRect[div_rect_count][i].midY = rt[select_rect].midY;
+					divRect[div_rect_count][i].dx = 1;
+					divRect[div_rect_count][i].dy = 0;
+				}
+				else if (i == 3)
+				{	//우하
+					divRect[div_rect_count][i].midX = rt[select_rect].midX + rt[select_rect].width / 3;
+					divRect[div_rect_count][i].midY = rt[select_rect].midY - rt[select_rect].height / 3;
+					divRect[div_rect_count][i].dx = 1;
+					divRect[div_rect_count][i].dy = -1;
+				}
+				else if (i == 4)
+				{	//하
+					divRect[div_rect_count][i].midX = rt[select_rect].midX;
+					divRect[div_rect_count][i].midY = rt[select_rect].midY - rt[select_rect].height / 2;
+					divRect[div_rect_count][i].dx = 0;
+					divRect[div_rect_count][i].dy = -1;
+				}
+				else if (i == 5)
+				{	//좌하
+					divRect[div_rect_count][i].midX = rt[select_rect].midX - rt[select_rect].width / 3;
+					divRect[div_rect_count][i].midY = rt[select_rect].midY - rt[select_rect].height / 3;
+					divRect[div_rect_count][i].dx = -1;
+					divRect[div_rect_count][i].dy = -1;
+				}
+				else if (i == 6)
+				{	//좌
+					divRect[div_rect_count][i].midX = rt[select_rect].midX - rt[select_rect].width / 2;
+					divRect[div_rect_count][i].midY = rt[select_rect].midY;
+					divRect[div_rect_count][i].dx = -1;
+					divRect[div_rect_count][i].dy = 0;
+				}
+				else
+				{	//좌상
+					divRect[div_rect_count][i].midX = rt[select_rect].midX - rt[select_rect].width / 3;
+					divRect[div_rect_count][i].midY = rt[select_rect].midY + rt[select_rect].height / 3;
+					divRect[div_rect_count][i].dx = -1;
+					divRect[div_rect_count][i].dy = 1;
+				}		
+			}
 			break;
 		}
 		div_rect_count++;	
@@ -466,8 +535,16 @@ void TimerFunction1(int value)
 			// 조건 추가: width가 너무 작으면 exist를 false로 설정
 			if (divRect[i][j].exist == true)
 			{
-				divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.01f;
-				divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.01f;
+				if (j % 2 == 1)
+				{
+					divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.007f;
+					divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.007f;
+				}
+				else
+				{
+					divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.01f;
+					divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.01f;
+				}
 				divRect[i][j].width = divRect[i][j].width * 0.99f;
 				divRect[i][j].height = divRect[i][j].height * 0.99f;
 
