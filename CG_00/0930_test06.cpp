@@ -341,78 +341,69 @@ void divideRect(float mX, float mY)
 			}
 			break;
 		}
-		case 3:
+		case 3:	
+		{
 			// 4. 8, 8방향 이동
 			for (int i = 0; i < 8; i++)
-			{
+			{	//공통 적용 요소
 				divRect[div_rect_count][i].timer = 3;
-				//8방향 중 상우하좌 방향(0,2,4,6인덱스)
-				//공통 적용 요소
 				divRect[div_rect_count][i].exist = true;
 				divRect[div_rect_count][i].r = rt[select_rect].r;
 				divRect[div_rect_count][i].g = rt[select_rect].g;
 				divRect[div_rect_count][i].b = rt[select_rect].b;
 				divRect[div_rect_count][i].width = rt[select_rect].width / 2;
 				divRect[div_rect_count][i].height = rt[select_rect].height / 2;
-				//방향에 따라 달라지는 요소들
-				if (i == 0)
-				{	//상
-					divRect[div_rect_count][i].midX = rt[select_rect].midX;
-					divRect[div_rect_count][i].midY = rt[select_rect].midY + rt[select_rect].height / 2;
-					divRect[div_rect_count][i].dx = 0;
-					divRect[div_rect_count][i].dy = 1;
-				}
-				else if (i == 1)
-				{	//우상
-					divRect[div_rect_count][i].midX = rt[select_rect].midX + rt[select_rect].width / 3;
-					divRect[div_rect_count][i].midY = rt[select_rect].midY + rt[select_rect].height / 3;
-					divRect[div_rect_count][i].dx = 1;
-					divRect[div_rect_count][i].dy = 1;
-				}
-				else if (i == 2)
-				{	//우
-					divRect[div_rect_count][i].midX = rt[select_rect].midX + rt[select_rect].width / 2;
-					divRect[div_rect_count][i].midY = rt[select_rect].midY;
-					divRect[div_rect_count][i].dx = 1;
-					divRect[div_rect_count][i].dy = 0;
-				}
-				else if (i == 3)
-				{	//우하
-					divRect[div_rect_count][i].midX = rt[select_rect].midX + rt[select_rect].width / 3;
-					divRect[div_rect_count][i].midY = rt[select_rect].midY - rt[select_rect].height / 3;
-					divRect[div_rect_count][i].dx = 1;
-					divRect[div_rect_count][i].dy = -1;
-				}
-				else if (i == 4)
-				{	//하
-					divRect[div_rect_count][i].midX = rt[select_rect].midX;
-					divRect[div_rect_count][i].midY = rt[select_rect].midY - rt[select_rect].height / 2;
-					divRect[div_rect_count][i].dx = 0;
-					divRect[div_rect_count][i].dy = -1;
-				}
-				else if (i == 5)
-				{	//좌하
-					divRect[div_rect_count][i].midX = rt[select_rect].midX - rt[select_rect].width / 3;
-					divRect[div_rect_count][i].midY = rt[select_rect].midY - rt[select_rect].height / 3;
-					divRect[div_rect_count][i].dx = -1;
-					divRect[div_rect_count][i].dy = -1;
-				}
-				else if (i == 6)
-				{	//좌
-					divRect[div_rect_count][i].midX = rt[select_rect].midX - rt[select_rect].width / 2;
-					divRect[div_rect_count][i].midY = rt[select_rect].midY;
-					divRect[div_rect_count][i].dx = -1;
-					divRect[div_rect_count][i].dy = 0;
-				}
-				else
-				{	//좌상
-					divRect[div_rect_count][i].midX = rt[select_rect].midX - rt[select_rect].width / 3;
-					divRect[div_rect_count][i].midY = rt[select_rect].midY + rt[select_rect].height / 3;
-					divRect[div_rect_count][i].dx = -1;
-					divRect[div_rect_count][i].dy = 1;
-				}		
 			}
+			//방향에 따라 달라지는 요소들			
+			//상
+			divRect[div_rect_count][0].midX = rt[select_rect].midX;
+			divRect[div_rect_count][0].midY = rt[select_rect].midY + rt[select_rect].height / 2;
+			divRect[div_rect_count][0].dx = 0;
+			divRect[div_rect_count][0].dy = 1;
+
+			//우상
+			divRect[div_rect_count][1].midX = rt[select_rect].midX + rt[select_rect].width / 3;
+			divRect[div_rect_count][1].midY = rt[select_rect].midY + rt[select_rect].height / 3;
+			divRect[div_rect_count][1].dx = 1;
+			divRect[div_rect_count][1].dy = 1;
+
+			//우
+			divRect[div_rect_count][2].midX = rt[select_rect].midX + rt[select_rect].width / 2;
+			divRect[div_rect_count][2].midY = rt[select_rect].midY;
+			divRect[div_rect_count][2].dx = 1;
+			divRect[div_rect_count][2].dy = 0;
+
+			//우하
+			divRect[div_rect_count][3].midX = rt[select_rect].midX + rt[select_rect].width / 3;
+			divRect[div_rect_count][3].midY = rt[select_rect].midY - rt[select_rect].height / 3;
+			divRect[div_rect_count][3].dx = 1;
+			divRect[div_rect_count][3].dy = -1;
+
+			//하
+			divRect[div_rect_count][4].midX = rt[select_rect].midX;
+			divRect[div_rect_count][4].midY = rt[select_rect].midY - rt[select_rect].height / 2;
+			divRect[div_rect_count][4].dx = 0;
+			divRect[div_rect_count][4].dy = -1;
+
+			//좌하
+			divRect[div_rect_count][5].midX = rt[select_rect].midX - rt[select_rect].width / 3;
+			divRect[div_rect_count][5].midY = rt[select_rect].midY - rt[select_rect].height / 3;
+			divRect[div_rect_count][5].dx = -1;
+			divRect[div_rect_count][5].dy = -1;
+
+			//좌
+			divRect[div_rect_count][6].midX = rt[select_rect].midX - rt[select_rect].width / 2;
+			divRect[div_rect_count][6].midY = rt[select_rect].midY;
+			divRect[div_rect_count][6].dx = -1;
+			divRect[div_rect_count][6].dy = 0;
+
+			//좌상
+			divRect[div_rect_count][7].midX = rt[select_rect].midX - rt[select_rect].width / 3;
+			divRect[div_rect_count][7].midY = rt[select_rect].midY + rt[select_rect].height / 3;
+			divRect[div_rect_count][7].dx = -1;
+			divRect[div_rect_count][7].dy = 1;
 			break;
+		}
 		}
 		div_rect_count++;	
 	}
