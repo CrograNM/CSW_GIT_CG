@@ -88,6 +88,24 @@ void setRects()
 		rt[i].width = 0;
 		rt[i].height = 0;
 	}
+	// init divRect
+	for (int i = 0; i < MAX_RECT; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			divRect[i][j].exist = false;
+			divRect[i][j].timer = -1;
+			divRect[i][j].midX = 0;
+			divRect[i][j].midY = 0;
+			divRect[i][j].r = 0;
+			divRect[i][j].g = 0;
+			divRect[i][j].b = 0;
+			divRect[i][j].width = 0;
+			divRect[i][j].height = 0;
+			divRect[i][j].dx = 0; 
+			divRect[i][j].dy = 0;
+		}
+	}
 	std::cout << "--set rects--\n";
 	create_rect_count = (int)generateRandomFloat(MIN_RECT, MAX_RECT);
 	for (int i = 0; i < create_rect_count; i++)
@@ -126,20 +144,22 @@ void divideRect(float mX, float mY)
 	//선택에 성공한 경우 아래 코드 실행
 	if (select_rect >= 0)
 	{
-		int timerNum = rand() % 2;
+		int timerNum = rand() % 3;
+		//int timerNum = 1;
 		std::cout << "select : timer " << timerNum << "\n";
 		rt[select_rect].exist = false;
 		switch (timerNum)
 		{
 		case 0:
+		{
 			// 1. 4, 좌우상하 이동
 			for (int i = 0; i < 8; i++)
 			{
 				divRect[div_rect_count][i].timer = 0;
-				divRect[div_rect_count][i].exist = true;
 				if (i % 2 == 0)
 				{	//8방향 중 상우하좌 방향(0,2,4,6인덱스)
 					//공통 적용 요소
+					divRect[div_rect_count][i].exist = true;
 					divRect[div_rect_count][i].r = rt[select_rect].r;
 					divRect[div_rect_count][i].g = rt[select_rect].g;
 					divRect[div_rect_count][i].b = rt[select_rect].b;
@@ -177,6 +197,7 @@ void divideRect(float mX, float mY)
 				}
 				else
 				{	//8방향 중 대각선 부분은 없는 셈이다.
+					divRect[div_rect_count][i].exist = false;
 					divRect[div_rect_count][i].midX = 0;
 					divRect[div_rect_count][i].midY = 0;
 					divRect[div_rect_count][i].r = 0;
@@ -189,15 +210,17 @@ void divideRect(float mX, float mY)
 				}
 			}
 			break;
+		}
 		case 1:
+		{
 			// 2. 4, 대각선 이동
 			for (int i = 0; i < 8; i++)
 			{
 				divRect[div_rect_count][i].timer = 1;
-				divRect[div_rect_count][i].exist = true;
 				if (i % 2 == 1)
 				{	//8방향 중 대각선 방향(1,3,5,7인덱스)
 					//공통 적용 요소
+					divRect[div_rect_count][i].exist = true;
 					divRect[div_rect_count][i].r = rt[select_rect].r;
 					divRect[div_rect_count][i].g = rt[select_rect].g;
 					divRect[div_rect_count][i].b = rt[select_rect].b;
@@ -235,6 +258,7 @@ void divideRect(float mX, float mY)
 				}
 				else
 				{	//8방향 중 좌우상하 부분은 없는 셈이다.
+					divRect[div_rect_count][i].exist = false;
 					divRect[div_rect_count][i].midX = 0;
 					divRect[div_rect_count][i].midY = 0;
 					divRect[div_rect_count][i].r = 0;
@@ -247,12 +271,79 @@ void divideRect(float mX, float mY)
 				}
 			}
 			break;
-		/*case 2:
+		}
+		case 2:
+		{
 			// 3. 4, 쪼개지고, 한쪽 방향으로 같이 이동
+			int randDir = rand() % 4;
+			for (int i = 0; i < 8; i++) 
+			{
+				divRect[div_rect_count][i].timer = 2;
+				switch (randDir)
+				{
+				case 0:
+					divRect[div_rect_count][i].dy = 1;
+					break;
+				case 1:
+					divRect[div_rect_count][i].dx = 1;
+					break;
+				case 2:
+					divRect[div_rect_count][i].dy = -1;
+					break;
+				case 3:
+					divRect[div_rect_count][i].dx = -1;
+					break;
+				}
+				if (i % 2 == 1)
+				{	//8방향 중 대각선 방향(1,3,5,7인덱스)
+					//공통 적용 요소
+					divRect[div_rect_count][i].exist = true;
+					divRect[div_rect_count][i].r = rt[select_rect].r;
+					divRect[div_rect_count][i].g = rt[select_rect].g;
+					divRect[div_rect_count][i].b = rt[select_rect].b;
+					divRect[div_rect_count][i].width = rt[select_rect].width / 2;
+					divRect[div_rect_count][i].height = rt[select_rect].height / 2;
+					//방향에 따라 달라지는 요소들
+					if (i == 1)
+					{	//우상
+						divRect[div_rect_count][i].midX = rt[select_rect].midX + rt[select_rect].width / 3;
+						divRect[div_rect_count][i].midY = rt[select_rect].midY + rt[select_rect].height / 3;
+					}
+					else if (i == 3)
+					{	//우하
+						divRect[div_rect_count][i].midX = rt[select_rect].midX + rt[select_rect].width / 3;
+						divRect[div_rect_count][i].midY = rt[select_rect].midY - rt[select_rect].height / 3;			
+					}
+					else if (i == 5)
+					{	//좌하
+						divRect[div_rect_count][i].midX = rt[select_rect].midX - rt[select_rect].width / 3;
+						divRect[div_rect_count][i].midY = rt[select_rect].midY - rt[select_rect].height / 3;		
+					}
+					else
+					{	//좌상
+						divRect[div_rect_count][i].midX = rt[select_rect].midX - rt[select_rect].width / 3;
+						divRect[div_rect_count][i].midY = rt[select_rect].midY + rt[select_rect].height / 3;
+					}
+				}
+				else
+				{	//8방향 중 좌우상하 부분은 없는 셈이다.
+					divRect[div_rect_count][i].exist = false;
+					divRect[div_rect_count][i].midX = 0;
+					divRect[div_rect_count][i].midY = 0;
+					divRect[div_rect_count][i].r = 0;
+					divRect[div_rect_count][i].g = 0;
+					divRect[div_rect_count][i].b = 0;
+					divRect[div_rect_count][i].width = 0;
+					divRect[div_rect_count][i].height = 0;
+					divRect[div_rect_count][i].dx = 0;
+					divRect[div_rect_count][i].dy = 0;
+				}
+			}
 			break;
+		}
 		case 3:
 			// 4. 8, 8방향 이동
-			break;*/
+			break;
 		}
 		div_rect_count++;	
 	}
@@ -280,7 +371,7 @@ void draw()
 	{
 		for (int j = 0; j < 8; j++)
 		{
-			if (divRect[i][0].exist == true)
+			if (divRect[i][j].exist == true)
 			{
 				glColor3f(divRect[i][j].r, divRect[i][j].g, divRect[i][j].b);
 				glRectf(divRect[i][j].midX - (divRect[i][j].width / 2), divRect[i][j].midY - (divRect[i][j].height / 2),
@@ -365,35 +456,28 @@ void Mouse(int button, int state, int x, int y)
 	}
 	glutPostRedisplay(); // refresh
 }
-// 타이머 함수
+// 타이머 함수 : 무한반복
 void TimerFunction1(int value)
 {
-	if (timer_1 == true)
+	for (int i = 0; i < div_rect_count; i++)
 	{
-		for (int i = 0; i < div_rect_count; i++)
+		for (int j = 0; j < 8; j++)
 		{
-			//timer 0: 상하좌우만 건드리기
-			if (divRect[i][0].exist == true)
+			// 조건 추가: width가 너무 작으면 exist를 false로 설정
+			if (divRect[i][j].exist == true)
 			{
-				if (divRect[i][0].timer == 0)
+				divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.01f;
+				divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.01f;
+				divRect[i][j].width = divRect[i][j].width * 0.99f;
+				divRect[i][j].height = divRect[i][j].height * 0.99f;
+
+				if (divRect[i][j].width < 0.05f)
 				{
-					for (int j = 0; j < 8; j++)
-					{
-						divRect[i][j].width = divRect[i][j].width * 0.99f;
-						divRect[i][j].height = divRect[i][j].height * 0.99f;
-						if (divRect[i][j].width < 0.05f)
-						{
-							divRect[i][j].width = 0.0f;
-							divRect[i][j].height = 0.0f;
-							divRect[i][j].exist = false;
-						}
-						divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.01f;
-						divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.01f;
-					}
+					divRect[i][j].exist = false; // exist가 false로 설정
 				}
 			}
-		}
-		glutPostRedisplay();  // 화면 재출력
-		glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
+		}	
 	}
+	glutPostRedisplay();  // 화면 재출력
+	glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
 }
