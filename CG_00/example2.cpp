@@ -60,12 +60,15 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 void make_vertexShaders()
 {
 	GLchar* vertexSource;
+	
 	//--- 버텍스 세이더 읽어 저장하고 컴파일 하기
 	//--- filetobuf: 사용자정의 함수로 텍스트를 읽어서 문자열에 저장하는 함수
+	
 	vertexSource = filetobuf("vertex.glsl");
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexSource, NULL);
 	glCompileShader(vertexShader);
+	
 	GLint result;
 	GLchar errorLog[512];
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &result);
@@ -75,12 +78,29 @@ void make_vertexShaders()
 		std::cerr << "ERROR: vertex shader 컴파일 실패\n" << errorLog << std::endl;
 		return;
 	}
-
 }
+
 void make_fragmentShaders()
 {
+	GLchar* fragmentSource;
+	
+	//--- 프래그먼트 세이더 읽어 저장하고 컴파일하기
+	fragmentSource = filetobuf("fragment.glsl"); // 프래그세이더 읽어오기
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
+	glCompileShader(fragmentShader);
 
+	GLint result;
+	GLchar errorLog[512];
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &result);
+	if (!result)
+	{
+		glGetShaderInfoLog(fragmentShader, 512, NULL, errorLog);
+		std::cerr << "ERROR: frag_shader 컴파일 실패\n" << errorLog << std::endl;
+		return;
+	}
 }
+
 GLuint make_shaderProgram()
 {
 	return 0;
