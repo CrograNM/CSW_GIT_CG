@@ -124,7 +124,7 @@ void setRects()
 // 사각형 나누기
 void divideRect(float mX, float mY)
 {
-	//마우스를 클릭하면 사각형 4개로 나눠서 출력
+	//마우스를 클릭하면 사각형 나눠서 출력
 	//해당 사각형들은 기존 사각형의 색을 유지하며, 각 사각형의 크기는 기존의 절반크기
 	int select_rect = -1;	//select_rect값이 -1이면, 선택에 실패한 것임
 	for (int i = create_rect_count - 1; i >= 0; i--)
@@ -142,8 +142,8 @@ void divideRect(float mX, float mY)
 	//선택에 성공한 경우 아래 코드 실행
 	if (select_rect >= 0)
 	{
-		//int timerNum = rand() % 3;
-		int timerNum = 3;
+		int timerNum = rand() % 3;
+		//int timerNum = 3; //TEST용
 		std::cout << "select : timer " << timerNum << "\n";
 		rt[select_rect].exist = false;
 		switch (timerNum)
