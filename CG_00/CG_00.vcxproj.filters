@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="0924_test.cpp">
+    <ClCompile Include="test1.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="0928_test01.cpp">
@@ -34,6 +34,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="0930_test06.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="test2.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

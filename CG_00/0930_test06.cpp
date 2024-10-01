@@ -40,23 +40,76 @@ float Win_to_GL_Y(int y)
 	return 1 - (y / (float)clientHeight) * 2;  // 정수 나눗셈 방지
 }
 
+// 구조체 생성
+#define MIN_RECT 5
+#define MAX_RECT 10
+#define RECT_SIZE 0.025f // x3, x4으로 width, height 초기화 (eraser는 x6, x8)
+int create_rect_count = 0;
+typedef struct RECTANGLES
+{
+	bool exist;
+	float midX;
+	float midY;
+	float r, g, b;
+	float width;
+	float height;
+}RECTS;
+RECTS rt[MAX_RECT];
+
+// 사각형 생성
+void setRects()
+{
+	// init Rect
+	for (int i = 0; i < MAX_RECT; i++)
+	{
+		rt[i].exist = false;
+		rt[i].midX = 0;
+		rt[i].midY = 0;
+		rt[i].r = 0;
+		rt[i].g = 0;
+		rt[i].b = 0;
+		rt[i].width = 0;
+		rt[i].height = 0;
+	}
+	std::cout << "--set rects--\n";
+	create_rect_count = (int)generateRandomFloat(MIN_RECT, MAX_RECT);
+	for (int i = 0; i < create_rect_count; i++)
+	{
+		float rect_size = generateRandomFloat(0.025f, 0.1f);
+		rt[i].exist = true;
+		rt[i].midX = generateRandomFloat(-1.0f, 1.0f);
+		rt[i].midY = generateRandomFloat(-1.0f, 1.0f);
+		rt[i].r = generateRandomFloat(0.0f, 1.0f);
+		rt[i].g = generateRandomFloat(0.0f, 1.0f);
+		rt[i].b = generateRandomFloat(0.0f, 1.0f);
+		rt[i].width = rect_size * 3.0f;
+		rt[i].height = rect_size * 4.0f;
+	}
+	std::cout << "rects : " << create_rect_count << std::endl;
+}
+// 사각형 나누기
+void devideRect(float mx, float my)
+{
+
+}
 
 // 화면 출력
 void draw()
 {
-	//glColor3f(r,g,b);
-	//glRectf(x1, y1, x2, y2);
+	//draw Rects
+	for (int i = 0; i < create_rect_count; i++)
+	{
+		glColor3f(rt[i].r, rt[i].g, rt[i].b);
+		glRectf(rt[i].midX - (rt[i].width / 2), rt[i].midY - (rt[i].height / 2),
+			rt[i].midX + (rt[i].width / 2), rt[i].midY + (rt[i].height / 2));
+	}
 }
-
-// 왼쪽 마우스 클릭 확인
-bool left_button = false;
 
 // GL 이벤트 함수
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
 void Mouse(int button, int state, int x, int y);
-void Motion(int x, int y);
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -65,7 +118,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);		//--- 디스플레이 모드 설정
 	glutInitWindowPosition(0, 0);						//--- 윈도우의 위치 지정
 	glutInitWindowSize(clientWidth, clientHeight);		//--- 윈도우의 크기 지정
-	glutCreateWindow("test 04");						//--- 윈도우 생성(윈도우 이름)
+	glutCreateWindow("test 06");						//--- 윈도우 생성(윈도우 이름)
 
 	//--- GLEW 초기화하기
 	glewExperimental = GL_TRUE;
@@ -78,12 +131,12 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 		std::cout << "GLEW Initialized\n";
 
 	//--여기서 구조체 초기화 가능--
+	setRects();
 
 	glutDisplayFunc(drawScene);					// 출력 콜백함수의 지정
 	glutReshapeFunc(Reshape);					// 다시 그리기 콜백함수 지정
 	glutKeyboardFunc(Keyboard);					// 키보드 입력 콜백함수 지정
 	glutMouseFunc(Mouse);						// 마우스 입력
-	glutMotionFunc(Motion);						// 마우스 움직임
 	glutMainLoop();								// 이벤트 처리 시작
 }
 
@@ -106,13 +159,23 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	{
 	case 'q':		// 프로그램 종료
 	{
-		std::cout << "Quit\n";
+		std::cout << "--Quit--\n";
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
 		break;
 	}
 	case 'r':		// 타이머 중지, 사각형 초기화 및 재입력
+		setRects();
 		break;
 	}
 	glutPostRedisplay(); //--- refresh
 }
-
+void Mouse(int button, int state, int x, int y)
+{
+	float mX = Win_to_GL_X(x);
+	float mY = Win_to_GL_Y(y);
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		devideRect(mX, mY);
+	}
+	glutPostRedisplay(); // refresh
+}
