@@ -126,6 +126,10 @@ void draw()
 	}
 }
 
+// 타이머 함수
+bool timer_1 = false;
+void TimerFunction1(int value);
+
 // GL 이벤트 함수
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
@@ -199,4 +203,13 @@ void Mouse(int button, int state, int x, int y)
 		devideRect(mX, mY);
 	}
 	glutPostRedisplay(); // refresh
+}
+// 대각선 이동
+void TimerFunction1(int value)
+{
+	if (timer_1 == true)
+	{
+		glutPostRedisplay();  // 화면 재출력
+		glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
+	}
 }
