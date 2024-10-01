@@ -61,7 +61,6 @@ RECTS rt[MAX_RECT];
 typedef struct DIVRECTS
 {
 	bool exist;
-	int timer;
 	float midX;
 	float midY;
 	float r, g, b;
@@ -94,7 +93,6 @@ void setRects()
 		for (int j = 0; j < 8; j++)
 		{
 			divRect[i][j].exist = false;
-			divRect[i][j].timer = -1;
 			divRect[i][j].midX = 0;
 			divRect[i][j].midY = 0;
 			divRect[i][j].r = 0;
@@ -155,7 +153,6 @@ void divideRect(float mX, float mY)
 			// 1. 4, 좌우상하 이동
 			for (int i = 0; i < 8; i++)
 			{
-				divRect[div_rect_count][i].timer = 0;
 				if (i % 2 == 0)
 				{	//8방향 중 상우하좌 방향(0,2,4,6인덱스)
 					//공통 적용 요소
@@ -216,7 +213,6 @@ void divideRect(float mX, float mY)
 			// 2. 4, 대각선 이동
 			for (int i = 0; i < 8; i++)
 			{
-				divRect[div_rect_count][i].timer = 1;
 				if (i % 2 == 1)
 				{	//8방향 중 대각선 방향(1,3,5,7인덱스)
 					//공통 적용 요소
@@ -278,7 +274,6 @@ void divideRect(float mX, float mY)
 			int randDir = rand() % 4;
 			for (int i = 0; i < 8; i++) 
 			{
-				divRect[div_rect_count][i].timer = 2;
 				switch (randDir)
 				{
 				case 0:
@@ -346,7 +341,6 @@ void divideRect(float mX, float mY)
 			// 4. 8, 8방향 이동
 			for (int i = 0; i < 8; i++)
 			{	//공통 적용 요소
-				divRect[div_rect_count][i].timer = 3;
 				divRect[div_rect_count][i].exist = true;
 				divRect[div_rect_count][i].r = rt[select_rect].r;
 				divRect[div_rect_count][i].g = rt[select_rect].g;
