@@ -104,6 +104,7 @@ void setRects()
 			divRect[i][j].dy = 0;
 		}
 	}
+	div_rect_count = 0;
 	std::cout << "--set rects--\n";
 	create_rect_count = (int)generateRandomFloat(MIN_RECT, MAX_RECT);
 	for (int i = 0; i < create_rect_count; i++)
@@ -467,7 +468,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutDisplayFunc(drawScene);					// 출력 콜백함수의 지정
 	glutReshapeFunc(Reshape);					// 다시 그리기 콜백함수 지정
 	glutKeyboardFunc(Keyboard);					// 키보드 입력 콜백함수 지정
-	glutMouseFunc(Mouse);						// 마우스 입력
+	glutMouseFunc(Mouse);						// 마우스 입력	
 	glutMainLoop();								// 이벤트 처리 시작
 }
 
