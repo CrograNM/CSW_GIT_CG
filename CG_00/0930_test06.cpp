@@ -365,28 +365,31 @@ void Mouse(int button, int state, int x, int y)
 	}
 	glutPostRedisplay(); // refresh
 }
-// 대각선 이동
+// 타이머 함수
 void TimerFunction1(int value)
 {
 	if (timer_1 == true)
 	{
 		for (int i = 0; i < div_rect_count; i++)
 		{
-			if (divRect[i][0].exist == true && divRect[i][0].timer == 0)
+			//timer 0: 상하좌우만 건드리기
+			if (divRect[i][0].exist == true)
 			{
-				for (int j = 0; j < 8; j++)
-				{	//상하좌우만 건드리기
-				
-					divRect[i][j].width = divRect[i][j].width * 0.99f;
-					divRect[i][j].height = divRect[i][j].height * 0.99f;
-					if (divRect[i][j].width < 0.05f)
+				if (divRect[i][0].timer == 0)
+				{
+					for (int j = 0; j < 8; j++)
 					{
-						divRect[i][j].width = 0.0f;
-						divRect[i][j].height = 0.0f;
-						divRect[i][j].exist = false;
-					}	
-					divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.01f;
-					divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.01f;
+						divRect[i][j].width = divRect[i][j].width * 0.99f;
+						divRect[i][j].height = divRect[i][j].height * 0.99f;
+						if (divRect[i][j].width < 0.05f)
+						{
+							divRect[i][j].width = 0.0f;
+							divRect[i][j].height = 0.0f;
+							divRect[i][j].exist = false;
+						}
+						divRect[i][j].midX = divRect[i][j].midX + divRect[i][j].dx * 0.01f;
+						divRect[i][j].midY = divRect[i][j].midY + divRect[i][j].dy * 0.01f;
+					}
 				}
 			}
 		}
