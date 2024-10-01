@@ -26,6 +26,9 @@ GLuint shaderProgramID;		//--- 세이더 프로그램 이름
 GLuint vertexShader;		//--- 버텍스 세이더 객체
 GLuint fragmentShader;		//--- 프래그먼트 세이더 객체
 
+GLint result;
+GLchar errorLog[512];
+
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
 	width = 500;
@@ -69,8 +72,6 @@ void make_vertexShaders()
 	glShaderSource(vertexShader, 1, &vertexSource, NULL);
 	glCompileShader(vertexShader);
 	
-	GLint result;
-	GLchar errorLog[512];
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &result);
 	if(!result)
 	{
@@ -90,8 +91,6 @@ void make_fragmentShaders()
 	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
 	glCompileShader(fragmentShader);
 
-	GLint result;
-	GLchar errorLog[512];
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &result);
 	if (!result)
 	{
@@ -103,7 +102,30 @@ void make_fragmentShaders()
 
 GLuint make_shaderProgram()
 {
-	return 0;
+	GLuint shaderID;
+	shaderID = glCreateProgram();						//--- 세이더 프로그램 만들기
+	
+	glAttachShader(shaderID, vertexShader);				//--- 세이더 프로그램에 버텍스 세이더 붙이기
+	glAttachShader(shaderID, fragmentShader);			//--- 세이더 프로그램에 프래그먼트 세이더 붙이기
+	
+	glLinkProgram(shaderID);							//--- 세이더 프로그램 링크하기
+	
+	glDeleteShader(vertexShader);						//--- 세이더 객체를 세이더 프로그램에 링크했음으로, 세이더 객체 자체는 삭제 가능
+	glDeleteShader(fragmentShader);
+	
+	glGetProgramiv(shaderID, GL_LINK_STATUS, &result);	// ---세이더가 잘 연결되었는지 체크하기
+	if (!result)
+	{
+		glGetProgramInfoLog(shaderID, 512, NULL, errorLog);
+		std::cerr << "ERROR: shader program 연결 실패\n" << errorLog << std::endl;
+		return false;
+	}
+	
+	glUseProgram(shaderID); //--- 만들어진 세이더 프로그램 사용하기
+							//--- 여러 개의 세이더프로그램 만들 수 있고, 그 중 한개의 프로그램을 사용하려면
+							//--- glUseProgram 함수를 호출하여 사용 할 특정 프로그램을 지정한다.
+							//--- 사용하기 직전에 호출할 수 있다.
+	return shaderID;
 }
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 {
@@ -112,7 +134,11 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	bColor = 1.0;	//--- 배경색을 파랑색으로 설정
 	glClearColor(rColor, gColor, bColor, 1.0f);			//--- 바탕색을 변경
 	glClear(GL_COLOR_BUFFER_BIT);						//--- 설정된 색으로 전체를 칠하기
-	glutSwapBuffers();									//--- 화면에 출력하기
+	
+	glUseProgram(shaderProgramID);
+	glPointSize(5.0);
+	glDrawArrays(GL_POINTS, 0, 1); //--- 렌더링하기: 0번 인덱스에서 1개의 버텍스를 사용하여 점 그리기
+	glutSwapBuffers(); // 화면에 출력하기
 }
 GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
 {
