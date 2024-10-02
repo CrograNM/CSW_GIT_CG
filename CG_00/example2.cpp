@@ -130,15 +130,16 @@ GLuint make_shaderProgram()
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 {
 	GLfloat rColor, gColor, bColor;
-	rColor = gColor = 0.0;
-	bColor = 1.0;	//--- 배경색을 파랑색으로 설정
+	rColor = 1.0;
+	gColor = 1.0;
+	bColor = 1.0;										//--- 배경색을 파랑색으로 설정
 	glClearColor(rColor, gColor, bColor, 1.0f);			//--- 바탕색을 변경
 	glClear(GL_COLOR_BUFFER_BIT);						//--- 설정된 색으로 전체를 칠하기
 	
 	glUseProgram(shaderProgramID);
 	glPointSize(5.0);
-	glDrawArrays(GL_POINTS, 0, 1); //--- 렌더링하기: 0번 인덱스에서 1개의 버텍스를 사용하여 점 그리기
-	glutSwapBuffers(); // 화면에 출력하기
+	glDrawArrays(GL_POINTS, 0, 1);		//--- 렌더링하기: 0번 인덱스에서 1개의 버텍스를 사용하여 점 그리기
+	glutSwapBuffers();					// 화면에 출력하기
 }
 GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
 {
