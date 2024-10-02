@@ -143,8 +143,8 @@ void divideRect(float mX, float mY)
 	//선택에 성공한 경우 아래 코드 실행
 	if (select_rect >= 0)
 	{
-		//int timerNum = rand() % 4;
-		int timerNum = 3; //TEST용
+		int timerNum = rand() % 4;
+		//int timerNum = 3; //TEST용
 		std::cout << "select : timer " << timerNum << "\n";
 		rt[select_rect].exist = false;
 		switch (timerNum)
