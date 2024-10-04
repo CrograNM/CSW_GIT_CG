@@ -63,18 +63,16 @@ GLuint shaderProgramID;						//--- 셰이더 프로그램
 //--- 함수 선언 추가하기
 GLvoid InitBuffer();
 
-GLfloat triShape[3][3] =
-{ //--- 삼각형 위치 값
-	{ -0.5, -0.5, 0.0 }, 
-	{ 0.5, -0.5, 0.0 }, 
-	{ 0.0, 0.5, 0.0 }
-};
-GLfloat colors[3][3] =
+// 최대 10개의 삼각형을 저장할 배열
+GLfloat triShapes[10][3][3];  // 10개의 삼각형, 각 삼각형은 3개의 정점, 각 정점은 3차원 좌표
+GLfloat triColors[10][3][3];
+GLfloat colors[3][3] = 
 { //--- 삼각형 꼭지점 색상
 	{ 1.0, 0.0, 0.0 }, 
 	{ 0.0, 1.0, 0.0 }, 
 	{ 0.0, 0.0, 1.0 }
 };
+int triangleCount = 0;        // 현재까지 추가된 삼각형 개수
 GLuint vao, vbo[2];
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
@@ -122,7 +120,7 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, triangleCount * 3);
 
 	glutSwapBuffers(); // 화면에 출력하기
 }
@@ -145,25 +143,43 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 }
 void Mouse(int button, int state, int x, int y)
 {
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && triangleCount < 10)
 	{
+		// 마우스 클릭 위치를 GL 좌표로 변환
 		float mX = Win_to_GL_X(x);
-		float mY = Win_to_GL_Y(y);	
+		float mY = Win_to_GL_Y(y);
 
-        // 클릭한 좌표를 중점으로 삼각형의 정점 좌표 설정
-        triShape[0][0] = mX - 0.1f;  // 왼쪽 아래
-        triShape[0][1] = mY - 0.1f;
-        triShape[1][0] = mX + 0.1f;  // 오른쪽 아래
-        triShape[1][1] = mY - 0.1f;
-        triShape[2][0] = mX;         // 위쪽 중앙
-        triShape[2][1] = mY + 0.1f;
+		// 클릭한 좌표를 중심으로 삼각형의 정점 좌표 설정
+		triShapes[triangleCount][0][0] = mX - 0.1f;  // 왼쪽 아래
+		triShapes[triangleCount][0][1] = mY - 0.1f;
+		triShapes[triangleCount][0][2] = 0.0f;
 
-        // VBO에 새로운 삼각형 좌표를 업데이트
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triShape, GL_STATIC_DRAW);
+		triShapes[triangleCount][1][0] = mX + 0.1f;  // 오른쪽 아래
+		triShapes[triangleCount][1][1] = mY - 0.1f;
+		triShapes[triangleCount][1][2] = 0.0f;
 
-        // 화면 갱신
-        glutPostRedisplay();
+		triShapes[triangleCount][2][0] = mX;         // 위쪽 중앙
+		triShapes[triangleCount][2][1] = mY + 0.1f;
+		triShapes[triangleCount][2][2] = 0.0f;
+		
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				triColors[triangleCount][i][j] = colors[i][j];
+			}
+		}
+		
+		// VBO에 새로운 삼각형 좌표 추가
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, (triangleCount + 1) * 9 * sizeof(GLfloat), triShapes, GL_STATIC_DRAW);
+		
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, (triangleCount + 1) * 9 * sizeof(GLfloat), triColors, GL_STATIC_DRAW);
+		triangleCount++;  // 삼각형 개수 증가
+
+		// 화면 갱신
+		glutPostRedisplay();
 	}
 }
 
@@ -259,18 +275,15 @@ void InitBuffer()
 
 	//--- 1번째 VBO를 활성화하여 바인드하고, 버텍스 속성 (좌표값)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triShape, GL_STATIC_DRAW);	// 정의된 변수에서 좌표값을 가져온다
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triShapes, GL_STATIC_DRAW);	// 정의된 변수에서 좌표값을 가져온다
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);							// 가져온 좌표값을 0번 인덱스에 명시
 	glEnableVertexAttribArray(0);													// VBO[0] 활성화
 
 	//--- 2번째 VBO를 활성화 하여 바인드 하고, 버텍스 속성 (색상)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), colors, GL_STATIC_DRAW);		// 정의된 변수에서 색상을 가져온다
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triColors, GL_STATIC_DRAW);		// 정의된 변수에서 색상을 가져온다
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);							// 받아온 색상을 1번 인덱스에 명시
 	glEnableVertexAttribArray(1);													// VBO[1] 활성화
 
 	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
 }
-
-
-
