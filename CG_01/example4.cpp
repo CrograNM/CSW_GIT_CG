@@ -83,11 +83,9 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 
 	glUseProgram(shaderProgramID);
 
-	//--- 사용할 VAO 불러오기
-	glBindVertexArray(vao);
-
-	glDrawArrays(GL_TRIANGLES, 0, 3);					//--- 삼각형 그리기: 0번 인덱스부터 3개의 버텍스를 사용하여 삼각형 그리기
-
+	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
+	glBindVertexArray(vao);		
+	glDrawArrays(GL_TRIANGLES, 0, 3);		
 	glutSwapBuffers(); // 화면에 출력하기
 }
 GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
@@ -124,9 +122,10 @@ char* filetobuf(const char* file)
 	buf[length] = 0;					// Null terminator 
 	return buf;							// Return the buffer 
 }
+
 void make_vertexShaders()
 {
-	vertexSource = filetobuf("ex4_vertex.glsl");
+	vertexSource = filetobuf("vertex.glsl");
 
 	//--- 버텍스 세이더 객체 만들기
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -150,7 +149,7 @@ void make_vertexShaders()
 }
 void make_fragmentShaders()
 {
-	fragmentSource = filetobuf("ex4_fragment.glsl");
+	fragmentSource = filetobuf("fragment.glsl");
 
 	//--- 프래그먼트 세이더 객체 만들기
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -192,36 +191,32 @@ void make_shaderProgram()
 }
 void InitBuffer()
 {
-	glGenVertexArrays(1, &vao); //--- VAO 를 지정하고 할당하기
-	glBindVertexArray(vao); //--- VAO를 바인드하기
+	glGenVertexArrays(1, &vao);		//--- VAO 를 지정하고 할당하기
+	glBindVertexArray(vao);			//--- VAO를 바인드하기
 
-	glGenBuffers(2, vbo); //--- 2개의 VBO를 지정하고 할당하기
+	glGenBuffers(2, vbo);			//--- 2개의 VBO를 지정하고 할당하기
 
 	//--- 1번째 VBO를 활성화하여 바인드하고, 버텍스 속성 (좌표값)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-
 	//--- 변수 diamond 에서 버텍스 데이터 값을 버퍼에 복사한다.
 	//--- triShape 배열의 사이즈: 9 * float
 	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triShape, GL_STATIC_DRAW);
-
 	//--- 좌표값을 attribute 인덱스 0번에 명시한다: 버텍스 당 3* float
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
 	//--- attribute 인덱스 0번을 사용가능하게 함
 	glEnableVertexAttribArray(0);
 
 	//--- 2번째 VBO를 활성화 하여 바인드 하고, 버텍스 속성 (색상)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-
 	//--- 변수 colors에서 버텍스 색상을 복사한다.
 	//--- colors 배열의 사이즈: 9 *float 
 	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), colors, GL_STATIC_DRAW);
-
 	//--- 색상값을 attribute 인덱스 1번에 명시한다: 버텍스 당 3*float
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
 	//--- attribute 인덱스 1번을 사용 가능하게 함.
 	glEnableVertexAttribArray(1);
+
+	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
 }
 
 
