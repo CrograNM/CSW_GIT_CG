@@ -18,12 +18,15 @@
     <ClCompile Include="example4.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="1004_test07.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ex4_fragment.glsl">
+    <None Include="fragment.glsl">
       <Filter>소스 파일</Filter>
     </None>
-    <None Include="ex4_vertex.glsl">
+    <None Include="vertex.glsl">
       <Filter>소스 파일</Filter>
     </None>
   </ItemGroup>
