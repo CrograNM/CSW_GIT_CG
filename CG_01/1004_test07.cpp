@@ -24,7 +24,7 @@ float generateRandomFloat(float min, float max)
 	return dis(gen);
 }
 
-//좌표 변환 함수
+// 좌표 변환 함수
 int GL_to_Win_X(float x)
 {
 	return (x + 1) * (clientWidth / 2.0f);  // 2.0f로 실수 나눗셈
@@ -45,6 +45,7 @@ float Win_to_GL_Y(int y)
 // 도형 관련 함수들
 void initFigure();
 void moveFigureRand(char dir);
+
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 10
 #define FIGURE_SIZE 0.02f
@@ -52,10 +53,10 @@ void moveFigureRand(char dir);
 GLfloat figure[MAX_FIGURE][6][3];  
 GLfloat colorData[MAX_FIGURE][6][3];
 int figureCount = 0;
-int figureType = 1;					//1:point,  2:line,  3:tri,  4:rect
-int typeArray[MAX_FIGURE] = { 0, };	//1:point,  2:line,  3:tri,  4:rect
+int figureType = 1;					// 1:point,  2:line,  3:tri,  4:rect
+int typeArray[MAX_FIGURE] = { 0, };	// 1:point,  2:line,  3:tri,  4:rect
 
-//필요 변수 선언
+// 필요 변수 선언
 GLint width, height;
 GLchar* vertexSource, * fragmentSource;		//--- 소스코드 저장 변수
 GLuint vertexShader, fragmentShader;		//--- 세이더 객체
