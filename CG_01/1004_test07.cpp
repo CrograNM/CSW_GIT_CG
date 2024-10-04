@@ -42,21 +42,17 @@ float Win_to_GL_Y(int y)
 	return 1 - (y / (float)clientHeight) * 2;  // 정수 나눗셈 방지
 }
 
-// 최대 10개의 삼각형을 저장할 배열
+// 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 10
 #define FIGURE_SIZE 0.02f
-int figureType = 1;					//1:point,  2:line,  3:tri,  4:rect
-int typeArray[MAX_FIGURE] = {0, };	//1:point,  2:line,  3:tri,  4:rect
-GLfloat figure[MAX_FIGURE][6][3];  // 10개의 삼각형, 각 삼각형은 3개의 정점, 각 정점은 3차원 좌표
-GLfloat colors[3][3] =
-{ //--- 삼각형 꼭지점 색상
-	{ 1.0, 0.0, 0.0 },
-	{ 0.0, 1.0, 0.0 },
-	{ 0.0, 0.0, 1.0 }
-};
-int figureCount = 0;        // 현재까지 추가된 삼각형 개수
-GLuint vao, vbo[2];
 
+GLfloat figure[MAX_FIGURE][6][3];  
+GLfloat colorData[MAX_FIGURE][6][3];
+int figureCount = 0;
+int figureType = 1;					//1:point,  2:line,  3:tri,  4:rect
+int typeArray[MAX_FIGURE] = { 0, };	//1:point,  2:line,  3:tri,  4:rect
+     
+GLuint vao, vbo[2];							//--- VAO, VBO
 void initFigure()
 {
 	for (int i = 0; i < MAX_FIGURE; i++)
@@ -66,10 +62,63 @@ void initFigure()
 			for (int k = 0; k < 3; k++)
 			{
 				figure[i][j][k] = 0;
+				colorData[i][j][k] = 1.0f;
 			}
 		}
 		typeArray[i] = 0;
 	}
+}
+void moveFigureRand(char dir)
+{
+	std::cout << "move random : " << dir << std::endl;
+	int randIndex = rand() % figureCount;
+	float v = 0.02f;
+	switch (dir)
+	{
+	case 'w':
+	{
+		figure[randIndex][0][1] += v;
+		figure[randIndex][1][1] += v;
+		figure[randIndex][2][1] += v;
+		figure[randIndex][3][1] += v;
+		figure[randIndex][4][1] += v;
+		figure[randIndex][5][1] += v;
+		break;
+	}
+	case 'a':
+	{
+		figure[randIndex][0][0] -= v;
+		figure[randIndex][1][0] -= v;
+		figure[randIndex][2][0] -= v;
+		figure[randIndex][3][0] -= v;
+		figure[randIndex][4][0] -= v;
+		figure[randIndex][5][0] -= v;
+		break;
+	}
+	case 's':
+	{
+		figure[randIndex][0][1] -= v;
+		figure[randIndex][1][1] -= v;
+		figure[randIndex][2][1] -= v;
+		figure[randIndex][3][1] -= v;
+		figure[randIndex][4][1] -= v;
+		figure[randIndex][5][1] -= v;
+		break;
+	}
+	case 'd':
+	{
+		figure[randIndex][0][0] += v;
+		figure[randIndex][1][0] += v;
+		figure[randIndex][2][0] += v;
+		figure[randIndex][3][0] += v;
+		figure[randIndex][4][0] += v;
+		figure[randIndex][5][0] += v;
+		break;
+	}
+	}
+	// VBO에 새로운 삼각형 좌표 추가
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
 }
 
 //사용자 정의 함수
@@ -82,7 +131,6 @@ char* filetobuf(const char* file);
 void make_vertexShaders();
 void make_fragmentShaders();
 void make_shaderProgram();
-//--- 함수 선언 추가하기
 GLvoid InitBuffer();
 
 //필요 변수 선언
@@ -93,6 +141,7 @@ GLuint shaderProgramID;						//--- 셰이더 프로그램
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
+	srand(time(0));
 	width = clientWidth;
 	height = clientHeight;
 
@@ -207,6 +256,11 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		initFigure();
 		break;
 	}
+	case 'w': case 'a': case 's': case 'd':
+	{
+		moveFigureRand(key);
+		break;
+	}
 	}
 	glutPostRedisplay(); //--- refresh
 }
@@ -257,10 +311,13 @@ void Mouse(int button, int state, int x, int y)
 			figure[figureCount][5][0] = right;
 			figure[figureCount][5][1] = bottom;
 			figure[figureCount][5][2] = 0.0f;
-
-			// VBO에 새로운 삼각형 좌표 추가
-			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+			
+			for (int i = 0; i < 6; i++)
+			{
+				colorData[figureCount][i][0] = 1.0f; // R
+				colorData[figureCount][i][1] = 0.0f; // G
+				colorData[figureCount][i][2] = 0.0f; // B
+			}
 		}
 		else if (figureType == 2)
 		{
@@ -291,9 +348,12 @@ void Mouse(int button, int state, int x, int y)
 			figure[figureCount][5][1] = 0;
 			figure[figureCount][5][2] = 0;
 
-			// VBO에 새로운 삼각형 좌표 추가
-			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+			for (int i = 0; i < 6; i++)
+			{
+				colorData[figureCount][i][0] = 0.0f; // R
+				colorData[figureCount][i][1] = 1.0f; // G
+				colorData[figureCount][i][2] = 0.0f; // B
+			}
 		}
 		else if (figureType == 3)
 		{
@@ -325,9 +385,12 @@ void Mouse(int button, int state, int x, int y)
 			figure[figureCount][5][1] = 0;
 			figure[figureCount][5][2] = 0;
 
-			// VBO에 새로운 삼각형 좌표 추가
-			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+			for (int i = 0; i < 6; i++)
+			{
+				colorData[figureCount][i][0] = 0.0f; // R
+				colorData[figureCount][i][1] = 0.0f; // G
+				colorData[figureCount][i][2] = 1.0f; // B
+			}
 		}
 		else if (figureType == 4)
 		{
@@ -360,14 +423,21 @@ void Mouse(int button, int state, int x, int y)
 			figure[figureCount][5][1] = bottom;
 			figure[figureCount][5][2] = 0.0f;
 
-			// VBO에 새로운 삼각형 좌표 추가
-			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-			glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+			for (int i = 0; i < 6; i++)
+			{
+				colorData[figureCount][i][0] = 1.0f; // R
+				colorData[figureCount][i][1] = 0.0f; // G
+				colorData[figureCount][i][2] = 1.0f; // B
+			}
 		}
-		figureCount++;  // 삼각형 개수 증가
-
-		// 화면 갱신
-		glutPostRedisplay();
+		// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
+		
+		figureCount++;			// 삼각형 개수 증가	
+		glutPostRedisplay();	// 화면 갱신
 	}
 }
 
@@ -458,20 +528,19 @@ void InitBuffer()
 {
 	glGenVertexArrays(1, &vao);		//--- VAO 를 지정하고 할당하기
 	glBindVertexArray(vao);			//--- VAO를 바인드하기
-
 	glGenBuffers(2, vbo);			//--- 2개의 VBO를 지정하고 할당하기
 
-	//--- 1번째 VBO를 활성화하여 바인드하고, 버텍스 속성 (좌표값)을 저장
+	//--- 1번째 VBO 설정 : 좌표값
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);	// 정의된 변수에서 좌표값을 가져온다
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);							// 가져온 좌표값을 0번 인덱스에 명시
-	glEnableVertexAttribArray(0);													// VBO[0] 활성화
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat), figure, GL_STATIC_DRAW);		
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);							
+	glEnableVertexAttribArray(0);													
 
-	//--- 2번째 VBO를 활성화 하여 바인드 하고, 버텍스 속성 (색상)을 저장
+	//--- 2번째 VBO 설정 : 색상
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), colors, GL_STATIC_DRAW);		// 정의된 변수에서 색상을 가져온다
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);							// 받아온 색상을 1번 인덱스에 명시
-	glEnableVertexAttribArray(1);													// VBO[1] 활성화
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat), colorData, GL_STATIC_DRAW);		
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);							
+	glEnableVertexAttribArray(1);													
 
 	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
 }
