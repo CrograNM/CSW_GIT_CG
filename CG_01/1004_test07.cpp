@@ -45,7 +45,7 @@ float Win_to_GL_Y(int y)
 // 최대 10개의 삼각형을 저장할 배열
 #define MAX_FIGURE 10
 #define FIGURE_SIZE 0.02f
-int figureType = 2;					//1:point,  2:line,  3:tri,  4:rect
+int figureType = 1;					//1:point,  2:line,  3:tri,  4:rect
 int typeArray[MAX_FIGURE] = {0, };	//1:point,  2:line,  3:tri,  4:rect
 GLfloat figure[MAX_FIGURE][6][3];  // 10개의 삼각형, 각 삼각형은 3개의 정점, 각 정점은 3차원 좌표
 GLfloat colors[3][3] =
@@ -56,6 +56,21 @@ GLfloat colors[3][3] =
 };
 int figureCount = 0;        // 현재까지 추가된 삼각형 개수
 GLuint vao, vbo[2];
+
+void initFigure()
+{
+	for (int i = 0; i < MAX_FIGURE; i++)
+	{
+		for (int j = 0; j < 6; j++)
+		{
+			for (int k = 0; k < 3; k++)
+			{
+				figure[i][j][k] = 0;
+			}
+		}
+		typeArray[i] = 0;
+	}
+}
 
 //사용자 정의 함수
 GLvoid drawScene(GLvoid);
@@ -186,7 +201,10 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	}
 	case 'c': 
 	{
-
+		std::cout << "--Clear client--\n";
+		figureCount = 0;
+		figureType = 1;
+		initFigure();
 		break;
 	}
 	}
@@ -208,6 +226,7 @@ void Mouse(int button, int state, int x, int y)
 		if (figureType == 1)
 		{
 			typeArray[figureCount] = 1;
+			std::cout << "Draw : point\n";
 			left = mX - FIGURE_SIZE * 3		/ 4;
 			right = mX + FIGURE_SIZE * 3	/ 4;
 			top = mY + FIGURE_SIZE * 4		/ 4;
@@ -246,8 +265,8 @@ void Mouse(int button, int state, int x, int y)
 		else if (figureType == 2)
 		{
 			typeArray[figureCount] = 2;
-			// 두개의 삼각형 좌표로 사각형 생성
-			//왼쪽 삼각형 
+			std::cout << "Draw : line\n";
+			// 두개의 버텍스로 라인 생성 
 			figure[figureCount][0][0] = left;
 			figure[figureCount][0][1] = top;
 			figure[figureCount][0][2] = 0.0f;
@@ -260,7 +279,6 @@ void Mouse(int button, int state, int x, int y)
 			figure[figureCount][2][1] = 0;
 			figure[figureCount][2][2] = 0;
 
-			//오른쪽 삼각형
 			figure[figureCount][3][0] = 0;
 			figure[figureCount][3][1] = 0;
 			figure[figureCount][3][2] = 0;
@@ -280,6 +298,7 @@ void Mouse(int button, int state, int x, int y)
 		else if (figureType == 3)
 		{
 			typeArray[figureCount] = 3;
+			std::cout << "Draw : tri\n";
 			// 클릭한 좌표를 중심으로 삼각형의 정점 좌표 설정
 			figure[figureCount][0][0] = left;  // 왼쪽 아래
 			figure[figureCount][0][1] = bottom;
@@ -313,6 +332,7 @@ void Mouse(int button, int state, int x, int y)
 		else if (figureType == 4)
 		{
 			typeArray[figureCount] = 4;
+			std::cout << "Draw : rect\n";
 			// 두개의 삼각형 좌표로 사각형 생성
 			//왼쪽 삼각형 
 			figure[figureCount][0][0] = left;  
