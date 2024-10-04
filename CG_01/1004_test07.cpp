@@ -160,6 +160,35 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
 		break;
 	}
+	case 'p':		
+	{
+		std::cout << "--point mod--\n";
+		figureType = 1;
+		break;
+	}
+	case 'l':		
+	{
+		std::cout << "--line mod--\n";
+		figureType = 2;
+		break;
+	}
+	case 't':		
+	{
+		std::cout << "--tri mod--\n";
+		figureType = 3;
+		break;
+	}
+	case 'r':		
+	{
+		std::cout << "--rect mod--\n";
+		figureType = 4;
+		break;
+	}
+	case 'c': 
+	{
+
+		break;
+	}
 	}
 	glutPostRedisplay(); //--- refresh
 }
