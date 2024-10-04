@@ -3,18 +3,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <gl/glew.h>			//--- 필요한 헤더파일 include
+#include <gl/glew.h>			
 #include <gl/freeglut.h>
 #include <gl/freeglut_ext.h>
 #include <gl/glm/glm.hpp>
 #include <gl/glm/ext.hpp>
 #include <gl/glm/gtc/matrix_transform.hpp>
+#include <random>
 
 // 클라이언트 크기
 #define clientWidth 800
 #define clientHeight 600
 
-#include <random>
 // 랜덤 실수값(min ~ max) 반환 함수
 std::random_device rd;
 std::mt19937 gen(rd()); // Mersenne Twister 엔진
@@ -42,6 +42,9 @@ float Win_to_GL_Y(int y)
 	return 1 - (y / (float)clientHeight) * 2;  // 정수 나눗셈 방지
 }
 
+// 도형 관련 함수들
+void initFigure();
+void moveFigureRand(char dir);
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 10
 #define FIGURE_SIZE 0.02f
@@ -51,77 +54,15 @@ GLfloat colorData[MAX_FIGURE][6][3];
 int figureCount = 0;
 int figureType = 1;					//1:point,  2:line,  3:tri,  4:rect
 int typeArray[MAX_FIGURE] = { 0, };	//1:point,  2:line,  3:tri,  4:rect
-     
-GLuint vao, vbo[2];							//--- VAO, VBO
-void initFigure()
-{
-	for (int i = 0; i < MAX_FIGURE; i++)
-	{
-		for (int j = 0; j < 6; j++)
-		{
-			for (int k = 0; k < 3; k++)
-			{
-				figure[i][j][k] = 0;
-				colorData[i][j][k] = 1.0f;
-			}
-		}
-		typeArray[i] = 0;
-	}
-}
-void moveFigureRand(char dir)
-{
-	std::cout << "move random : " << dir << std::endl;
-	int randIndex = rand() % figureCount;
-	float v = 0.02f;
-	switch (dir)
-	{
-	case 'w':
-	{
-		figure[randIndex][0][1] += v;
-		figure[randIndex][1][1] += v;
-		figure[randIndex][2][1] += v;
-		figure[randIndex][3][1] += v;
-		figure[randIndex][4][1] += v;
-		figure[randIndex][5][1] += v;
-		break;
-	}
-	case 'a':
-	{
-		figure[randIndex][0][0] -= v;
-		figure[randIndex][1][0] -= v;
-		figure[randIndex][2][0] -= v;
-		figure[randIndex][3][0] -= v;
-		figure[randIndex][4][0] -= v;
-		figure[randIndex][5][0] -= v;
-		break;
-	}
-	case 's':
-	{
-		figure[randIndex][0][1] -= v;
-		figure[randIndex][1][1] -= v;
-		figure[randIndex][2][1] -= v;
-		figure[randIndex][3][1] -= v;
-		figure[randIndex][4][1] -= v;
-		figure[randIndex][5][1] -= v;
-		break;
-	}
-	case 'd':
-	{
-		figure[randIndex][0][0] += v;
-		figure[randIndex][1][0] += v;
-		figure[randIndex][2][0] += v;
-		figure[randIndex][3][0] += v;
-		figure[randIndex][4][0] += v;
-		figure[randIndex][5][0] += v;
-		break;
-	}
-	}
-	// VBO에 새로운 삼각형 좌표 추가
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
-}
 
-//사용자 정의 함수
+//필요 변수 선언
+GLint width, height;
+GLchar* vertexSource, * fragmentSource;		//--- 소스코드 저장 변수
+GLuint vertexShader, fragmentShader;		//--- 세이더 객체
+GLuint shaderProgramID;						//--- 셰이더 프로그램
+GLuint vao, vbo[2];							//--- VAO, VBO
+
+// 사용자 정의 함수
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
@@ -132,12 +73,6 @@ void make_vertexShaders();
 void make_fragmentShaders();
 void make_shaderProgram();
 GLvoid InitBuffer();
-
-//필요 변수 선언
-GLint width, height;
-GLchar* vertexSource, * fragmentSource;		//--- 소스코드 저장 변수
-GLuint vertexShader, fragmentShader;		//--- 세이더 객체
-GLuint shaderProgramID;						//--- 셰이더 프로그램
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -172,13 +107,14 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutMouseFunc(Mouse);
 	glutMainLoop();								//--- 이벤트 처리 시작
 }
-GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
+
+GLvoid drawScene()
 {
 	GLfloat rColor, gColor, bColor;
 	rColor = 1.0;
 	gColor = 1.0;
 	bColor = 1.0;
-	glClearColor(rColor, gColor, bColor, 1.0f);			//--- 바탕색을 변경
+	glClearColor(rColor, gColor, bColor, 1.0f);			
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(shaderProgramID);
@@ -543,4 +479,72 @@ void InitBuffer()
 	glEnableVertexAttribArray(1);													
 
 	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
+}
+
+void initFigure()
+{
+	for (int i = 0; i < MAX_FIGURE; i++)
+	{
+		for (int j = 0; j < 6; j++)
+		{
+			for (int k = 0; k < 3; k++)
+			{
+				figure[i][j][k] = 0;
+				colorData[i][j][k] = 1.0f;
+			}
+		}
+		typeArray[i] = 0;
+	}
+}
+void moveFigureRand(char dir)
+{
+	std::cout << "move random : " << dir << std::endl;
+	int randIndex = rand() % figureCount;
+	float v = 0.02f;
+	switch (dir)
+	{
+	case 'w':
+	{
+		figure[randIndex][0][1] += v;
+		figure[randIndex][1][1] += v;
+		figure[randIndex][2][1] += v;
+		figure[randIndex][3][1] += v;
+		figure[randIndex][4][1] += v;
+		figure[randIndex][5][1] += v;
+		break;
+	}
+	case 'a':
+	{
+		figure[randIndex][0][0] -= v;
+		figure[randIndex][1][0] -= v;
+		figure[randIndex][2][0] -= v;
+		figure[randIndex][3][0] -= v;
+		figure[randIndex][4][0] -= v;
+		figure[randIndex][5][0] -= v;
+		break;
+	}
+	case 's':
+	{
+		figure[randIndex][0][1] -= v;
+		figure[randIndex][1][1] -= v;
+		figure[randIndex][2][1] -= v;
+		figure[randIndex][3][1] -= v;
+		figure[randIndex][4][1] -= v;
+		figure[randIndex][5][1] -= v;
+		break;
+	}
+	case 'd':
+	{
+		figure[randIndex][0][0] += v;
+		figure[randIndex][1][0] += v;
+		figure[randIndex][2][0] += v;
+		figure[randIndex][3][0] += v;
+		figure[randIndex][4][0] += v;
+		figure[randIndex][5][0] += v;
+		break;
+	}
+	}
+	// VBO에 새로운 삼각형 좌표 추가
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
 }
