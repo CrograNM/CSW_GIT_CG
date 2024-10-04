@@ -42,6 +42,20 @@ float Win_to_GL_Y(int y)
 	return 1 - (y / (float)clientHeight) * 2;  // 정수 나눗셈 방지
 }
 
+// 최대 10개의 삼각형을 저장할 배열
+#define MAX_FIGURE 10
+#define FIGURE_SIZE 0.02f
+int figureType = 1;	//1:point,  2:line,  3:tri,  4:rect
+GLfloat figure[MAX_FIGURE][6][3];  // 10개의 삼각형, 각 삼각형은 3개의 정점, 각 정점은 3차원 좌표
+GLfloat colors[3][3] =
+{ //--- 삼각형 꼭지점 색상
+	{ 1.0, 0.0, 0.0 },
+	{ 0.0, 1.0, 0.0 },
+	{ 0.0, 0.0, 1.0 }
+};
+int figureCount = 0;        // 현재까지 추가된 삼각형 개수
+GLuint vao, vbo[2];
+
 //사용자 정의 함수
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
@@ -52,28 +66,14 @@ char* filetobuf(const char* file);
 void make_vertexShaders();
 void make_fragmentShaders();
 void make_shaderProgram();
-
-//필요 변수 선언
-GLint width, height;
-
-GLchar* vertexSource, * fragmentSource;		//--- 소스코드 저장 변수
-GLuint vertexShader, fragmentShader;		//--- 세이더 객체
-GLuint shaderProgramID;						//--- 셰이더 프로그램
-
 //--- 함수 선언 추가하기
 GLvoid InitBuffer();
 
-// 최대 10개의 삼각형을 저장할 배열
-GLfloat triShapes[10][3][3];  // 10개의 삼각형, 각 삼각형은 3개의 정점, 각 정점은 3차원 좌표
-GLfloat triColors[10][3][3];
-GLfloat colors[3][3] = 
-{ //--- 삼각형 꼭지점 색상
-	{ 1.0, 0.0, 0.0 }, 
-	{ 0.0, 1.0, 0.0 }, 
-	{ 0.0, 0.0, 1.0 }
-};
-int triangleCount = 0;        // 현재까지 추가된 삼각형 개수
-GLuint vao, vbo[2];
+//필요 변수 선언
+GLint width, height;
+GLchar* vertexSource, * fragmentSource;		//--- 소스코드 저장 변수
+GLuint vertexShader, fragmentShader;		//--- 세이더 객체
+GLuint shaderProgramID;						//--- 셰이더 프로그램
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -120,7 +120,7 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, triangleCount * 3);
+	glDrawArrays(GL_TRIANGLES, 0, figureCount * 6);
 
 	glutSwapBuffers(); // 화면에 출력하기
 }
@@ -143,40 +143,153 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 }
 void Mouse(int button, int state, int x, int y)
 {
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && triangleCount < 10)
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && figureCount < 10)
 	{
 		// 마우스 클릭 위치를 GL 좌표로 변환
 		float mX = Win_to_GL_X(x);
 		float mY = Win_to_GL_Y(y);
 
-		// 클릭한 좌표를 중심으로 삼각형의 정점 좌표 설정
-		triShapes[triangleCount][0][0] = mX - 0.1f;  // 왼쪽 아래
-		triShapes[triangleCount][0][1] = mY - 0.1f;
-		triShapes[triangleCount][0][2] = 0.0f;
+		float left = mX - FIGURE_SIZE * 3;
+		float right = mX + FIGURE_SIZE * 3;
+		float top = mY + FIGURE_SIZE * 4;
+		float bottom = mY - FIGURE_SIZE * 4;
 
-		triShapes[triangleCount][1][0] = mX + 0.1f;  // 오른쪽 아래
-		triShapes[triangleCount][1][1] = mY - 0.1f;
-		triShapes[triangleCount][1][2] = 0.0f;
-
-		triShapes[triangleCount][2][0] = mX;         // 위쪽 중앙
-		triShapes[triangleCount][2][1] = mY + 0.1f;
-		triShapes[triangleCount][2][2] = 0.0f;
-		
-		for (int i = 0; i < 3; i++)
+		if (figureType == 1)
 		{
-			for (int j = 0; j < 3; j++)
-			{
-				triColors[triangleCount][i][j] = colors[i][j];
-			}
+			left = mX - FIGURE_SIZE * 3		/ 4;
+			right = mX + FIGURE_SIZE * 3	/ 4;
+			top = mY + FIGURE_SIZE * 4		/ 4;
+			bottom = mY - FIGURE_SIZE * 4	/ 4;
+			// 두개의 삼각형 좌표로 사각형 생성
+			//왼쪽 삼각형 
+			figure[figureCount][0][0] = left;
+			figure[figureCount][0][1] = top;
+			figure[figureCount][0][2] = 0.0f;
+
+			figure[figureCount][1][0] = left;
+			figure[figureCount][1][1] = bottom;
+			figure[figureCount][1][2] = 0.0f;
+
+			figure[figureCount][2][0] = right;
+			figure[figureCount][2][1] = bottom;
+			figure[figureCount][2][2] = 0.0f;
+
+			//오른쪽 삼각형
+			figure[figureCount][3][0] = left;
+			figure[figureCount][3][1] = top;
+			figure[figureCount][3][2] = 0.0f;
+
+			figure[figureCount][4][0] = right;
+			figure[figureCount][4][1] = top;
+			figure[figureCount][4][2] = 0.0f;
+
+			figure[figureCount][5][0] = right;
+			figure[figureCount][5][1] = bottom;
+			figure[figureCount][5][2] = 0.0f;
+
+			// VBO에 새로운 삼각형 좌표 추가
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
 		}
-		
-		// VBO에 새로운 삼각형 좌표 추가
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glBufferData(GL_ARRAY_BUFFER, (triangleCount + 1) * 9 * sizeof(GLfloat), triShapes, GL_STATIC_DRAW);
-		
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glBufferData(GL_ARRAY_BUFFER, (triangleCount + 1) * 9 * sizeof(GLfloat), triColors, GL_STATIC_DRAW);
-		triangleCount++;  // 삼각형 개수 증가
+		else if (figureType == 2)
+		{
+			// 두개의 삼각형 좌표로 사각형 생성
+			//왼쪽 삼각형 
+			figure[figureCount][0][0] = left;
+			figure[figureCount][0][1] = top;
+			figure[figureCount][0][2] = 0.0f;
+
+			figure[figureCount][1][0] = left;
+			figure[figureCount][1][1] = bottom;
+			figure[figureCount][1][2] = 0.0f;
+
+			figure[figureCount][2][0] = right;
+			figure[figureCount][2][1] = bottom;
+			figure[figureCount][2][2] = 0.0f;
+
+			//오른쪽 삼각형
+			figure[figureCount][3][0] = left;
+			figure[figureCount][3][1] = top;
+			figure[figureCount][3][2] = 0.0f;
+
+			figure[figureCount][4][0] = right;
+			figure[figureCount][4][1] = top;
+			figure[figureCount][4][2] = 0.0f;
+
+			figure[figureCount][5][0] = right;
+			figure[figureCount][5][1] = bottom;
+			figure[figureCount][5][2] = 0.0f;
+
+			// VBO에 새로운 삼각형 좌표 추가
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+		}
+		else if (figureType == 3)
+		{
+			// 클릭한 좌표를 중심으로 삼각형의 정점 좌표 설정
+			figure[figureCount][0][0] = left;  // 왼쪽 아래
+			figure[figureCount][0][1] = bottom;
+			figure[figureCount][0][2] = 0.0f;
+
+			figure[figureCount][1][0] = right;  // 오른쪽 아래
+			figure[figureCount][1][1] = bottom;
+			figure[figureCount][1][2] = 0.0f;
+
+			figure[figureCount][2][0] = mX;         // 위쪽 중앙
+			figure[figureCount][2][1] = top;
+			figure[figureCount][2][2] = 0.0f;
+
+			// 나머지 초기화
+			figure[figureCount][3][0] = 0;
+			figure[figureCount][3][1] = 0;
+			figure[figureCount][3][2] = 0;
+										
+			figure[figureCount][4][0] = 0;
+			figure[figureCount][4][1] = 0;
+			figure[figureCount][4][2] = 0;
+										
+			figure[figureCount][5][0] = 0;
+			figure[figureCount][5][1] = 0;
+			figure[figureCount][5][2] = 0;
+
+			// VBO에 새로운 삼각형 좌표 추가
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+		}
+		else if (figureType == 4)
+		{
+			// 두개의 삼각형 좌표로 사각형 생성
+			//왼쪽 삼각형 
+			figure[figureCount][0][0] = left;  
+			figure[figureCount][0][1] = top;
+			figure[figureCount][0][2] = 0.0f;
+
+			figure[figureCount][1][0] = left;  
+			figure[figureCount][1][1] = bottom;
+			figure[figureCount][1][2] = 0.0f;
+
+			figure[figureCount][2][0] = right;        
+			figure[figureCount][2][1] = bottom;
+			figure[figureCount][2][2] = 0.0f;
+
+			//오른쪽 삼각형
+			figure[figureCount][3][0] = left;
+			figure[figureCount][3][1] = top;
+			figure[figureCount][3][2] = 0.0f;
+
+			figure[figureCount][4][0] = right;  
+			figure[figureCount][4][1] = top;
+			figure[figureCount][4][2] = 0.0f;
+
+			figure[figureCount][5][0] = right;
+			figure[figureCount][5][1] = bottom;
+			figure[figureCount][5][2] = 0.0f;
+
+			// VBO에 새로운 삼각형 좌표 추가
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+		}
+		figureCount++;  // 삼각형 개수 증가
 
 		// 화면 갱신
 		glutPostRedisplay();
@@ -275,13 +388,13 @@ void InitBuffer()
 
 	//--- 1번째 VBO를 활성화하여 바인드하고, 버텍스 속성 (좌표값)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triShapes, GL_STATIC_DRAW);	// 정의된 변수에서 좌표값을 가져온다
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);	// 정의된 변수에서 좌표값을 가져온다
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);							// 가져온 좌표값을 0번 인덱스에 명시
 	glEnableVertexAttribArray(0);													// VBO[0] 활성화
 
 	//--- 2번째 VBO를 활성화 하여 바인드 하고, 버텍스 속성 (색상)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triColors, GL_STATIC_DRAW);		// 정의된 변수에서 색상을 가져온다
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), colors, GL_STATIC_DRAW);		// 정의된 변수에서 색상을 가져온다
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);							// 받아온 색상을 1번 인덱스에 명시
 	glEnableVertexAttribArray(1);													// VBO[1] 활성화
 
