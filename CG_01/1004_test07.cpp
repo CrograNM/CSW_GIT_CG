@@ -45,7 +45,8 @@ float Win_to_GL_Y(int y)
 // 최대 10개의 삼각형을 저장할 배열
 #define MAX_FIGURE 10
 #define FIGURE_SIZE 0.02f
-int figureType = 1;	//1:point,  2:line,  3:tri,  4:rect
+int figureType = 2;					//1:point,  2:line,  3:tri,  4:rect
+int typeArray[MAX_FIGURE] = {0, };	//1:point,  2:line,  3:tri,  4:rect
 GLfloat figure[MAX_FIGURE][6][3];  // 10개의 삼각형, 각 삼각형은 3개의 정점, 각 정점은 3차원 좌표
 GLfloat colors[3][3] =
 { //--- 삼각형 꼭지점 색상
@@ -120,8 +121,29 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, figureCount * 6);
-
+	for (int i = 0; i < figureCount; i++)
+	{
+		int vertexCount;
+		switch (typeArray[i])
+		{
+		case 1:
+			vertexCount = 6;
+			glDrawArrays(GL_TRIANGLES, i * 6, vertexCount);
+			break;
+		case 2:
+			vertexCount = 2;
+			glDrawArrays(GL_LINES, i * 6, vertexCount);
+			break;
+		case 3:
+			vertexCount = 3;
+			glDrawArrays(GL_TRIANGLES, i * 6, vertexCount);
+			break;
+		case 4:
+			vertexCount = 6;
+			glDrawArrays(GL_TRIANGLES, i * 6, vertexCount);
+			break;
+		}
+	}
 	glutSwapBuffers(); // 화면에 출력하기
 }
 GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
@@ -156,6 +178,7 @@ void Mouse(int button, int state, int x, int y)
 
 		if (figureType == 1)
 		{
+			typeArray[figureCount] = 1;
 			left = mX - FIGURE_SIZE * 3		/ 4;
 			right = mX + FIGURE_SIZE * 3	/ 4;
 			top = mY + FIGURE_SIZE * 4		/ 4;
@@ -193,32 +216,33 @@ void Mouse(int button, int state, int x, int y)
 		}
 		else if (figureType == 2)
 		{
+			typeArray[figureCount] = 2;
 			// 두개의 삼각형 좌표로 사각형 생성
 			//왼쪽 삼각형 
 			figure[figureCount][0][0] = left;
 			figure[figureCount][0][1] = top;
 			figure[figureCount][0][2] = 0.0f;
 
-			figure[figureCount][1][0] = left;
+			figure[figureCount][1][0] = right;
 			figure[figureCount][1][1] = bottom;
 			figure[figureCount][1][2] = 0.0f;
 
-			figure[figureCount][2][0] = right;
-			figure[figureCount][2][1] = bottom;
-			figure[figureCount][2][2] = 0.0f;
+			figure[figureCount][2][0] = 0;
+			figure[figureCount][2][1] = 0;
+			figure[figureCount][2][2] = 0;
 
 			//오른쪽 삼각형
-			figure[figureCount][3][0] = left;
-			figure[figureCount][3][1] = top;
-			figure[figureCount][3][2] = 0.0f;
+			figure[figureCount][3][0] = 0;
+			figure[figureCount][3][1] = 0;
+			figure[figureCount][3][2] = 0;
 
-			figure[figureCount][4][0] = right;
-			figure[figureCount][4][1] = top;
-			figure[figureCount][4][2] = 0.0f;
+			figure[figureCount][4][0] = 0;
+			figure[figureCount][4][1] = 0;
+			figure[figureCount][4][2] = 0;
 
-			figure[figureCount][5][0] = right;
-			figure[figureCount][5][1] = bottom;
-			figure[figureCount][5][2] = 0.0f;
+			figure[figureCount][5][0] = 0;
+			figure[figureCount][5][1] = 0;
+			figure[figureCount][5][2] = 0;
 
 			// VBO에 새로운 삼각형 좌표 추가
 			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -226,6 +250,7 @@ void Mouse(int button, int state, int x, int y)
 		}
 		else if (figureType == 3)
 		{
+			typeArray[figureCount] = 3;
 			// 클릭한 좌표를 중심으로 삼각형의 정점 좌표 설정
 			figure[figureCount][0][0] = left;  // 왼쪽 아래
 			figure[figureCount][0][1] = bottom;
@@ -258,6 +283,7 @@ void Mouse(int button, int state, int x, int y)
 		}
 		else if (figureType == 4)
 		{
+			typeArray[figureCount] = 4;
 			// 두개의 삼각형 좌표로 사각형 생성
 			//왼쪽 삼각형 
 			figure[figureCount][0][0] = left;  
