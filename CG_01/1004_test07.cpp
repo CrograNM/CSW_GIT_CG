@@ -31,11 +31,11 @@ GLuint shaderProgramID;						//--- 셰이더 프로그램
 //--- 함수 선언 추가하기
 GLvoid InitBuffer();
 
-const GLfloat triShape[3][3] =
+GLfloat triShape[3][3] =
 { //--- 삼각형 위치 값
 	{ -0.5, -0.5, 0.0 }, { 0.5, -0.5, 0.0 }, { 0.0, 0.5, 0.0}
 };
-const GLfloat colors[3][3] =
+GLfloat colors[3][3] =
 { //--- 삼각형 꼭지점 색상
 	{ 1.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 }, { 0.0, 0.0, 1.0 }
 };
