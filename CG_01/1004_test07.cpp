@@ -6,17 +6,49 @@
 #include <gl/glew.h>			//--- 필요한 헤더파일 include
 #include <gl/freeglut.h>
 #include <gl/freeglut_ext.h>
-
 #include <gl/glm/glm.hpp>
 #include <gl/glm/ext.hpp>
 #include <gl/glm/gtc/matrix_transform.hpp>
+
+// 클라이언트 크기
+#define clientWidth 800
+#define clientHeight 600
+
+#include <random>
+// 랜덤 실수값(min ~ max) 반환 함수
+std::random_device rd;
+std::mt19937 gen(rd()); // Mersenne Twister 엔진
+float generateRandomFloat(float min, float max)
+{
+	std::uniform_real_distribution<float> dis(min, max);	// 인자로 범위 설정
+	return dis(gen);
+}
+
+//좌표 변환 함수
+int GL_to_Win_X(float x)
+{
+	return (x + 1) * (clientWidth / 2.0f);  // 2.0f로 실수 나눗셈
+}
+int GL_to_Win_Y(float y)
+{
+	return (1 - y) * (clientHeight / 2.0f);  // 2.0f로 실수 나눗셈
+}
+float Win_to_GL_X(int x)
+{
+	return (x / (float)clientWidth) * 2 - 1;  // 정수 나눗셈 방지
+}
+float Win_to_GL_Y(int y)
+{
+	return 1 - (y / (float)clientHeight) * 2;  // 정수 나눗셈 방지
+}
 
 //사용자 정의 함수
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
-char* filetobuf(const char* file);
+void Mouse(int button, int state, int x, int y);
 
+char* filetobuf(const char* file);
 void make_vertexShaders();
 void make_fragmentShaders();
 void make_shaderProgram();
@@ -33,18 +65,22 @@ GLvoid InitBuffer();
 
 GLfloat triShape[3][3] =
 { //--- 삼각형 위치 값
-	{ -0.5, -0.5, 0.0 }, { 0.5, -0.5, 0.0 }, { 0.0, 0.5, 0.0}
+	{ -0.5, -0.5, 0.0 }, 
+	{ 0.5, -0.5, 0.0 }, 
+	{ 0.0, 0.5, 0.0 }
 };
 GLfloat colors[3][3] =
 { //--- 삼각형 꼭지점 색상
-	{ 1.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 }, { 0.0, 0.0, 1.0 }
+	{ 1.0, 0.0, 0.0 }, 
+	{ 0.0, 1.0, 0.0 }, 
+	{ 0.0, 0.0, 1.0 }
 };
 GLuint vao, vbo[2];
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
-	width = 800;
-	height = 600;
+	width = clientWidth;
+	height = clientHeight;
 
 	//--- 윈도우 생성하기
 	glutInit(&argc, argv);									//--- glut 초기화
@@ -70,6 +106,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutDisplayFunc(drawScene);					//--- 출력 콜백함수의 지정
 	glutReshapeFunc(Reshape);					//--- 다시 그리기 콜백함수 지정
 	glutKeyboardFunc(Keyboard);
+	glutMouseFunc(Mouse);
 	glutMainLoop();								//--- 이벤트 처리 시작
 }
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
@@ -86,6 +123,7 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
+
 	glutSwapBuffers(); // 화면에 출력하기
 }
 GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
@@ -105,6 +143,30 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	}
 	glutPostRedisplay(); //--- refresh
 }
+void Mouse(int button, int state, int x, int y)
+{
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		float mX = Win_to_GL_X(x);
+		float mY = Win_to_GL_Y(y);	
+
+        // 클릭한 좌표를 중점으로 삼각형의 정점 좌표 설정
+        triShape[0][0] = mX - 0.1f;  // 왼쪽 아래
+        triShape[0][1] = mY - 0.1f;
+        triShape[1][0] = mX + 0.1f;  // 오른쪽 아래
+        triShape[1][1] = mY - 0.1f;
+        triShape[2][0] = mX;         // 위쪽 중앙
+        triShape[2][1] = mY + 0.1f;
+
+        // VBO에 새로운 삼각형 좌표를 업데이트
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+        glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triShape, GL_STATIC_DRAW);
+
+        // 화면 갱신
+        glutPostRedisplay();
+	}
+}
+
 char* filetobuf(const char* file)
 {
 	FILE* fptr;
@@ -122,7 +184,6 @@ char* filetobuf(const char* file)
 	buf[length] = 0;					// Null terminator 
 	return buf;							// Return the buffer 
 }
-
 void make_vertexShaders()
 {
 	vertexSource = filetobuf("vertex.glsl");
@@ -198,23 +259,15 @@ void InitBuffer()
 
 	//--- 1번째 VBO를 활성화하여 바인드하고, 버텍스 속성 (좌표값)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	//--- 변수 diamond 에서 버텍스 데이터 값을 버퍼에 복사한다.
-	//--- triShape 배열의 사이즈: 9 * float
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triShape, GL_STATIC_DRAW);
-	//--- 좌표값을 attribute 인덱스 0번에 명시한다: 버텍스 당 3* float
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//--- attribute 인덱스 0번을 사용가능하게 함
-	glEnableVertexAttribArray(0);
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), triShape, GL_STATIC_DRAW);	// 정의된 변수에서 좌표값을 가져온다
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);							// 가져온 좌표값을 0번 인덱스에 명시
+	glEnableVertexAttribArray(0);													// VBO[0] 활성화
 
 	//--- 2번째 VBO를 활성화 하여 바인드 하고, 버텍스 속성 (색상)을 저장
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	//--- 변수 colors에서 버텍스 색상을 복사한다.
-	//--- colors 배열의 사이즈: 9 *float 
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), colors, GL_STATIC_DRAW);
-	//--- 색상값을 attribute 인덱스 1번에 명시한다: 버텍스 당 3*float
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//--- attribute 인덱스 1번을 사용 가능하게 함.
-	glEnableVertexAttribArray(1);
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(GLfloat), colors, GL_STATIC_DRAW);		// 정의된 변수에서 색상을 가져온다
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);							// 받아온 색상을 1번 인덱스에 명시
+	glEnableVertexAttribArray(1);													// VBO[1] 활성화
 
 	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
 }
