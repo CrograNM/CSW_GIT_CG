@@ -119,16 +119,31 @@ GLvoid drawScene()
 
 	glUseProgram(shaderProgramID);
 
-	// VBO 업데이트
+	// VBO 업데이트: spiralPoints의 크기가 변했을 때 다시 초기화
+	glBindVertexArray(vao);
+
+	// VBO 업데이트 (새로운 포인트로)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * spiralPoints.size(), spiralPoints.data(), GL_STATIC_DRAW);
 
-	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
-	glBindVertexArray(vao);
-	
+	// 색상 VBO 업데이트 (예시로 임의의 색상 사용)
+	std::vector<float> colors;
+	for (size_t i = 0; i < spiralPoints.size() / 2; ++i)
+	{
+		colors.push_back(0.0f); // Red
+		colors.push_back(0.0f); // Green
+		colors.push_back(1.0f); // Blue
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * colors.size(), colors.data(), GL_STATIC_DRAW);
+
+	// 점 크기 설정
+	glPointSize(5.0f); // 점의 크기를 5로 설정
 	glDrawArrays(GL_POINTS, 0, spiralPoints.size() / 2);  // 점 그리기
 	glutSwapBuffers(); // 화면에 출력하기
 }
+
 GLvoid Reshape(int w, int h) //--- 콜백 함수: 다시 그리기 콜백 함수
 {
 	glViewport(0, 0, w, h);
@@ -155,8 +170,8 @@ void Mouse(int button, int state, int x, int y)
 		float mX = Win_to_GL_X(x);
 		float mY = Win_to_GL_Y(y);
 
-		// 스파이럴 생성: 시작 위치와 생성할 점의 수, 반지름 증가량, 각도 증가량
-		createSpiral(mX, mY, 1.0f); // 여기서 1.0f는 스파이럴의 길이입니다.
+		// 스파이럴 생성
+		createSpiral(mX, mY, 0.5f); // 세번째 요소로 반지름 설정
 	}
 	glutPostRedisplay(); // 화면 다시 그리기
 }
@@ -244,7 +259,6 @@ void make_shaderProgram()
 	//--- Shader Program 사용하기
 	glUseProgram(shaderProgramID);
 }
-
 void InitBuffer()
 {
 	glGenVertexArrays(1, &vao);
@@ -268,9 +282,10 @@ void InitBuffer()
 
 void createSpiral(float centerX, float centerY, float length)
 {
+	std::cout << "--Create Spiral--\n";
 	spiralPoints.clear(); // 이전 스파이럴 점 제거
 
-	const int numPoints = 10; // 스파이럴의 점 수
+	const int numPoints = 200; // 스파이럴의 점 수
 	float angleIncrement = 0.1f; // 각도 증가량
 	float radius = 0.0f; // 초기 반지름
 
@@ -287,6 +302,7 @@ void createSpiral(float centerX, float centerY, float length)
 		spiralPoints.push_back(x);
 		spiralPoints.push_back(y);
 	}
+	std::cout << "Number of spiral points: " << spiralPoints.size() << std::endl;
 }
 
 // 스파이럴 애니메이션
