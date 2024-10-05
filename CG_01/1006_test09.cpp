@@ -57,6 +57,8 @@ int figureCount = 0;
 int figureType = 1;						// 1:fill,  2:line
 int typeArray[MAX_FIGURE] = { 0, };		// 1:fill,  2:line
 int directArray[MAX_FIGURE] = { 0, };	// 0:North, 1:East, 2:South, 3:West
+int widthArray[MAX_FIGURE] = { 0, };
+int heightArray[MAX_FIGURE] = { 0, };
 
 // 필요 변수 선언
 GLint width, height;
@@ -352,6 +354,9 @@ void drawNewTriangle(float mX, float mY)
 	figure[figureCount][2][1] = bottom;
 	figure[figureCount][2][2] = 0.0f;
 
+	widthArray[figureCount] = right - left;
+	heightArray[figureCount] = top - bottom;
+
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random3 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
@@ -391,6 +396,9 @@ void redrawTriangle(float mX, float mY)
 	figure[figureCount][2][0] = right + addSize;
 	figure[figureCount][2][1] = bottom - addSize;
 	figure[figureCount][2][2] = 0.0f;
+
+	widthArray[figureCount] = right - left + (2 * addSize);
+	heightArray[figureCount] = top - bottom + (2 * addSize);
 
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
