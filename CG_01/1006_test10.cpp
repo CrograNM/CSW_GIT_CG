@@ -102,6 +102,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	make_shaderProgram();
 	InitBuffer();
 
+	glutTimerFunc(16, TimerFunction1, 1);		// 약 60fps 간격으로 타이머 재설정
 	glutDisplayFunc(drawScene);					//--- 출력 콜백함수의 지정
 	glutReshapeFunc(Reshape);					//--- 다시 그리기 콜백함수 지정
 	glutKeyboardFunc(Keyboard);
@@ -141,7 +142,8 @@ GLvoid drawScene()
 
 	// 점 크기 설정
 	glPointSize(5.0f); // 점의 크기를 5로 설정
-	glDrawArrays(GL_POINTS, 0, spiralPoints.size() / 2);  // 점 그리기
+	glDrawArrays(GL_POINTS, 0, spiralPoints.size() / 2);		// 점 그리기
+	//glDrawArrays(GL_LINES, 0, spiralPoints.size() / 2);		// 선 그리기
 	glutSwapBuffers(); // 화면에 출력하기
 }
 
@@ -159,6 +161,12 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
 		break;
 	}
+	case 'p':
+		pointMod = true;
+		break;
+	case 'l':
+		pointMod = false;
+		break;
 	}
 	glutPostRedisplay(); //--- refresh
 }
@@ -285,21 +293,21 @@ void InitBuffer()
 void createSpiral(float centerX, float centerY, float length, float angle)
 {
 	std::cout << "--Create Spiral--\n";
-	spiralPoints.clear(); // 이전 스파이럴 점 제거
+	//spiralPoints.clear(); // 이전 스파이럴 점 제거
 
-
-	float mul;
-	if (pointMod == false)
+	int numPoints = 100;
+	float angleIncrement;
+	if(pointMod == true)
 	{
-		mul = 10.0f;	//10배 늘려서 lineMod로 그리기
+		numPoints = 100;		// 스파이럴의 점 수
+		angleIncrement = 0.3f;	// 각도 증가량
 	}
 	else
 	{
-		mul = 1.0f;		//pointMod로 그리기
+		numPoints = 1000;		// 스파이럴의 점 수
+		angleIncrement = 0.03f; // 각도 증가량
 	}
-	
-	const int numPoints = 100 * mul; // 스파이럴의 점 수
-	float angleIncrement = 0.3f * mul; // 각도 증가량
+
 	float radius = 0.0f; // 초기 반지름
 	float x, y;
 	float centerX2, centerY2;
@@ -345,4 +353,5 @@ void createSpiral(float centerX, float centerY, float length, float angle)
 void TimerFunction1(int value)
 {
 
+	glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
 }
