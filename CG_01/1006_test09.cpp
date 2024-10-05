@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include <gl/glew.h>			
 #include <gl/freeglut.h>
@@ -66,6 +67,10 @@ typedef struct FIGURE
 	
 	float virtualWall;
 	bool shrink;
+
+	float theta;
+	float tempX;
+	float tempY;
 }FIGURE;
 FIGURE fg[MAX_FIGURE] = { 0, };
 
@@ -110,6 +115,7 @@ void stopTimer()
 void TimerFunction1(int value);	// 대각선 이동
 void TimerFunction2(int value);	// 좌우 지그재그 이동
 void TimerFunction3(int value);	// 사각 스파이럴
+void TimerFunction4(int value); // 원 스파이럴
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -248,6 +254,8 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 
 			for (int i = 0; i < MAX_FIGURE; i++)
 			{
+				fg[i].virtualWall = 1.0f;
+				fg[i].shrink = true;
 				fg[i].vertexCount = 0;
 			}
 
@@ -263,7 +271,27 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	}
 	case '4':
+	{
+		if (timer_4 == false)
+		{
+			stopTimer();
+
+			for (int i = 0; i < MAX_FIGURE; i++)
+			{
+				fg[i].theta = 90 * (i);
+			}
+
+			std::cout << "timer_4 ON\n";
+			timer_4 = true;
+			glutTimerFunc(16, TimerFunction4, 1);
+		}
+		else
+		{
+			std::cout << "timer_4 OFF\n";
+			timer_4 = false;
+		}
 		break;
+	}
 	}
 	glutPostRedisplay(); //--- refresh
 }
@@ -421,6 +449,10 @@ void initFigure()
 
 		fg[i].virtualWall = 1.0f;
 		fg[i].shrink = true;
+
+		fg[i].theta = 0.0f;
+		fg[i].tempX = 0;
+		fg[i].tempY = 0;
 	}
 	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -458,7 +490,8 @@ void drawNewTriangle(float mX, float mY)
 	fg[figureCount].dy = VELOCITY;
 	fg[figureCount].dir = 0;
 	fg[figureCount].type = figureType;
-	fg[figureCount].vertexCount = 50;
+	fg[figureCount].tempX = mX;
+	fg[figureCount].tempY = mY;
 
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
@@ -508,7 +541,8 @@ void redrawTriangle(float mX, float mY)
 	fg[figureCount].dy = VELOCITY;
 	fg[figureCount].dir = 0;
 	fg[figureCount].type = figureType;
-	//fg[figureCount].verticalMoveCount = 50;
+	fg[figureCount].tempX = mX;
+	fg[figureCount].tempY = mY;
 
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
@@ -808,6 +842,51 @@ void TimerFunction3(int value)
 		}
 		glutPostRedisplay();  // 화면 재출력
 		glutTimerFunc(5, TimerFunction3, 1);  // 약 60fps 간격으로 타이머 재설정
+	}
+}
+// 원 스파이럴
+void TimerFunction4(int value)
+{
+	if (timer_4 == true)
+	{
+		for (int i = 0; i < figureCount; i++)
+		{
+			// X, Y 좌표 계산 (원 형태 경계 내에서 이동)
+			fg[i].mX = fg[i].virtualWall * cos(fg[i].theta);
+			fg[i].mY = fg[i].virtualWall * sin(fg[i].theta);
+
+			// 스파이럴 회전 방향(θ에 따라 이동)
+			fg[i].theta += 0.05f;
+
+			// 가상의 원 경계(virtualWall)가 shrink와 vertexCount에 따라 팽창/수축
+			if (fg[i].shrink)
+			{
+				fg[i].virtualWall -= 0.002f; // 축소 속도
+			}
+			else
+			{
+				fg[i].virtualWall += 0.002f; // 팽창 속도
+			}
+
+			// 너무 작아지면 다시 커지도록 설정
+			if (fg[i].virtualWall < 0.2f)
+			{
+				fg[i].shrink = false;
+			}
+			// 다시 커졌다가 원래 크기보다 커지면 다시 축소
+			else if (fg[i].virtualWall > 1.0f)
+			{
+				fg[i].shrink = true;
+			}
+			updateFigurePos(i);
+
+			// VBO 업데이트
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, i * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), figure[i]);
+		}
+
+		glutPostRedisplay();  // 화면 재출력
+		glutTimerFunc(16, TimerFunction4, 1);  // 약 60fps 간격으로 타이머 재설정
 	}
 }
 
