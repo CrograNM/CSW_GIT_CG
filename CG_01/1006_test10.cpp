@@ -312,7 +312,7 @@ void InitBuffer()
 	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
 }
 
-// 스파이럴 관련 함수
+// 스파이럴 생성 함수
 void createSpiral(float centerX, float centerY, float length, float angle)
 {
 	switch (pointMod)
@@ -329,7 +329,7 @@ void createSpiral(float centerX, float centerY, float length, float angle)
 
 	int numPoints = 100;
 	float angleIncrement;
-	if(pointMod == true)
+	if (pointMod == true)
 	{
 		numPoints = 100;		// 스파이럴의 점 수
 		angleIncrement = 0.3f;	// 각도 증가량
@@ -344,6 +344,9 @@ void createSpiral(float centerX, float centerY, float length, float angle)
 	float x, y;
 	float centerX2, centerY2;
 
+	// 시계방향 또는 반시계방향 랜덤 설정
+	bool clockwise = generateRandomFloat(0.0f, 1.0f) > 0.5f;
+
 	// 첫 번째 스파이럴을 생성
 	for (int i = 0; i < numPoints; i++)
 	{
@@ -351,21 +354,21 @@ void createSpiral(float centerX, float centerY, float length, float angle)
 		if (i < numPoints / 2)
 		{
 			// 첫 번째 절반: 반지름 증가
-			angle += angleIncrement; // 각도 증가
+			angle += angleIncrement * (clockwise ? 1 : -1); // 각도 증가
 			radius += length / (float)numPoints; // 반지름 증가
 
 			// 스파이럴 점 계산
 			x = centerX + radius * cos(angle);
 			y = centerY + radius * sin(angle);
-			
+
 			centerX2 = x + (x - centerX);
 			centerY2 = y + (y - centerY);
 
-		}	
+		}
 		else
 		{
 			// 두 번째 절반: 반지름 감소하고 각도 반전
-			angle -= angleIncrement; // 각도 감소
+			angle -= angleIncrement * (clockwise ? 1 : -1); // 각도 감소
 			radius -= length / (float)numPoints; // 반지름 감소
 
 			// 스파이럴 점 계산
