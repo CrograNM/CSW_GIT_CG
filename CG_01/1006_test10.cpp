@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <vector>
 
 #include <gl/glew.h>			
 #include <gl/freeglut.h>
@@ -44,10 +45,10 @@ float Win_to_GL_Y(int y)
 }
 
 // 스파이럴 생성 함수
-void createSpiral(float startX, float startY, int numPoints, float radiusIncrement, float angleIncrement);
+void createSpiral(float centerX, float centerY, float length);
 
 // 스파이럴을 구성할 점(point) 벡터 
-#define PI 3.14159265358979323846
+#define PI 3.141592
 std::vector<float> spiralPoints;  // 스파이럴 점 좌표를 저장할 벡터
 
 // 필요 변수 선언
@@ -118,6 +119,10 @@ GLvoid drawScene()
 
 	glUseProgram(shaderProgramID);
 
+	// VBO 업데이트
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * spiralPoints.size(), spiralPoints.data(), GL_STATIC_DRAW);
+
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
 	glBindVertexArray(vao);
 	
@@ -143,13 +148,15 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 }
 void Mouse(int button, int state, int x, int y)
 {
-	// 마우스 클릭 위치를 GL 좌표로 변환
-	float mX = Win_to_GL_X(x);
-	float mY = Win_to_GL_Y(y);
 	//클릭시 몇사분면인지 검사
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
+		// 마우스 클릭 위치를 GL 좌표로 변환
+		float mX = Win_to_GL_X(x);
+		float mY = Win_to_GL_Y(y);
 
+		// 스파이럴 생성: 시작 위치와 생성할 점의 수, 반지름 증가량, 각도 증가량
+		createSpiral(mX, mY, 1.0f); // 여기서 1.0f는 스파이럴의 길이입니다.
 	}
 	glutPostRedisplay(); // 화면 다시 그리기
 }
@@ -250,30 +257,35 @@ void InitBuffer()
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
-	////--- 2번째 VBO 설정 : 색상
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat), colorData, GL_STATIC_DRAW);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//glEnableVertexAttribArray(1);
+	//--- 2번째 VBO 설정 : 색상
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * spiralPoints.size(), spiralPoints.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
 
 	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
 }
 
-void createSpiral(float startX, float startY, int numPoints, float radiusIncrement, float angleIncrement)
+void createSpiral(float centerX, float centerY, float length)
 {
-	float theta = 0.0f;
-	float radius = 0.0f;
+	spiralPoints.clear(); // 이전 스파이럴 점 제거
 
-	for (int i = 0; i < numPoints; ++i)
+	const int numPoints = 10; // 스파이럴의 점 수
+	float angleIncrement = 0.1f; // 각도 증가량
+	float radius = 0.0f; // 초기 반지름
+
+	for (int i = 0; i < numPoints; i++)
 	{
-		float x = startX + radius * cos(theta);
-		float y = startY + radius * sin(theta);
+		float angle = i * angleIncrement; // 현재 각도
+		radius += length / (float)numPoints; // 반지름 증가
 
+		// 스파이럴 점 계산
+		float x = centerX + radius * cos(angle);
+		float y = centerY + radius * sin(angle);
+
+		// 점을 벡터에 추가
 		spiralPoints.push_back(x);
 		spiralPoints.push_back(y);
-
-		theta += angleIncrement;
-		radius += radiusIncrement;
 	}
 }
 
