@@ -62,7 +62,7 @@ typedef struct FIGURE
 	int dir;	// 0:North, 1:East, 2:South, 3:West
 	int type;	// 1:fill,  2:line
 
-	int	verticalMoveCount;     // 세로로 이동할 횟수 (50번 반복 후 변경)	//0
+	int	vertexCount;     // 세로로 이동할 횟수 (50번 반복 후 변경)	//0
 }FIGURE;
 FIGURE fg[MAX_FIGURE] = { 0, };
 
@@ -106,6 +106,7 @@ void stopTimer()
 }
 void TimerFunction1(int value);	// 대각선 이동
 void TimerFunction2(int value);	// 좌우 지그재그 이동
+void TimerFunction3(int value);	// 사각 스파이럴
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -200,9 +201,9 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	}
 	case '1':
 	{
-		stopTimer();
 		if (timer_1 == false)
 		{
+			stopTimer();
 			std::cout << "timer_1 ON\n";
 			timer_1 = true;
 			glutTimerFunc(16, TimerFunction1, 1);
@@ -216,9 +217,9 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	}
 	case '2':
 	{
-		stopTimer();
 		if (timer_2 == false)
 		{
+			stopTimer();
 			std::cout << "timer_2 ON\n";
 			timer_2 = true;
 			glutTimerFunc(16, TimerFunction2, 1);
@@ -231,7 +232,21 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	}
 	case '3':
+	{
+		if (timer_3 == false)
+		{
+			stopTimer();
+			std::cout << "timer_3 ON\n";
+			timer_3 = true;
+			glutTimerFunc(16, TimerFunction3, 1);
+		}
+		else
+		{
+			std::cout << "timer_3 OFF\n";
+			timer_3 = false;
+		}
 		break;
+	}
 	case '4':
 		break;
 	}
@@ -387,7 +402,7 @@ void initFigure()
 		fg[i].dy = VELOCITY;
 		fg[i].dir = 0;	
 		fg[i].type = 1;	
-		fg[i].verticalMoveCount = 50;
+		fg[i].vertexCount = 50;
 	}
 	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -425,7 +440,7 @@ void drawNewTriangle(float mX, float mY)
 	fg[figureCount].dy = VELOCITY;
 	fg[figureCount].dir = 0;
 	fg[figureCount].type = figureType;
-	fg[figureCount].verticalMoveCount = 50;
+	fg[figureCount].vertexCount = 50;
 
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
@@ -625,24 +640,24 @@ void TimerFunction2(int value)
 				{
 					fg[i].mY = 1.0f - fg[i].height / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
 					fg[i].dy *= -1.0f;
-					fg[i].verticalMoveCount = 50;
+					fg[i].vertexCount = 50;
 					fg[i].dir = 2;  // 남쪽으로 전환
 				}
 				else if (fg[i].mY - (fg[i].height / 2) <= -1.0f)  // 하단 벽
 				{
 					fg[i].mY = -1.0f + fg[i].height / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
 					fg[i].dy *= -1.0f;
-					fg[i].verticalMoveCount = 50;
+					fg[i].vertexCount = 50;
 					fg[i].dir = 0;  // 북쪽으로 전환
 				}
 
-				fg[i].verticalMoveCount--;
+				fg[i].vertexCount--;
 
 				// 세로로 50번 이동한 후 가로 이동으로 전환
-				if (fg[i].verticalMoveCount <= 0)
+				if (fg[i].vertexCount <= 0)
 				{
 					fg[i].dir = (fg[i].dx > 0) ? 1 : 3;  // dx가 양수면 동쪽, 음수면 서쪽
-					fg[i].verticalMoveCount = 50;  // 가로로 이동하기 전에 카운트 초기화
+					fg[i].vertexCount = 50;  // 가로로 이동하기 전에 카운트 초기화
 				}
 				break;
 
@@ -655,14 +670,14 @@ void TimerFunction2(int value)
 				{
 					fg[i].mX = 1.0f - fg[i].width / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
 					fg[i].dx *= -1.0f;
-					fg[i].verticalMoveCount = 50;
+					fg[i].vertexCount = 50;
 					fg[i].dir = (fg[i].dy > 0) ? 0 : 2;  // dy가 양수면 북쪽, 음수면 남쪽
 				}
 				else if (fg[i].mX - (fg[i].width / 2) <= -1.0f)  // 왼쪽 벽
 				{
 					fg[i].mX = -1.0f + fg[i].width / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
 					fg[i].dx *= -1.0f;
-					fg[i].verticalMoveCount = 50;
+					fg[i].vertexCount = 50;
 					fg[i].dir = (fg[i].dy > 0) ? 0 : 2;  // dy가 양수면 북쪽, 음수면 남쪽
 				}
 				break;
@@ -746,4 +761,8 @@ void TimerFunction2(int value)
 		glutTimerFunc(16, TimerFunction2, 1);  // 약 60fps 간격으로 타이머 재설정
 	}
 }
+// 사각 스파이럴
+void TimerFunction3(int value)
+{
 
+}
