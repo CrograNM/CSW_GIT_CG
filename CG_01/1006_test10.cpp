@@ -43,10 +43,8 @@ float Win_to_GL_Y(int y)
 	return 1 - (y / (float)clientHeight) * 2;  // 정수 나눗셈 방지
 }
 
-// 도형 관련 함수들
-void initFigure();
-void drawNewTriangle(float mX, float mY);
-void redrawTriangle(float mX, float mY);
+// 스파이럴 생성 함수
+void createSpiral(float startX, float startY, int numPoints, float radiusIncrement, float angleIncrement);
 
 // 스파이럴을 구성할 점(point) 벡터 
 #define PI 3.14159265358979323846
@@ -86,7 +84,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);			//--- 디스플레이 모드 설정
 	glutInitWindowPosition(100, 100);						//--- 윈도우의 위치 지정
 	glutInitWindowSize(width, height);						//--- 윈도우의 크기 지정
-	glutCreateWindow("test 07");							//--- 윈도우 생성(윈도우 이름)
+	glutCreateWindow("test 10");							//--- 윈도우 생성(윈도우 이름)
 
 	//--- GLEW 초기화하기
 	glewExperimental = GL_TRUE;
@@ -98,7 +96,6 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	else
 		std::cout << "GLEW Initialized\n";
 
-	initFigure();
 	//--- 세이더 읽어와서 세이더 프로그램 만들기
 	make_shaderProgram();
 	InitBuffer();
@@ -240,25 +237,44 @@ void make_shaderProgram()
 	//--- Shader Program 사용하기
 	glUseProgram(shaderProgramID);
 }
+
 void InitBuffer()
 {
-	glGenVertexArrays(1, &vao);		//--- VAO 를 지정하고 할당하기
-	glBindVertexArray(vao);			//--- VAO를 바인드하기
-	glGenBuffers(2, vbo);			//--- 2개의 VBO를 지정하고 할당하기
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glGenBuffers(2, vbo); // 2개의 VBO를 지정하고 할당하기
 
 	//--- 1번째 VBO 설정 : 좌표값
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat), figure, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * spiralPoints.size(), spiralPoints.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
-	//--- 2번째 VBO 설정 : 색상
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat), colorData, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(1);
+	////--- 2번째 VBO 설정 : 색상
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat), colorData, GL_STATIC_DRAW);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	//glEnableVertexAttribArray(1);
 
 	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
+}
+
+void createSpiral(float startX, float startY, int numPoints, float radiusIncrement, float angleIncrement)
+{
+	float theta = 0.0f;
+	float radius = 0.0f;
+
+	for (int i = 0; i < numPoints; ++i)
+	{
+		float x = startX + radius * cos(theta);
+		float y = startY + radius * sin(theta);
+
+		spiralPoints.push_back(x);
+		spiralPoints.push_back(y);
+
+		theta += angleIncrement;
+		radius += radiusIncrement;
+	}
 }
 
 // 스파이럴 애니메이션
