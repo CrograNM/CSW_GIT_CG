@@ -112,7 +112,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	make_shaderProgram();
 	InitBuffer();
 
-	glutTimerFunc(16, TimerFunction1, 1);		// 약 60fps 간격으로 타이머 재설정
+	glutTimerFunc(4, TimerFunction1, 1);		
 	glutDisplayFunc(drawScene);					//--- 출력 콜백함수의 지정
 	glutReshapeFunc(Reshape);					//--- 다시 그리기 콜백함수 지정
 	glutKeyboardFunc(Keyboard);
