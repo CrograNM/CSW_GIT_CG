@@ -119,6 +119,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
     else
         std::cout << "GLEW Initialized\n";
 
+    initFigure();
     //--- 세이더 읽어와서 세이더 프로그램 만들기
     make_shaderProgram();
     InitBuffer();
@@ -457,6 +458,27 @@ void initFigure()
     glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE * 4) * 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
     glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE * 4) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
+
+    // 초기 상태에 각 사분면당 하나의 삼각형이 있어야 함
+    quardrant = 1;
+    figureCount = 0 + figureCount_1;
+    drawNewTriangle(0.5f, 0.5f);
+    figureCount_1++;
+
+    quardrant = 2;
+    figureCount = 3 + figureCount_2;
+    drawNewTriangle(0.5f, -0.5f);
+    figureCount_2++;
+
+    quardrant = 3;
+    figureCount = 6 + figureCount_3;
+    drawNewTriangle(-0.5f, -0.5f);
+    figureCount_3++;
+
+    quardrant = 4;
+    figureCount = 9 + figureCount_4;
+    drawNewTriangle(-0.5f, 0.5f);
+    figureCount_4++;
 }
 void drawNewTriangle(float mX, float mY)
 {
