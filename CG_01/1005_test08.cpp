@@ -446,11 +446,14 @@ void drawTriangle(float mX, float mY)
     figure[figureCount][2][1] = bottom;
     figure[figureCount][2][2] = 0.0f;
 
+    float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+    float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+    float random3 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
     for (int i = 0; i < 3; i++)
     {
-        colorData[figureCount][i][0] = 1.0f; // R
-        colorData[figureCount][i][1] = 0.0f; // G
-        colorData[figureCount][i][2] = 0.0f; // B
+        colorData[figureCount][i][0] = random1; // R
+        colorData[figureCount][i][1] = random2; // G
+        colorData[figureCount][i][2] = random3; // B
     }
     // VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
     // glBufferData : 지정한 크기만큼 할당 -> 초기에 설정하는 방식
