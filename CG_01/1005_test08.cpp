@@ -259,35 +259,31 @@ void Mouse(int button, int state, int x, int y)
         switch (quardrant)
         {
         case 1:
-            if (figureCount_1 < 3)
+            if (0 < figureCount_1)
             {
-                figureCount = 0 + figureCount_1;
-                drawNewTriangle(mX, mY);
-                figureCount_1++;
+                figureCount = 0 + figureCount_1 - 1;
+                redrawTriangle(mX, mY);
             }
             break;
         case 2:
-            if (figureCount_2 < 3)
+            if (0 < figureCount_2)
             {
-                figureCount = 3 + figureCount_2;
-                drawNewTriangle(mX, mY);
-                figureCount_2++;
+                figureCount = 3 + figureCount_2 - 1;
+                redrawTriangle(mX, mY);
             }
             break;
         case 3:
-            if (figureCount_3 < 3)
+            if (0 < figureCount_3)
             {
-                figureCount = 6 + figureCount_3;
-                drawNewTriangle(mX, mY);
-                figureCount_3++;
+                figureCount = 6 + figureCount_3 - 1;
+                redrawTriangle(mX, mY);
             }
             break;
         case 4:
-            if (figureCount_4 < 3)
+            if (0 < figureCount_4)
             {
-                figureCount = 9 + figureCount_4;
-                drawNewTriangle(mX, mY);
-                figureCount_4++;
+                figureCount = 9 + figureCount_4 - 1;
+                redrawTriangle(mX, mY);
             }
             break;
         }
