@@ -419,9 +419,9 @@ void initFigure()
     }
     // VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-    glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE * 4 + 1) * 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE * 4) * 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE * 4 + 1) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE * 4) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
 }
 void drawTriangle(float mX, float mY)
 {
@@ -452,13 +452,6 @@ void drawTriangle(float mX, float mY)
         colorData[figureCount][i][1] = 0.0f; // G
         colorData[figureCount][i][2] = 0.0f; // B
     }
-
-    // VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-    //glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
-    //glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-    //glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
-
     // VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
     // glBufferData : 지정한 크기만큼 할당 -> 초기에 설정하는 방식
     // glBufferSubData : 일부 업데이트 및 재할당
