@@ -44,12 +44,19 @@ float Win_to_GL_Y(int y)
 
 // 도형 관련 함수들
 void initFigure_1();    //1사분면  (우상단)
+int figureCount_1 = 0;  //max 3
+
 void initFigure_2();    //2사분면  (우하단)
+int figureCount_2 = 0;
+
 void initFigure_3();    //3사분면  (좌하단)
+int figureCount_3 = 0;
+
 void initFigure_4();    //4사분면  (좌상단)
+int figureCount_4 = 0;
 
 // 최대 10개의 도형을 저장할 변수
-#define MAX_FIGURE 10
+#define MAX_FIGURE 3
 #define FIGURE_SIZE 0.02f
 
 GLfloat divLine[4][3] = {
@@ -58,11 +65,11 @@ GLfloat divLine[4][3] = {
     {0.0f, -1.0f, 0.0f},
     {0.0f, 1.0f, 0.0f}
 };
-GLfloat figure[MAX_FIGURE][3][3];
-GLfloat colorData[MAX_FIGURE][3][3];
+GLfloat figure[MAX_FIGURE * 4][3][3];
+GLfloat colorData[MAX_FIGURE * 4][3][3];
 int figureCount = 0;
-int figureType = 1;                    // 1:fill,  2:line
-int typeArray[MAX_FIGURE] = { 0, };    // 1:fill,  2:line
+int figureType = 1;                         // 1:fill,  2:line
+int typeArray[MAX_FIGURE * 4] = { 0, };     // 1:fill,  2:line
 
 // 필요 변수 선언
 GLint width, height;
