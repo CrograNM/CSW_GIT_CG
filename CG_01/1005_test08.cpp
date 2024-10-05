@@ -43,7 +43,10 @@ float Win_to_GL_Y(int y)
 }
 
 // 도형 관련 함수들
-void initFigure();
+void initFigure_1();    //1사분면  (우상단)
+void initFigure_2();    //2사분면  (우하단)
+void initFigure_3();    //3사분면  (좌하단)
+void initFigure_4();    //4사분면  (좌상단)
 
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 10
