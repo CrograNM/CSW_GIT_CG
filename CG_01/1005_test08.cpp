@@ -43,6 +43,9 @@ float Win_to_GL_Y(int y)
 }
 
 // 도형 관련 함수들
+void initFigure();
+int quardrant=0;  //사분면 변수 선언
+
 void initFigure_1();    //1사분면  (우상단)
 int figureCount_1 = 0;  //max 3
 
@@ -54,6 +57,8 @@ int figureCount_3 = 0;
 
 void initFigure_4();    //4사분면  (좌상단)
 int figureCount_4 = 0;
+
+void drawTriangle(float mX, float mY);
 
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 3
@@ -228,19 +233,13 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 }
 void Mouse(int button, int state, int x, int y)
 {
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && figureCount < 10)
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
         // 마우스 클릭 위치를 GL 좌표로 변환
         float mX = Win_to_GL_X(x);
         float mY = Win_to_GL_Y(y);
 
-        float left = mX - FIGURE_SIZE * 3;
-        float right = mX + FIGURE_SIZE * 3;
-        float top = mY + FIGURE_SIZE * 4;
-        float bottom = mY - FIGURE_SIZE * 4;
-
         //클릭시 몇사분면인지 검사
-        int quardrant;  //사분면 변수 선언
         if (mX >= 0 && mY >= 0)
         {
             quardrant = 1;
@@ -258,36 +257,42 @@ void Mouse(int button, int state, int x, int y)
             quardrant = 4;
         }
 
-        typeArray[figureCount] = figureType;
-        std::cout << "Draw : point\n";
-        // 두개의 삼각형 좌표로 사각형 생성
-        //왼쪽 삼각형 
-        figure[figureCount][0][0] = mX;
-        figure[figureCount][0][1] = top;
-        figure[figureCount][0][2] = 0.0f;
-
-        figure[figureCount][1][0] = left;
-        figure[figureCount][1][1] = bottom;
-        figure[figureCount][1][2] = 0.0f;
-
-        figure[figureCount][2][0] = right;
-        figure[figureCount][2][1] = bottom;
-        figure[figureCount][2][2] = 0.0f;
-
-        for (int i = 0; i < 3; i++)
+        switch (quardrant)
         {
-            colorData[figureCount][i][0] = 1.0f; // R
-            colorData[figureCount][i][1] = 0.0f; // G
-            colorData[figureCount][i][2] = 0.0f; // B
+        case 1:
+            if (figureCount_1 < 3)
+            {
+                figureCount = 0 + figureCount_1;
+                drawTriangle(mX, mY);
+                figureCount_1++;
+            }
+            break;
+        case 2:
+            if (figureCount_2 < 3)
+            {
+                figureCount = 3 + figureCount_2;
+                drawTriangle(mX, mY);
+                figureCount_2++;
+            }
+            break;
+        case 3:
+            if (figureCount_3 < 3)
+            {
+                figureCount = 6 + figureCount_3;
+                drawTriangle(mX, mY);
+                figureCount_3++;
+            }
+            break;
+        case 4:
+            if (figureCount_4 < 3)
+            {
+                figureCount = 9 + figureCount_4;
+                drawTriangle(mX, mY);
+                figureCount_4++;
+            }
+            break;
         }
 
-        // VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-        glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
-
-        figureCount++;
         glutPostRedisplay(); // 화면 다시 그리기
     }
 }
@@ -396,4 +401,61 @@ void make_shaderProgram()
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+}
+
+void initFigure()
+{
+    for (int i = 0; i < MAX_FIGURE * 4; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                figure[i][j][k] = 0;
+                colorData[i][j][k] = 1.0f;
+            }
+        }
+        // VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+        glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+        glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
+        typeArray[i] = 0;
+    }
+}
+void drawTriangle(float mX, float mY)
+{
+    float left = mX - FIGURE_SIZE * 3;
+    float right = mX + FIGURE_SIZE * 3;
+    float top = mY + FIGURE_SIZE * 4;
+    float bottom = mY - FIGURE_SIZE * 4;
+
+    typeArray[figureCount] = figureType;
+    std::cout << "Draw triangle : " << quardrant << "_사분면" << std::endl;
+    // 두개의 삼각형 좌표로 사각형 생성
+    //왼쪽 삼각형 
+    figure[figureCount][0][0] = mX;
+    figure[figureCount][0][1] = top;
+    figure[figureCount][0][2] = 0.0f;
+
+    figure[figureCount][1][0] = left;
+    figure[figureCount][1][1] = bottom;
+    figure[figureCount][1][2] = 0.0f;
+
+    figure[figureCount][2][0] = right;
+    figure[figureCount][2][1] = bottom;
+    figure[figureCount][2][2] = 0.0f;
+
+    for (int i = 0; i < 3; i++)
+    {
+        colorData[figureCount][i][0] = 1.0f; // R
+        colorData[figureCount][i][1] = 0.0f; // G
+        colorData[figureCount][i][2] = 0.0f; // B
+    }
+
+    // VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+    glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
 }

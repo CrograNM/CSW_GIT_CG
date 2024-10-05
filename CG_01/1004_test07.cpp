@@ -98,6 +98,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	else
 		std::cout << "GLEW Initialized\n";
 
+	initFigure();
 	//--- 세이더 읽어와서 세이더 프로그램 만들기
 	make_shaderProgram();
 	InitBuffer();
