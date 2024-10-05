@@ -201,6 +201,25 @@ void Mouse(int button, int state, int x, int y)
         float top = mY + FIGURE_SIZE * 4;
         float bottom = mY - FIGURE_SIZE * 4;
 
+        //클릭시 몇사분면인지 검사
+        int quardrant;  //사분면 변수 선언
+        if (mX >= 0 && mY >= 0)
+        {
+            quardrant = 1;
+        }
+        else if (mX >= 0 && mY < 0)
+        {
+            quardrant = 2;
+        }
+        else if (mX < 0 && mY < 0)
+        {
+            quardrant = 3;
+        }
+        else if (mX < 0 && mY >= 0)
+        {
+            quardrant = 4;
+        }
+
         typeArray[figureCount] = figureType;
         std::cout << "Draw : point\n";
         // 두개의 삼각형 좌표로 사각형 생성
