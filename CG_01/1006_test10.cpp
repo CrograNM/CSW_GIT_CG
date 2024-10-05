@@ -56,7 +56,7 @@ void generateRandSpiral(int count);
 // 스파이럴을 구성할 점(point) 벡터 
 #define PI 3.141592
 std::vector<float> spiralPoints;  // 스파이럴 점 좌표를 저장할 벡터
-std::vector<int> spiralMod;	  // 스파이럴의 모드를 저장할 벡터, 1이면 size가 200개, 10이면 2000개다.
+std::vector<int> spiralSize;	  // 스파이럴을 생성할 때마다의 사이즈를 저장한다. (200, 400 ...)
 bool pointMod = true;			
 
 // 필요 변수 선언
@@ -86,6 +86,7 @@ void TimerFunction1(int value);
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
+	spiralSize.push_back(0);
 	srand(time(0));
 	width = clientWidth;
 	height = clientHeight;
@@ -174,6 +175,18 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	case '1': 
 		generateRandSpiral(1);
+		break;
+	case '2':
+		generateRandSpiral(2);
+		break;
+	case '3':
+		generateRandSpiral(3);
+		break;
+	case '4':
+		generateRandSpiral(4);
+		break;
+	case '5':
+		generateRandSpiral(5);
 		break;
 	}
 	glutPostRedisplay(); //--- refresh
@@ -302,6 +315,15 @@ void InitBuffer()
 // 스파이럴 관련 함수
 void createSpiral(float centerX, float centerY, float length, float angle)
 {
+	switch (pointMod)
+	{
+	case true:
+		spiralSize.push_back(100 + spiralSize[spiralSize.size() - 1]);
+		break;
+	case false:
+		spiralSize.push_back(1000 + spiralSize[spiralSize.size() - 1]);
+		break;
+	}
 	std::cout << "--Create Spiral--\n";
 	//spiralPoints.clear(); // 이전 스파이럴 점 제거
 
@@ -373,16 +395,20 @@ void TimerFunction1(int value)
 {
 	if (currentPointIndex < spiralPoints.size() / 2)
 	{	
+		//새로운 스파이럴이 생성 될때마다 배경 변경
+		for (int i = 1; i < spiralSize.size(); i++)
+		{
+			if (currentPointIndex == spiralSize[i - 1])
+			{
+				rColor = generateRandomFloat(0.0f, 1.0f);
+				gColor = generateRandomFloat(0.0f, 1.0f);
+				bColor = generateRandomFloat(0.0f, 1.0f);
+				break;
+			}
+		}
+		
 		currentPointIndex++; // 점 하나씩 추가
 		glutPostRedisplay(); // 화면 다시 그리기
-
-		//최대 PointIndex에 도달하면 배경컬러를 바꾼다.
-		if (currentPointIndex == (spiralPoints.size() / 2))
-		{
-			rColor = generateRandomFloat(0.0f, 1.0f);
-			gColor = generateRandomFloat(0.0f, 1.0f);
-			bColor = generateRandomFloat(0.0f, 1.0f);
-		}
 	}
 	glutTimerFunc(4, TimerFunction1, 1);
 }
