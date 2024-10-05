@@ -141,9 +141,47 @@ GLvoid drawScene()
 
     //--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
     glBindVertexArray(vao[0]);
-    for (int i = 0; i < figureCount; i++)
+    for (int i = 0; i < figureCount_1; i++)
     {
-        int vertexCount;
+        switch (typeArray[i])
+        {
+        case 1:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            break;
+        case 2:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            break;
+        }
+        glDrawArrays(GL_TRIANGLES, i * 3, 3);
+    }
+    for (int i = 3; i < figureCount_2; i++)
+    {
+        switch (typeArray[i])
+        {
+        case 1:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            break;
+        case 2:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            break;
+        }
+        glDrawArrays(GL_TRIANGLES, i * 3, 3);
+    }
+    for (int i = 6; i < figureCount_3; i++)
+    {
+        switch (typeArray[i])
+        {
+        case 1:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            break;
+        case 2:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            break;
+        }
+        glDrawArrays(GL_TRIANGLES, i * 3, 3);
+    }
+    for (int i = 9; i < figureCount_4; i++)
+    {
         switch (typeArray[i])
         {
         case 1:
