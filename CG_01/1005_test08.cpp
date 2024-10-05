@@ -58,7 +58,7 @@ int figureCount_3 = 0;
 void initFigure_4();    //4사분면  (좌상단)
 int figureCount_4 = 0;
 
-void drawTriangle(float mX, float mY);
+void drawNewTriangle(float mX, float mY);
 
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 3
@@ -263,7 +263,7 @@ void Mouse(int button, int state, int x, int y)
             if (figureCount_1 < 3)
             {
                 figureCount = 0 + figureCount_1;
-                drawTriangle(mX, mY);
+                drawNewTriangle(mX, mY);
                 figureCount_1++;
             }
             break;
@@ -271,7 +271,7 @@ void Mouse(int button, int state, int x, int y)
             if (figureCount_2 < 3)
             {
                 figureCount = 3 + figureCount_2;
-                drawTriangle(mX, mY);
+                drawNewTriangle(mX, mY);
                 figureCount_2++;
             }
             break;
@@ -279,7 +279,7 @@ void Mouse(int button, int state, int x, int y)
             if (figureCount_3 < 3)
             {
                 figureCount = 6 + figureCount_3;
-                drawTriangle(mX, mY);
+                drawNewTriangle(mX, mY);
                 figureCount_3++;
             }
             break;
@@ -287,7 +287,7 @@ void Mouse(int button, int state, int x, int y)
             if (figureCount_4 < 3)
             {
                 figureCount = 9 + figureCount_4;
-                drawTriangle(mX, mY);
+                drawNewTriangle(mX, mY);
                 figureCount_4++;
             }
             break;
@@ -423,7 +423,7 @@ void initFigure()
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
     glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE * 4) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
 }
-void drawTriangle(float mX, float mY)
+void drawNewTriangle(float mX, float mY)
 {
     float left = mX - FIGURE_SIZE * 3;
     float right = mX + FIGURE_SIZE * 3;
