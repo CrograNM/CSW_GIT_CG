@@ -66,7 +66,7 @@ GLint width, height;
 GLchar* vertexSource, * fragmentSource;        //--- 소스코드 저장 변수
 GLuint vertexShader, fragmentShader;        //--- 세이더 객체
 GLuint shaderProgramID;                        //--- 셰이더 프로그램
-GLuint vao[3], vbo[3];                        //--- VAO, VBO
+GLuint vao[2], vbo[3];                        //--- VAO, VBO
 
 // 사용자 정의 함수
 GLvoid drawScene(GLvoid);
