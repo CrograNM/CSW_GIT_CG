@@ -17,6 +17,10 @@
 #define clientWidth 600
 #define clientHeight 600
 
+GLfloat rColor = 0.0;
+GLfloat gColor = 0.0;
+GLfloat bColor = 0.0;
+
 // 랜덤 실수값(min ~ max) 반환 함수
 std::random_device rd;
 std::mt19937 gen(rd()); // Mersenne Twister 엔진
@@ -50,8 +54,8 @@ void createSpiral(float centerX, float centerY, float length, float angle);
 // 스파이럴을 구성할 점(point) 벡터 
 #define PI 3.141592
 std::vector<float> spiralPoints;  // 스파이럴 점 좌표를 저장할 벡터
-std::vector<float> spiralMod;	  // 스파이럴의 모드를 저장할 벡터, 애니메이션을 언제 나눠야 할지 정한다.
-bool pointMod = true;
+std::vector<int> spiralMod;	  // 스파이럴의 모드를 저장할 벡터, 1이면 size가 200개, 10이면 2000개다.
+bool pointMod = true;			
 
 // 필요 변수 선언
 GLint width, height;
@@ -115,10 +119,6 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 
 GLvoid drawScene()
 {
-	GLfloat rColor, gColor, bColor;
-	rColor = 0.0;
-	gColor = 0.0;
-	bColor = 0.0;
 	glClearColor(rColor, gColor, bColor, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -178,13 +178,22 @@ void Mouse(int button, int state, int x, int y)
 	//클릭시 몇사분면인지 검사
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
+
 		// 마우스 클릭 위치를 GL 좌표로 변환
 		float mX = Win_to_GL_X(x);
 		float mY = Win_to_GL_Y(y);
 
 		// 현재 점 인덱스 초기화
 		//currentPointIndex = 0;
-
+		switch (pointMod)
+		{
+		case true:
+			spiralMod.push_back(1);
+			break;
+		case false:
+			spiralMod.push_back(10);
+			break;
+		}
 		// 스파이럴 생성
 		float randFloat = generateRandomFloat(0.0f, 360.0f);
 		createSpiral(mX, mY, 0.3f, randFloat);
@@ -354,15 +363,21 @@ void createSpiral(float centerX, float centerY, float length, float angle)
 
 	std::cout << "Number of spiral points: " << spiralPoints.size() << std::endl;
 }
-
 // 스파이럴 애니메이션
 void TimerFunction1(int value)
 {
 	if (currentPointIndex < spiralPoints.size() / 2)
-	{
+	{	
 		currentPointIndex++; // 점 하나씩 추가
-
 		glutPostRedisplay(); // 화면 다시 그리기
+
+		//최대 PointIndex에 도달하면 배경컬러를 바꾼다.
+		if (currentPointIndex == (spiralPoints.size() / 2))
+		{
+			rColor = generateRandomFloat(0.0f, 1.0f);
+			gColor = generateRandomFloat(0.0f, 1.0f);
+			bColor = generateRandomFloat(0.0f, 1.0f);
+		}
 	}
 	glutTimerFunc(4, TimerFunction1, 1);
 }
