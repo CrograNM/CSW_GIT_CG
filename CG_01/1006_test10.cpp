@@ -183,17 +183,6 @@ void Mouse(int button, int state, int x, int y)
 		float mX = Win_to_GL_X(x);
 		float mY = Win_to_GL_Y(y);
 
-		// 현재 점 인덱스 초기화
-		//currentPointIndex = 0;
-		switch (pointMod)
-		{
-		case true:
-			spiralMod.push_back(1);
-			break;
-		case false:
-			spiralMod.push_back(10);
-			break;
-		}
 		// 스파이럴 생성
 		float randFloat = generateRandomFloat(0.0f, 360.0f);
 		createSpiral(mX, mY, 0.3f, randFloat);
