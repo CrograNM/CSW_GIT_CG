@@ -50,6 +50,8 @@ float Win_to_GL_Y(int y)
 
 // 스파이럴 생성 함수
 void createSpiral(float centerX, float centerY, float length, float angle);
+//랜덤 위치에 스파이럴 생성 (개수 i)
+void generateRandSpiral(int count);	
 
 // 스파이럴을 구성할 점(point) 벡터 
 #define PI 3.141592
@@ -169,6 +171,9 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	case 'l':
 		pointMod = false;
+		break;
+	case '1': 
+		generateRandSpiral(1);
 		break;
 	}
 	glutPostRedisplay(); //--- refresh
@@ -294,6 +299,7 @@ void InitBuffer()
 	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
 }
 
+// 스파이럴 관련 함수
 void createSpiral(float centerX, float centerY, float length, float angle)
 {
 	std::cout << "--Create Spiral--\n";
@@ -351,6 +357,16 @@ void createSpiral(float centerX, float centerY, float length, float angle)
 	}
 
 	std::cout << "Number of spiral points: " << spiralPoints.size() << std::endl;
+}
+void generateRandSpiral(int count)
+{
+	for (int i = 0; i < count; i++)
+	{
+		float randX = generateRandomFloat(-1.0f, 1.0f);
+		float randY = generateRandomFloat(-1.0f, 1.0f);
+		float randFloat = generateRandomFloat(0.0f, 360.0f);
+		createSpiral(randX, randY, 0.3f, randFloat);
+	}
 }
 // 스파이럴 애니메이션
 void TimerFunction1(int value)
