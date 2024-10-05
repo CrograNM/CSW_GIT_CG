@@ -44,17 +44,19 @@ float Win_to_GL_Y(int y)
 
 // 도형 관련 함수들
 void initFigure();
-void moveFigureRand(char dir);
+void drawNewTriangle(float mX, float mY);
+void redrawTriangle(float mX, float mY);
 
 // 최대 10개의 도형을 저장할 변수
-#define MAX_FIGURE 10
+#define MAX_FIGURE 4
 #define FIGURE_SIZE 0.02f
 
-GLfloat figure[MAX_FIGURE][6][3];
-GLfloat colorData[MAX_FIGURE][6][3];
+GLfloat figure[MAX_FIGURE][3][3];
+GLfloat colorData[MAX_FIGURE][3][3];
 int figureCount = 0;
-int figureType = 1;					// 1:point,  2:line,  3:tri,  4:rect
-int typeArray[MAX_FIGURE] = { 0, };	// 1:point,  2:line,  3:tri,  4:rect
+int figureType = 1;						// 1:fill,  2:line
+int typeArray[MAX_FIGURE] = { 0, };		// 1:fill,  2:line
+int directArray[MAX_FIGURE] = { 0, };	// 0:North, 1:East, 2:South, 3:West
 
 // 필요 변수 선언
 GLint width, height;
@@ -123,28 +125,20 @@ GLvoid drawScene()
 
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
 	glBindVertexArray(vao);
+	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
+	glBindVertexArray(vao);
 	for (int i = 0; i < figureCount; i++)
 	{
-		int vertexCount;
 		switch (typeArray[i])
 		{
 		case 1:
-			vertexCount = 6;
-			glDrawArrays(GL_TRIANGLES, i * 6, vertexCount);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			break;
 		case 2:
-			vertexCount = 2;
-			glDrawArrays(GL_LINES, i * 6, vertexCount);
-			break;
-		case 3:
-			vertexCount = 3;
-			glDrawArrays(GL_TRIANGLES, i * 6, vertexCount);
-			break;
-		case 4:
-			vertexCount = 6;
-			glDrawArrays(GL_TRIANGLES, i * 6, vertexCount);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			break;
 		}
+		glDrawArrays(GL_TRIANGLES, i * 3, 3);
 	}
 	glutSwapBuffers(); // 화면에 출력하기
 }
@@ -162,52 +156,53 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
 		break;
 	}
-	case 'p':
+	case 'a':
 	{
-		std::cout << "--point mod--\n";
+		std::cout << "--fill mod--\n";
 		figureType = 1;
 		break;
 	}
-	case 'l':
+	case 'b':
 	{
 		std::cout << "--line mod--\n";
 		figureType = 2;
 		break;
 	}
-	case 't':
-	{
-		std::cout << "--tri mod--\n";
-		figureType = 3;
+	case '1':
 		break;
-	}
-	case 'r':
-	{
-		std::cout << "--rect mod--\n";
-		figureType = 4;
+	case '2':
 		break;
-	}
-	case 'c':
-	{
-		std::cout << "--Clear client--\n";
-		figureCount = 0;
-		figureType = 1;
-		initFigure();
+	case '3':
 		break;
-	}
-	case 'w': case 'a': case 's': case 'd':
-	{
-		moveFigureRand(key);
+	case '4':
 		break;
-	}
 	}
 	glutPostRedisplay(); //--- refresh
 }
 void Mouse(int button, int state, int x, int y)
 {
+	// 마우스 클릭 위치를 GL 좌표로 변환
+	float mX = Win_to_GL_X(x);
+	float mY = Win_to_GL_Y(y);
+	//클릭시 몇사분면인지 검사
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-
+		if(0 < figureCount)
+		{
+			figureCount--;
+			redrawTriangle(mX, mY);
+			figureCount++;
+		}
 	}
+	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+	{
+		if(figureCount < MAX_FIGURE)
+		{
+			drawNewTriangle(mX, mY);
+			figureCount++;
+		}
+	}
+	glutPostRedisplay(); // 화면 다시 그리기
 }
 
 char* filetobuf(const char* file)
@@ -318,7 +313,7 @@ void initFigure()
 {
 	for (int i = 0; i < MAX_FIGURE; i++)
 	{
-		for (int j = 0; j < 6; j++)
+		for (int j = 0; j < 3; j++)
 		{
 			for (int k = 0; k < 3; k++)
 			{
@@ -327,5 +322,90 @@ void initFigure()
 			}
 		}
 		typeArray[i] = 0;
+		directArray[i] = 0;
 	}
+	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE) * 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
+}
+void drawNewTriangle(float mX, float mY)
+{
+	float left = mX - FIGURE_SIZE * 3;
+	float right = mX + FIGURE_SIZE * 3;
+	float top = mY + FIGURE_SIZE * 4;
+	float bottom = mY - FIGURE_SIZE * 4;
+
+	typeArray[figureCount] = figureType;
+	std::cout << "Draw triangle" << std::endl;
+
+	figure[figureCount][0][0] = mX;
+	figure[figureCount][0][1] = top;
+	figure[figureCount][0][2] = 0.0f;
+
+	figure[figureCount][1][0] = left;
+	figure[figureCount][1][1] = bottom;
+	figure[figureCount][1][2] = 0.0f;
+
+	figure[figureCount][2][0] = right;
+	figure[figureCount][2][1] = bottom;
+	figure[figureCount][2][2] = 0.0f;
+
+	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	float random3 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	for (int i = 0; i < 3; i++)
+	{
+		colorData[figureCount][i][0] = random1; // R
+		colorData[figureCount][i][1] = random2; // G
+		colorData[figureCount][i][2] = random3; // B
+	}
+	
+	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 9 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
+}
+void redrawTriangle(float mX, float mY)
+{   //기존 삼각형을 지우고 하나 그리기 + 사이즈 변경, 색 변경
+	float left = mX - FIGURE_SIZE * 3;
+	float right = mX + FIGURE_SIZE * 3;
+	float top = mY + FIGURE_SIZE * 4;
+	float bottom = mY - FIGURE_SIZE * 4;
+
+	float addSize = generateRandomFloat(-0.05f, 0.1f);
+
+	typeArray[figureCount] = figureType;
+	std::cout << "Re_Draw triangle" << std::endl;
+
+	figure[figureCount][0][0] = mX;
+	figure[figureCount][0][1] = top + addSize;
+	figure[figureCount][0][2] = 0.0f;
+
+	figure[figureCount][1][0] = left - addSize;
+	figure[figureCount][1][1] = bottom - addSize;
+	figure[figureCount][1][2] = 0.0f;
+
+	figure[figureCount][2][0] = right + addSize;
+	figure[figureCount][2][1] = bottom - addSize;
+	figure[figureCount][2][2] = 0.0f;
+
+	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	float random3 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	for (int i = 0; i < 3; i++)
+	{
+		colorData[figureCount][i][0] = random1; // R
+		colorData[figureCount][i][1] = random2; // G
+		colorData[figureCount][i][2] = random3; // B
+	}
+	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
+	// glBufferData : 지정한 크기만큼 할당 -> 초기에 설정하는 방식
+	// glBufferSubData : 일부 업데이트 및 재할당
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, figureCount * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), figure[figureCount]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, figureCount * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), colorData[figureCount]);
 }
