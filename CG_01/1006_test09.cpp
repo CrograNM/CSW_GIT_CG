@@ -761,10 +761,7 @@ void TimerFunction3(int value)
 	{
 		for (int i = 0; i < figureCount; i++)
 		{
-			// 벽에 부딪히지 않는 한 현재 방향으로 이동
-			// 4번째 회전마다 가상의 벽을 만들어 더 좁게 돈다.
-
-			// 가상의 벽이 줄어들 때는 vertexCount에 따라 감소, 팽창할 때는 증가
+			// 4번째 회전마다 가상의 벽을 만들어 더 좁게/크게 돈다.
 			if (fg[i].shrink)
 			{
 				fg[i].virtualWall = 1.0f - (0.1f * (int)(fg[i].vertexCount / 4));
@@ -773,13 +770,12 @@ void TimerFunction3(int value)
 			{
 				fg[i].virtualWall = 0.2f + (0.1f * (int)(fg[i].vertexCount / 4));
 			}
-			// 벽이 너무 좁아지면 다시 커지게 설정 (0.2 이하로 줄어들면 팽창)
+			// 벽의 크기에 따라 모드 조절
 			if (fg[i].virtualWall < 0.2f)
 			{
 				fg[i].shrink = false;
 				fg[i].vertexCount = 0;
 			}
-			// 벽이 다시 커지다가 원래 크기로 돌아오면 다시 줄어들게 설정
 			else if (fg[i].virtualWall > 1.0f)
 			{
 				fg[i].shrink = true;
@@ -790,7 +786,7 @@ void TimerFunction3(int value)
 			{
 			case 0:  // North (위쪽으로 이동)
 			{
-				fg[i].mY += fg[i].dy;
+				fg[i].mY += VELOCITY;
 				if (fg[i].mY + (fg[i].height / 2) >= fg[i].virtualWall)
 				{
 					fg[i].mY = fg[i].virtualWall - fg[i].height / 2 - 0.001f;
@@ -801,10 +797,10 @@ void TimerFunction3(int value)
 			}
 			case 1:  // East (오른쪽으로 이동)
 			{
-				fg[i].mX += fg[i].dx;
-				if (fg[i].mX + (fg[i].width / 2) >= fg[i].virtualWall)
+				fg[i].mX += VELOCITY;
+				if (fg[i].mX + (fg[i].height / 2) >= fg[i].virtualWall)
 				{
-					fg[i].mX = fg[i].virtualWall - fg[i].width / 2 - 0.001f;
+					fg[i].mX = fg[i].virtualWall - fg[i].height / 2 - 0.001f;
 					fg[i].dir = 2;  // 남쪽으로 방향 전환
 					fg[i].vertexCount++;
 				}
@@ -812,7 +808,7 @@ void TimerFunction3(int value)
 			}
 			case 2:  // South (아래쪽으로 이동)
 			{
-				fg[i].mY -= fg[i].dy;
+				fg[i].mY -= VELOCITY;
 				if (fg[i].mY - (fg[i].height / 2) <= -fg[i].virtualWall)
 				{
 					fg[i].mY = -fg[i].virtualWall + fg[i].height / 2 + 0.001f;
@@ -823,17 +819,16 @@ void TimerFunction3(int value)
 			}
 			case 3:  // West (왼쪽으로 이동)
 			{
-				fg[i].mX -= fg[i].dx;
-				if (fg[i].mX - (fg[i].width / 2) <= -fg[i].virtualWall)
+				fg[i].mX -= VELOCITY;
+				if (fg[i].mX - (fg[i].height / 2) <= -fg[i].virtualWall)
 				{
-					fg[i].mX = -fg[i].virtualWall + fg[i].width / 2 + 0.001f;
+					fg[i].mX = -fg[i].virtualWall + fg[i].height / 2 + 0.001f;
 					fg[i].dir = 0;  // 북쪽으로 방향 전환
 					fg[i].vertexCount++;
 				}
 				break;
 			}
 			}
-
 			updateFigurePos(i);
 
 			// VBO 업데이트
