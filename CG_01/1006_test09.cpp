@@ -12,7 +12,7 @@
 #include <random>
 
 // 클라이언트 크기
-#define clientWidth 800
+#define clientWidth 600
 #define clientHeight 600
 
 // 랜덤 실수값(min ~ max) 반환 함수
@@ -50,6 +50,7 @@ void redrawTriangle(float mX, float mY);
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 4
 #define FIGURE_SIZE 0.02f
+#define VELOCITY 0.01f
 typedef struct FIGURE
 {
 	float mX;	//중앙점 x
@@ -365,8 +366,8 @@ void initFigure()
 		fg[i].mY = 0;	
 		fg[i].width = 0;
 		fg[i].height = 0;
-		fg[i].dx = 0;
-		fg[i].dy = 0;
+		fg[i].dx = VELOCITY;
+		fg[i].dy = VELOCITY;
 		fg[i].dir = 0;	
 		fg[i].type = 1;	
 	}
@@ -380,8 +381,8 @@ void drawNewTriangle(float mX, float mY)
 {
 	float left = mX - FIGURE_SIZE * 3;
 	float right = mX + FIGURE_SIZE * 3;
-	float top = mY + FIGURE_SIZE * 4;
-	float bottom = mY - FIGURE_SIZE * 4;
+	float top = mY + FIGURE_SIZE * 3;
+	float bottom = mY - FIGURE_SIZE * 3;
 
 	std::cout << "Draw triangle" << std::endl;
 
@@ -402,8 +403,8 @@ void drawNewTriangle(float mX, float mY)
 	fg[figureCount].mY = mY;
 	fg[figureCount].width = right - left;
 	fg[figureCount].height = top - bottom;
-	fg[figureCount].dx = 1;
-	fg[figureCount].dy = 1;
+	fg[figureCount].dx = VELOCITY;
+	fg[figureCount].dy = VELOCITY;
 	fg[figureCount].dir = 0;
 	fg[figureCount].type = figureType;
 
@@ -427,8 +428,8 @@ void redrawTriangle(float mX, float mY)
 {   //기존 삼각형을 지우고 하나 그리기 + 사이즈 변경, 색 변경
 	float left = mX - FIGURE_SIZE * 3;
 	float right = mX + FIGURE_SIZE * 3;
-	float top = mY + FIGURE_SIZE * 4;
-	float bottom = mY - FIGURE_SIZE * 4;
+	float top = mY + FIGURE_SIZE * 3;
+	float bottom = mY - FIGURE_SIZE * 3;
 
 	float addSize = generateRandomFloat(-0.05f, 0.1f);
 
@@ -451,8 +452,8 @@ void redrawTriangle(float mX, float mY)
 	fg[figureCount].mY = mY;
 	fg[figureCount].width = right - left;
 	fg[figureCount].height = top - bottom;
-	fg[figureCount].dx = 1;
-	fg[figureCount].dy = 1;
+	fg[figureCount].dx = VELOCITY;
+	fg[figureCount].dy = VELOCITY;
 	fg[figureCount].dir = 0;
 	fg[figureCount].type = figureType;
 
@@ -511,18 +512,76 @@ void TimerFunction1(int value)
 				fg[i].dy = -fg[i].dy;  // Y 방향 반전
 				fg[i].dir = 0;
 			}
-
+			//회전
 			switch (fg[i].dir)
 			{
-			case 0:	
-				break;
-			case 1:
-				break;
-			case 2:
-				break;
-			case 3:
+			case 0:	//North
+			{
+				//top			(top)
+				figure[i][0][0] = fg[i].mX;
+				figure[i][0][1] = fg[i].mY + (fg[i].height / 2.0f);
+				figure[i][0][2] = 0.0f;
+				//leftbottom	(leftbottom)
+				figure[i][1][0] = fg[i].mX - (fg[i].width / 2.0f);
+				figure[i][1][1] = fg[i].mY - (fg[i].height / 2.0f);
+				figure[i][1][2] = 0.0f;
+				//rightbottom	(rightbottom)
+				figure[i][2][0] = fg[i].mX + (fg[i].width / 2.0f);
+				figure[i][2][1] = fg[i].mY - (fg[i].height / 2.0f);
+				figure[i][2][2] = 0.0f;
 				break;
 			}
+			case 1:	//East
+			{
+				//leftbottom	(lefttop)
+				figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
+				figure[i][0][1] = fg[i].mY + (fg[i].width / 2.0f);
+				figure[i][0][2] = 0.0f;
+				//rightbottom	(leftbottom)
+				figure[i][1][0] = fg[i].mX - (fg[i].height / 2.0f);
+				figure[i][1][1] = fg[i].mY - (fg[i].width / 2.0f);
+				figure[i][1][2] = 0.0f;
+				//top			(right)
+				figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
+				figure[i][2][1] = fg[i].mY;
+				figure[i][2][2] = 0.0f;
+				break;
+			}
+			case 2:	//South
+			{
+				//leftbottom	(righttop)
+				figure[i][1][0] = fg[i].mX + (fg[i].width / 2.0f);
+				figure[i][1][1] = fg[i].mY + (fg[i].height / 2.0f);
+				figure[i][1][2] = 0.0f;
+				//rightbottom	(lefttop)
+				figure[i][2][0] = fg[i].mX - (fg[i].width / 2.0f);
+				figure[i][2][1] = fg[i].mY + (fg[i].height / 2.0f);
+				figure[i][2][2] = 0.0f;
+				//top			(bottom)
+				figure[i][0][0] = fg[i].mX;
+				figure[i][0][1] = fg[i].mY - (fg[i].height / 2.0f);
+				figure[i][0][2] = 0.0f;
+				break;
+			}
+			case 3:	//West
+			{
+				//top			(left)
+				figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
+				figure[i][0][1] = fg[i].mY;
+				figure[i][0][2] = 0.0f;
+				//rightbottom	(righttop)
+				figure[i][1][0] = fg[i].mX + (fg[i].height / 2.0f);
+				figure[i][1][1] = fg[i].mY + (fg[i].width / 2.0f);
+				figure[i][1][2] = 0.0f;
+				//leftbottom	(rightbottom)
+				figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
+				figure[i][2][1] = fg[i].mY - (fg[i].width / 2.0f);
+				figure[i][2][2] = 0.0f;
+				break;
+			}
+			}
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, i * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), figure[i]);
 		}
 		glutPostRedisplay();  // 화면 재출력
 		glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
