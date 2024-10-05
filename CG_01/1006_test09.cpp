@@ -61,6 +61,8 @@ typedef struct FIGURE
 	float dy;
 	int dir;	// 0:North, 1:East, 2:South, 3:West
 	int type;	// 1:fill,  2:line
+
+	int	verticalMoveCount;     // 세로로 이동할 횟수 (50번 반복 후 변경)	//0
 }FIGURE;
 FIGURE fg[MAX_FIGURE] = { 0, };
 
@@ -103,6 +105,7 @@ void stopTimer()
 	timer_4 = false;
 }
 void TimerFunction1(int value);	// 대각선 이동
+void TimerFunction2(int value);	// 좌우 지그재그 이동
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -212,7 +215,21 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	}
 	case '2':
+	{
+		stopTimer();
+		if (timer_2 == false)
+		{
+			std::cout << "timer_2 ON\n";
+			timer_2 = true;
+			glutTimerFunc(16, TimerFunction2, 1);
+		}
+		else
+		{
+			std::cout << "timer_2 OFF\n";
+			timer_2 = false;
+		}
 		break;
+	}
 	case '3':
 		break;
 	case '4':
@@ -370,6 +387,7 @@ void initFigure()
 		fg[i].dy = VELOCITY;
 		fg[i].dir = 0;	
 		fg[i].type = 1;	
+		fg[i].verticalMoveCount = 50;
 	}
 	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -407,6 +425,7 @@ void drawNewTriangle(float mX, float mY)
 	fg[figureCount].dy = VELOCITY;
 	fg[figureCount].dir = 0;
 	fg[figureCount].type = figureType;
+	fg[figureCount].verticalMoveCount = 50;
 
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
@@ -450,12 +469,13 @@ void redrawTriangle(float mX, float mY)
 	// 구조체에 값 대입 -> 해당 정보를 통해 타이머 구동
 	fg[figureCount].mX = mX;
 	fg[figureCount].mY = mY;
-	fg[figureCount].width = right - left;
-	fg[figureCount].height = top - bottom;
+	fg[figureCount].width = right - left + (2 * addSize);
+	fg[figureCount].height = top - bottom + (2 * addSize);
 	fg[figureCount].dx = VELOCITY;
 	fg[figureCount].dy = VELOCITY;
 	fg[figureCount].dir = 0;
 	fg[figureCount].type = figureType;
+	//fg[figureCount].verticalMoveCount = 50;
 
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
@@ -512,7 +532,7 @@ void TimerFunction1(int value)
 				fg[i].dy = -fg[i].dy;  // Y 방향 반전
 				fg[i].dir = 0;
 			}
-			//회전
+			//회전 및 좌표 적용(구조체 좌표 -> 실제 삼각형 좌표)
 			switch (fg[i].dir)
 			{
 			case 0:	//North
@@ -587,3 +607,143 @@ void TimerFunction1(int value)
 		glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
 	}
 }
+// 지그재그 이동 
+void TimerFunction2(int value)
+{
+	if (timer_2 == true)
+	{
+		for (int i = 0; i < figureCount; i++)
+		{
+			switch (fg[i].dir)
+			{
+			case 0:  // North
+			case 2:  // South
+				fg[i].mY += fg[i].dy;
+
+				// 세로 이동 중 벽에 부딪힌 경우 (상하 벽 체크)
+				if (fg[i].mY + (fg[i].height / 2) >= 1.0f)  // 상단 벽
+				{
+					fg[i].mY = 1.0f - fg[i].height / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+					fg[i].dy *= -1.0f;
+					fg[i].verticalMoveCount = 50;
+					fg[i].dir = 2;  // 남쪽으로 전환
+				}
+				else if (fg[i].mY - (fg[i].height / 2) <= -1.0f)  // 하단 벽
+				{
+					fg[i].mY = -1.0f + fg[i].height / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+					fg[i].dy *= -1.0f;
+					fg[i].verticalMoveCount = 50;
+					fg[i].dir = 0;  // 북쪽으로 전환
+				}
+
+				fg[i].verticalMoveCount--;
+
+				// 세로로 50번 이동한 후 가로 이동으로 전환
+				if (fg[i].verticalMoveCount <= 0)
+				{
+					fg[i].dir = (fg[i].dx > 0) ? 1 : 3;  // dx가 양수면 동쪽, 음수면 서쪽
+					fg[i].verticalMoveCount = 50;  // 가로로 이동하기 전에 카운트 초기화
+				}
+				break;
+
+			case 1:  // East
+			case 3:  // West
+				fg[i].mX += fg[i].dx;
+				
+				// 가로 이동 중 벽에 부딪힌 경우 (좌우 벽 체크)
+				if (fg[i].mX + (fg[i].width / 2) >= 1.0f)  // 오른쪽 벽
+				{
+					fg[i].mX = 1.0f - fg[i].width / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+					fg[i].dx *= -1.0f;
+					fg[i].verticalMoveCount = 50;
+					fg[i].dir = (fg[i].dy > 0) ? 0 : 2;  // dy가 양수면 북쪽, 음수면 남쪽
+				}
+				else if (fg[i].mX - (fg[i].width / 2) <= -1.0f)  // 왼쪽 벽
+				{
+					fg[i].mX = -1.0f + fg[i].width / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+					fg[i].dx *= -1.0f;
+					fg[i].verticalMoveCount = 50;
+					fg[i].dir = (fg[i].dy > 0) ? 0 : 2;  // dy가 양수면 북쪽, 음수면 남쪽
+				}
+				break;
+			}
+
+			// 회전 및 좌표 적용(구조체 좌표 -> 실제 삼각형 좌표)
+			switch (fg[i].dir)
+			{
+			case 0:	//North
+			{
+				//top			(top)
+				figure[i][0][0] = fg[i].mX;
+				figure[i][0][1] = fg[i].mY + (fg[i].height / 2.0f);
+				figure[i][0][2] = 0.0f;
+				//leftbottom	(leftbottom)
+				figure[i][1][0] = fg[i].mX - (fg[i].width / 2.0f);
+				figure[i][1][1] = fg[i].mY - (fg[i].height / 2.0f);
+				figure[i][1][2] = 0.0f;
+				//rightbottom	(rightbottom)
+				figure[i][2][0] = fg[i].mX + (fg[i].width / 2.0f);
+				figure[i][2][1] = fg[i].mY - (fg[i].height / 2.0f);
+				figure[i][2][2] = 0.0f;
+				break;
+			}
+			case 1:	//East
+			{
+				//leftbottom	(lefttop)
+				figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
+				figure[i][0][1] = fg[i].mY + (fg[i].width / 2.0f);
+				figure[i][0][2] = 0.0f;
+				//rightbottom	(leftbottom)
+				figure[i][1][0] = fg[i].mX - (fg[i].height / 2.0f);
+				figure[i][1][1] = fg[i].mY - (fg[i].width / 2.0f);
+				figure[i][1][2] = 0.0f;
+				//top			(right)
+				figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
+				figure[i][2][1] = fg[i].mY;
+				figure[i][2][2] = 0.0f;
+				break;
+			}
+			case 2:	//South
+			{
+				//leftbottom	(righttop)
+				figure[i][1][0] = fg[i].mX + (fg[i].width / 2.0f);
+				figure[i][1][1] = fg[i].mY + (fg[i].height / 2.0f);
+				figure[i][1][2] = 0.0f;
+				//rightbottom	(lefttop)
+				figure[i][2][0] = fg[i].mX - (fg[i].width / 2.0f);
+				figure[i][2][1] = fg[i].mY + (fg[i].height / 2.0f);
+				figure[i][2][2] = 0.0f;
+				//top			(bottom)
+				figure[i][0][0] = fg[i].mX;
+				figure[i][0][1] = fg[i].mY - (fg[i].height / 2.0f);
+				figure[i][0][2] = 0.0f;
+				break;
+			}
+			case 3:	//West
+			{
+				//top			(left)
+				figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
+				figure[i][0][1] = fg[i].mY;
+				figure[i][0][2] = 0.0f;
+				//rightbottom	(righttop)
+				figure[i][1][0] = fg[i].mX + (fg[i].height / 2.0f);
+				figure[i][1][1] = fg[i].mY + (fg[i].width / 2.0f);
+				figure[i][1][2] = 0.0f;
+				//leftbottom	(rightbottom)
+				figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
+				figure[i][2][1] = fg[i].mY - (fg[i].width / 2.0f);
+				figure[i][2][2] = 0.0f;
+				break;
+			}
+			}
+			
+			// VBO 업데이트
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, i * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), figure[i]);
+		}
+
+		glutPostRedisplay();  // 화면 재출력
+		glutTimerFunc(16, TimerFunction2, 1);  // 약 60fps 간격으로 타이머 재설정
+	}
+}
+
