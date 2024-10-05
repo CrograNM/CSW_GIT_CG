@@ -50,6 +50,7 @@ void createSpiral(float centerX, float centerY, float length, float angle);
 // 스파이럴을 구성할 점(point) 벡터 
 #define PI 3.141592
 std::vector<float> spiralPoints;  // 스파이럴 점 좌표를 저장할 벡터
+std::vector<float> spiralMod;	  // 스파이럴의 모드를 저장할 벡터, 애니메이션을 언제 나눠야 할지 정한다.
 bool pointMod = true;
 
 // 필요 변수 선언
@@ -73,7 +74,9 @@ GLvoid InitBuffer();
 
 // 타이머 관련
 int timer_1 = false;
+int currentPointIndex = 0; // 현재 점의 인덱스
 void TimerFunction1(int value);	
+
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -113,9 +116,9 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 GLvoid drawScene()
 {
 	GLfloat rColor, gColor, bColor;
-	rColor = 1.0;
-	gColor = 1.0;
-	bColor = 1.0;
+	rColor = 0.0;
+	gColor = 0.0;
+	bColor = 0.0;
 	glClearColor(rColor, gColor, bColor, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -132,8 +135,8 @@ GLvoid drawScene()
 	std::vector<float> colors;
 	for (size_t i = 0; i < spiralPoints.size() / 2; ++i)
 	{
-		colors.push_back(0.0f); // Red
-		colors.push_back(0.0f); // Green
+		colors.push_back(1.0f); // Red
+		colors.push_back(1.0f); // Green
 		colors.push_back(1.0f); // Blue
 	}
 
@@ -142,8 +145,8 @@ GLvoid drawScene()
 
 	// 점 크기 설정
 	glPointSize(5.0f); // 점의 크기를 5로 설정
-	glDrawArrays(GL_POINTS, 0, spiralPoints.size() / 2);		// 점 그리기
-	//glDrawArrays(GL_LINES, 0, spiralPoints.size() / 2);		// 선 그리기
+	glDrawArrays(GL_POINTS, 0, currentPointIndex); // 현재 점까지만 그리기
+	//glDrawArrays(GL_LINES, 0, currentPointIndex); // 선 그리기
 	glutSwapBuffers(); // 화면에 출력하기
 }
 
@@ -178,6 +181,9 @@ void Mouse(int button, int state, int x, int y)
 		// 마우스 클릭 위치를 GL 좌표로 변환
 		float mX = Win_to_GL_X(x);
 		float mY = Win_to_GL_Y(y);
+
+		// 현재 점 인덱스 초기화
+		//currentPointIndex = 0;
 
 		// 스파이럴 생성
 		float randFloat = generateRandomFloat(0.0f, 360.0f);
@@ -352,6 +358,11 @@ void createSpiral(float centerX, float centerY, float length, float angle)
 // 스파이럴 애니메이션
 void TimerFunction1(int value)
 {
+	if (currentPointIndex < spiralPoints.size() / 2)
+	{
+		currentPointIndex++; // 점 하나씩 추가
 
-	glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
+		glutPostRedisplay(); // 화면 다시 그리기
+	}
+	glutTimerFunc(4, TimerFunction1, 1);
 }
