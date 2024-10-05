@@ -159,7 +159,7 @@ GLvoid drawScene()
         }
         glDrawArrays(GL_TRIANGLES, i * 3, 3);
     }
-    for (int i = 3; i < figureCount_2; i++)
+    for (int i = 3; i < 3 + figureCount_2; i++)
     {
         switch (typeArray[i])
         {
@@ -172,7 +172,7 @@ GLvoid drawScene()
         }
         glDrawArrays(GL_TRIANGLES, i * 3, 3);
     }
-    for (int i = 6; i < figureCount_3; i++)
+    for (int i = 6; i < 6 + figureCount_3; i++)
     {
         switch (typeArray[i])
         {
@@ -185,7 +185,7 @@ GLvoid drawScene()
         }
         glDrawArrays(GL_TRIANGLES, i * 3, 3);
     }
-    for (int i = 9; i < figureCount_4; i++)
+    for (int i = 9; i < 9 + figureCount_4; i++)
     {
         switch (typeArray[i])
         {
