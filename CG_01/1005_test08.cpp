@@ -58,7 +58,8 @@ int figureCount_3 = 0;
 void initFigure_4();    //4사분면  (좌상단)
 int figureCount_4 = 0;
 
-void drawNewTriangle(float mX, float mY);
+void drawNewTriangle(float mX, float mY);   //오른쪽 클릭
+void redrawTriangle(float mX, float mY);    //왼쪽 클릭
 
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 3
@@ -425,6 +426,48 @@ void initFigure()
 }
 void drawNewTriangle(float mX, float mY)
 {
+    float left = mX - FIGURE_SIZE * 3;
+    float right = mX + FIGURE_SIZE * 3;
+    float top = mY + FIGURE_SIZE * 4;
+    float bottom = mY - FIGURE_SIZE * 4;
+
+    typeArray[figureCount] = figureType;
+    std::cout << "Draw triangle : " << quardrant << "_사분면" << std::endl;
+    // 두개의 삼각형 좌표로 사각형 생성
+    //왼쪽 삼각형 
+    figure[figureCount][0][0] = mX;
+    figure[figureCount][0][1] = top;
+    figure[figureCount][0][2] = 0.0f;
+
+    figure[figureCount][1][0] = left;
+    figure[figureCount][1][1] = bottom;
+    figure[figureCount][1][2] = 0.0f;
+
+    figure[figureCount][2][0] = right;
+    figure[figureCount][2][1] = bottom;
+    figure[figureCount][2][2] = 0.0f;
+
+    float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+    float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+    float random3 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+    for (int i = 0; i < 3; i++)
+    {
+        colorData[figureCount][i][0] = random1; // R
+        colorData[figureCount][i][1] = random2; // G
+        colorData[figureCount][i][2] = random3; // B
+    }
+    // VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
+    // glBufferData : 지정한 크기만큼 할당 -> 초기에 설정하는 방식
+    // glBufferSubData : 일부 업데이트 및 재할당
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, figureCount * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), figure[figureCount]);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glBufferSubData(GL_ARRAY_BUFFER, figureCount * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), colorData[figureCount]);
+}
+void redrawTriangle(float mX, float mY)
+{   //기존 삼각형을 지우고 하나 그리기 + 사이즈 변경, 색 변경
     float left = mX - FIGURE_SIZE * 3;
     float right = mX + FIGURE_SIZE * 3;
     float top = mY + FIGURE_SIZE * 4;
