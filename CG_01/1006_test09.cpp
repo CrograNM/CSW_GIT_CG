@@ -165,8 +165,6 @@ GLvoid drawScene()
 
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
 	glBindVertexArray(vao);
-	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
-	glBindVertexArray(vao);
 	for (int i = 0; i < figureCount; i++)
 	{
 		switch (fg[i].type)
