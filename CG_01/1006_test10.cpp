@@ -45,11 +45,12 @@ float Win_to_GL_Y(int y)
 }
 
 // 스파이럴 생성 함수
-void createSpiral(float centerX, float centerY, float length);
+void createSpiral(float centerX, float centerY, float length, float angle);
 
 // 스파이럴을 구성할 점(point) 벡터 
 #define PI 3.141592
 std::vector<float> spiralPoints;  // 스파이럴 점 좌표를 저장할 벡터
+bool pointMod = true;
 
 // 필요 변수 선언
 GLint width, height;
@@ -171,7 +172,8 @@ void Mouse(int button, int state, int x, int y)
 		float mY = Win_to_GL_Y(y);
 
 		// 스파이럴 생성
-		createSpiral(mX, mY, 0.5f); // 세번째 요소로 반지름 설정
+		float randFloat = generateRandomFloat(0.0f, 360.0f);
+		createSpiral(mX, mY, 0.3f, randFloat);
 	}
 	glutPostRedisplay(); // 화면 다시 그리기
 }
@@ -280,28 +282,62 @@ void InitBuffer()
 	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
 }
 
-void createSpiral(float centerX, float centerY, float length)
+void createSpiral(float centerX, float centerY, float length, float angle)
 {
 	std::cout << "--Create Spiral--\n";
 	spiralPoints.clear(); // 이전 스파이럴 점 제거
 
-	const int numPoints = 200; // 스파이럴의 점 수
-	float angleIncrement = 0.1f; // 각도 증가량
-	float radius = 0.0f; // 초기 반지름
 
+	float mul;
+	if (pointMod == false)
+	{
+		mul = 10.0f;	//10배 늘려서 lineMod로 그리기
+	}
+	else
+	{
+		mul = 1.0f;		//pointMod로 그리기
+	}
+	
+	const int numPoints = 100 * mul; // 스파이럴의 점 수
+	float angleIncrement = 0.3f * mul; // 각도 증가량
+	float radius = 0.0f; // 초기 반지름
+	float x, y;
+	float centerX2, centerY2;
+
+	// 첫 번째 스파이럴을 생성
 	for (int i = 0; i < numPoints; i++)
 	{
-		float angle = i * angleIncrement; // 현재 각도
-		radius += length / (float)numPoints; // 반지름 증가
+		// 각도와 반지름 계산
+		if (i < numPoints / 2)
+		{
+			// 첫 번째 절반: 반지름 증가
+			angle += angleIncrement; // 각도 증가
+			radius += length / (float)numPoints; // 반지름 증가
 
-		// 스파이럴 점 계산
-		float x = centerX + radius * cos(angle);
-		float y = centerY + radius * sin(angle);
+			// 스파이럴 점 계산
+			x = centerX + radius * cos(angle);
+			y = centerY + radius * sin(angle);
+			
+			centerX2 = x + (x - centerX);
+			centerY2 = y + (y - centerY);
+
+		}	
+		else
+		{
+			// 두 번째 절반: 반지름 감소하고 각도 반전
+			angle -= angleIncrement; // 각도 감소
+			radius -= length / (float)numPoints; // 반지름 감소
+
+			// 스파이럴 점 계산
+			x = centerX2 - radius * cos(angle);
+			y = centerY2 - radius * sin(angle);
+		}
 
 		// 점을 벡터에 추가
 		spiralPoints.push_back(x);
 		spiralPoints.push_back(y);
 	}
+
 	std::cout << "Number of spiral points: " << spiralPoints.size() << std::endl;
 }
 
