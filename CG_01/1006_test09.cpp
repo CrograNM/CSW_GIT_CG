@@ -50,15 +50,23 @@ void redrawTriangle(float mX, float mY);
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 4
 #define FIGURE_SIZE 0.02f
+typedef struct FIGURE
+{
+	float mX;	//중앙점 x
+	float mY;	//중앙점 y
+	float width;
+	float height;
+	float dx;
+	float dy;
+	int dir;	// 0:North, 1:East, 2:South, 3:West
+	int type;	// 1:fill,  2:line
+}FIGURE;
+FIGURE fg[MAX_FIGURE] = { 0, };
 
 GLfloat figure[MAX_FIGURE][3][3];
 GLfloat colorData[MAX_FIGURE][3][3];
 int figureCount = 0;
 int figureType = 1;						// 1:fill,  2:line
-int typeArray[MAX_FIGURE] = { 0, };		// 1:fill,  2:line
-int directArray[MAX_FIGURE] = { 0, };	// 0:North, 1:East, 2:South, 3:West
-int widthArray[MAX_FIGURE] = { 0, };
-int heightArray[MAX_FIGURE] = { 0, };
 
 // 필요 변수 선언
 GLint width, height;
@@ -78,6 +86,22 @@ void make_vertexShaders();
 void make_fragmentShaders();
 void make_shaderProgram();
 GLvoid InitBuffer();
+
+// 타이머 관련
+int timer_1 = false;
+int timer_2 = false;
+int timer_3 = false;
+int timer_4 = false;
+
+void stopTimer()
+{
+	std::cout << "stop timer ALL\n";
+	timer_1 = false;
+	timer_2 = false;
+	timer_3 = false;
+	timer_4 = false;
+}
+void TimerFunction1(int value);	// 대각선 이동
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
@@ -131,7 +155,7 @@ GLvoid drawScene()
 	glBindVertexArray(vao);
 	for (int i = 0; i < figureCount; i++)
 	{
-		switch (typeArray[i])
+		switch (fg[i].type)
 		{
 		case 1:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -171,7 +195,21 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	}
 	case '1':
+	{
+		stopTimer();
+		if (timer_1 == false)
+		{
+			std::cout << "timer_1 ON\n";
+			timer_1 = true;
+			glutTimerFunc(16, TimerFunction1, 1);
+		}
+		else
+		{
+			std::cout << "timer_1 OFF\n";
+			timer_1 = false;
+		}
 		break;
+	}
 	case '2':
 		break;
 	case '3':
@@ -323,8 +361,14 @@ void initFigure()
 				colorData[i][j][k] = 1.0f;
 			}
 		}
-		typeArray[i] = 0;
-		directArray[i] = 0;
+		fg[i].mX = 0;
+		fg[i].mY = 0;	
+		fg[i].width = 0;
+		fg[i].height = 0;
+		fg[i].dx = 0;
+		fg[i].dy = 0;
+		fg[i].dir = 0;	
+		fg[i].type = 1;	
 	}
 	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -339,7 +383,6 @@ void drawNewTriangle(float mX, float mY)
 	float top = mY + FIGURE_SIZE * 4;
 	float bottom = mY - FIGURE_SIZE * 4;
 
-	typeArray[figureCount] = figureType;
 	std::cout << "Draw triangle" << std::endl;
 
 	figure[figureCount][0][0] = mX;
@@ -354,8 +397,15 @@ void drawNewTriangle(float mX, float mY)
 	figure[figureCount][2][1] = bottom;
 	figure[figureCount][2][2] = 0.0f;
 
-	widthArray[figureCount] = right - left;
-	heightArray[figureCount] = top - bottom;
+	// 구조체에 값 대입 -> 해당 정보를 통해 타이머 구동
+	fg[figureCount].mX = mX;
+	fg[figureCount].mY = mY;
+	fg[figureCount].width = right - left;
+	fg[figureCount].height = top - bottom;
+	fg[figureCount].dx = 1;
+	fg[figureCount].dy = 1;
+	fg[figureCount].dir = 0;
+	fg[figureCount].type = figureType;
 
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
@@ -382,7 +432,6 @@ void redrawTriangle(float mX, float mY)
 
 	float addSize = generateRandomFloat(-0.05f, 0.1f);
 
-	typeArray[figureCount] = figureType;
 	std::cout << "Re_Draw triangle" << std::endl;
 
 	figure[figureCount][0][0] = mX;
@@ -397,8 +446,15 @@ void redrawTriangle(float mX, float mY)
 	figure[figureCount][2][1] = bottom - addSize;
 	figure[figureCount][2][2] = 0.0f;
 
-	widthArray[figureCount] = right - left + (2 * addSize);
-	heightArray[figureCount] = top - bottom + (2 * addSize);
+	// 구조체에 값 대입 -> 해당 정보를 통해 타이머 구동
+	fg[figureCount].mX = mX;
+	fg[figureCount].mY = mY;
+	fg[figureCount].width = right - left;
+	fg[figureCount].height = top - bottom;
+	fg[figureCount].dx = 1;
+	fg[figureCount].dy = 1;
+	fg[figureCount].dir = 0;
+	fg[figureCount].type = figureType;
 
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
@@ -416,4 +472,59 @@ void redrawTriangle(float mX, float mY)
 	glBufferSubData(GL_ARRAY_BUFFER, figureCount * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), figure[figureCount]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferSubData(GL_ARRAY_BUFFER, figureCount * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), colorData[figureCount]);
+}
+
+// 대각선 이동
+void TimerFunction1(int value)
+{
+	if (timer_1 == true)
+	{
+		for (int i = 0; i < figureCount; i++)
+		{
+			// 삼각형 이동
+			fg[i].mX += fg[i].dx;
+			fg[i].mY += fg[i].dy;
+
+			// 경계에 닿으면 반대 방향으로 변경
+			if (fg[i].mX + fg[i].width / 2 > 1.0f)			//오른쪽
+			{
+				fg[i].mX = 1.0f - fg[i].width / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				fg[i].dx = -fg[i].dx;  // X 방향 반전
+				fg[i].dir = 3;
+			}
+			else if (fg[i].mX - fg[i].width / 2 < -1.0f)	//왼쪽
+			{
+				fg[i].mX = -1.0f + fg[i].width / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				fg[i].dx = -fg[i].dx;  // X 방향 반전
+				fg[i].dir = 1;
+			}
+
+			if (fg[i].mY + fg[i].height / 2 > 1.0f)			//위쪽
+			{
+				fg[i].mY = 1.0f - fg[i].height / 2 - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				fg[i].dy = -fg[i].dy;  // Y 방향 반전
+				fg[i].dir = 2;
+			}
+			else if (fg[i].mY - fg[i].height / 2 < -1.0f)	//아래쪽
+			{
+				fg[i].mY = -1.0f + fg[i].height / 2 + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				fg[i].dy = -fg[i].dy;  // Y 방향 반전
+				fg[i].dir = 0;
+			}
+
+			switch (fg[i].dir)
+			{
+			case 0:	
+				break;
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			}
+		}
+		glutPostRedisplay();  // 화면 재출력
+		glutTimerFunc(16, TimerFunction1, 1);  // 약 60fps 간격으로 타이머 재설정
+	}
 }
