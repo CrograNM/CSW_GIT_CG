@@ -506,7 +506,7 @@ void redrawTriangle(float mX, float mY)
     float top = mY + FIGURE_SIZE * 4;
     float bottom = mY - FIGURE_SIZE * 4;
 
-    float addSize = generateRandomFloat(-0.5f, 1.0f);
+    float addSize = generateRandomFloat(-0.05f, 0.1f);
 
     typeArray[figureCount] = figureType;
     std::cout << "Re_Draw triangle : " << quardrant << "_사분면" << std::endl;
@@ -515,12 +515,12 @@ void redrawTriangle(float mX, float mY)
     figure[figureCount][0][1] = top + addSize;
     figure[figureCount][0][2] = 0.0f;
 
-    figure[figureCount][1][0] = left + addSize;
-    figure[figureCount][1][1] = bottom + addSize;
+    figure[figureCount][1][0] = left - addSize;
+    figure[figureCount][1][1] = bottom - addSize;
     figure[figureCount][1][2] = 0.0f;
 
     figure[figureCount][2][0] = right + addSize;
-    figure[figureCount][2][1] = bottom + addSize;
+    figure[figureCount][2][1] = bottom - addSize;
     figure[figureCount][2][2] = 0.0f;
 
     float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
