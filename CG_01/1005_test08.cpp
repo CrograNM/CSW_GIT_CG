@@ -58,8 +58,8 @@ GLfloat divLine[4][3] = {
 GLfloat figure[MAX_FIGURE][3][3];
 GLfloat colorData[MAX_FIGURE][3][3];
 int figureCount = 0;
-int figureType = 1;                    // 1:point,  2:line,  3:tri,  4:rect
-int typeArray[MAX_FIGURE] = { 0, };    // 1:point,  2:line,  3:tri,  4:rect
+int figureType = 1;                    // 1:fill,  2:line
+int typeArray[MAX_FIGURE] = { 0, };    // 1:fill,  2:line
 
 // 필요 변수 선언
 GLint width, height;
@@ -91,7 +91,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);            //--- 디스플레이 모드 설정
     glutInitWindowPosition(100, 100);                        //--- 윈도우의 위치 지정
     glutInitWindowSize(width, height);                        //--- 윈도우의 크기 지정
-    glutCreateWindow("test 07");                            //--- 윈도우 생성(윈도우 이름)
+    glutCreateWindow("test 08");                            //--- 윈도우 생성(윈도우 이름)
 
     //--- GLEW 초기화하기
     glewExperimental = GL_TRUE;
@@ -162,11 +162,19 @@ GLvoid Keyboard(unsigned char key, int x, int y)
         break;
     }
     case 'a':
+    {
         // 면으로 그리기
+        std::cout << "--fill mod--\n";
+        figureType = 1;
         break;
+    }
     case 'b':
+    {
         // 선으로 그리기
+        std::cout << "--line mod--\n";
+        figureType = 2;
         break;
+    }
     }
     glutPostRedisplay(); //--- refresh
 }
@@ -183,7 +191,7 @@ void Mouse(int button, int state, int x, int y)
         float top = mY + FIGURE_SIZE * 4;
         float bottom = mY - FIGURE_SIZE * 4;
 
-        typeArray[figureCount] = 2;
+        typeArray[figureCount] = figureType;
         std::cout << "Draw : point\n";
         // 두개의 삼각형 좌표로 사각형 생성
         //왼쪽 삼각형 
