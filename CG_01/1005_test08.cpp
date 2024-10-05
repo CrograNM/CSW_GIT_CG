@@ -234,30 +234,68 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 }
 void Mouse(int button, int state, int x, int y)
 {
-    if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+    // 마우스 클릭 위치를 GL 좌표로 변환
+    float mX = Win_to_GL_X(x);
+    float mY = Win_to_GL_Y(y);
+    //클릭시 몇사분면인지 검사
+    if (mX >= 0 && mY >= 0)
     {
-        // 마우스 클릭 위치를 GL 좌표로 변환
-        float mX = Win_to_GL_X(x);
-        float mY = Win_to_GL_Y(y);
+        quardrant = 1;
+    }
+    else if (mX >= 0 && mY < 0)
+    {
+        quardrant = 2;
+    }
+    else if (mX < 0 && mY < 0)
+    {
+        quardrant = 3;
+    }
+    else if (mX < 0 && mY >= 0)
+    {
+        quardrant = 4;
+    }
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    {
+        switch (quardrant)
+        {
+        case 1:
+            if (figureCount_1 < 3)
+            {
+                figureCount = 0 + figureCount_1;
+                drawNewTriangle(mX, mY);
+                figureCount_1++;
+            }
+            break;
+        case 2:
+            if (figureCount_2 < 3)
+            {
+                figureCount = 3 + figureCount_2;
+                drawNewTriangle(mX, mY);
+                figureCount_2++;
+            }
+            break;
+        case 3:
+            if (figureCount_3 < 3)
+            {
+                figureCount = 6 + figureCount_3;
+                drawNewTriangle(mX, mY);
+                figureCount_3++;
+            }
+            break;
+        case 4:
+            if (figureCount_4 < 3)
+            {
+                figureCount = 9 + figureCount_4;
+                drawNewTriangle(mX, mY);
+                figureCount_4++;
+            }
+            break;
+        }
 
-        //클릭시 몇사분면인지 검사
-        if (mX >= 0 && mY >= 0)
-        {
-            quardrant = 1;
-        }
-        else if (mX >= 0 && mY < 0)
-        {
-            quardrant = 2;
-        }
-        else if (mX < 0 && mY < 0)
-        {
-            quardrant = 3;
-        }
-        else if (mX < 0 && mY >= 0)
-        {
-            quardrant = 4;
-        }
-
+        glutPostRedisplay(); // 화면 다시 그리기
+    }
+    else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+    {
         switch (quardrant)
         {
         case 1:
@@ -472,19 +510,21 @@ void redrawTriangle(float mX, float mY)
     float top = mY + FIGURE_SIZE * 4;
     float bottom = mY - FIGURE_SIZE * 4;
 
+    float addSize = generateRandomFloat(-0.5f, 1.0f);
+
     typeArray[figureCount] = figureType;
-    std::cout << "Draw triangle : " << quardrant << "_사분면" << std::endl;
+    std::cout << "Re_Draw triangle : " << quardrant << "_사분면" << std::endl;
     
     figure[figureCount][0][0] = mX;
-    figure[figureCount][0][1] = top;
+    figure[figureCount][0][1] = top + addSize;
     figure[figureCount][0][2] = 0.0f;
 
-    figure[figureCount][1][0] = left;
-    figure[figureCount][1][1] = bottom;
+    figure[figureCount][1][0] = left + addSize;
+    figure[figureCount][1][1] = bottom + addSize;
     figure[figureCount][1][2] = 0.0f;
 
-    figure[figureCount][2][0] = right;
-    figure[figureCount][2][1] = bottom;
+    figure[figureCount][2][0] = right + addSize;
+    figure[figureCount][2][1] = bottom + addSize;
     figure[figureCount][2][2] = 0.0f;
 
     float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
