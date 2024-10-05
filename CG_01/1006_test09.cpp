@@ -63,6 +63,9 @@ typedef struct FIGURE
 	int type;	// 1:fill,  2:line
 
 	int	vertexCount;     // 세로로 이동할 횟수 (50번 반복 후 변경)	//0
+	
+	float virtualWall;
+	bool shrink;
 }FIGURE;
 FIGURE fg[MAX_FIGURE] = { 0, };
 
@@ -220,6 +223,12 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		if (timer_2 == false)
 		{
 			stopTimer();
+
+			for (int i = 0; i < MAX_FIGURE; i++)
+			{
+				fg[i].vertexCount = 50;
+			}
+
 			std::cout << "timer_2 ON\n";
 			timer_2 = true;
 			glutTimerFunc(16, TimerFunction2, 1);
@@ -236,6 +245,12 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		if (timer_3 == false)
 		{
 			stopTimer();
+
+			for (int i = 0; i < MAX_FIGURE; i++)
+			{
+				fg[i].vertexCount = 0;
+			}
+
 			std::cout << "timer_3 ON\n";
 			timer_3 = true;
 			glutTimerFunc(16, TimerFunction3, 1);
@@ -403,6 +418,9 @@ void initFigure()
 		fg[i].dir = 0;	
 		fg[i].type = 1;	
 		fg[i].vertexCount = 50;
+
+		fg[i].virtualWall = 1.0f;
+		fg[i].shrink = true;
 	}
 	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -509,6 +527,77 @@ void redrawTriangle(float mX, float mY)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferSubData(GL_ARRAY_BUFFER, figureCount * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), colorData[figureCount]);
 }
+void updateFigurePos(int i)
+{
+	//회전 및 좌표 적용(구조체 좌표 -> 실제 삼각형 좌표)
+	switch (fg[i].dir)
+	{
+	case 0:	//North
+	{
+		//top			(top)
+		figure[i][0][0] = fg[i].mX;
+		figure[i][0][1] = fg[i].mY + (fg[i].height / 2.0f);
+		figure[i][0][2] = 0.0f;
+		//leftbottom	(leftbottom)
+		figure[i][1][0] = fg[i].mX - (fg[i].width / 2.0f);
+		figure[i][1][1] = fg[i].mY - (fg[i].height / 2.0f);
+		figure[i][1][2] = 0.0f;
+		//rightbottom	(rightbottom)
+		figure[i][2][0] = fg[i].mX + (fg[i].width / 2.0f);
+		figure[i][2][1] = fg[i].mY - (fg[i].height / 2.0f);
+		figure[i][2][2] = 0.0f;
+		break;
+	}
+	case 1:	//East
+	{
+		//leftbottom	(lefttop)
+		figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
+		figure[i][0][1] = fg[i].mY + (fg[i].width / 2.0f);
+		figure[i][0][2] = 0.0f;
+		//rightbottom	(leftbottom)
+		figure[i][1][0] = fg[i].mX - (fg[i].height / 2.0f);
+		figure[i][1][1] = fg[i].mY - (fg[i].width / 2.0f);
+		figure[i][1][2] = 0.0f;
+		//top			(right)
+		figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
+		figure[i][2][1] = fg[i].mY;
+		figure[i][2][2] = 0.0f;
+		break;
+	}
+	case 2:	//South
+	{
+		//leftbottom	(righttop)
+		figure[i][1][0] = fg[i].mX + (fg[i].width / 2.0f);
+		figure[i][1][1] = fg[i].mY + (fg[i].height / 2.0f);
+		figure[i][1][2] = 0.0f;
+		//rightbottom	(lefttop)
+		figure[i][2][0] = fg[i].mX - (fg[i].width / 2.0f);
+		figure[i][2][1] = fg[i].mY + (fg[i].height / 2.0f);
+		figure[i][2][2] = 0.0f;
+		//top			(bottom)
+		figure[i][0][0] = fg[i].mX;
+		figure[i][0][1] = fg[i].mY - (fg[i].height / 2.0f);
+		figure[i][0][2] = 0.0f;
+		break;
+	}
+	case 3:	//West
+	{
+		//top			(left)
+		figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
+		figure[i][0][1] = fg[i].mY;
+		figure[i][0][2] = 0.0f;
+		//rightbottom	(righttop)
+		figure[i][1][0] = fg[i].mX + (fg[i].height / 2.0f);
+		figure[i][1][1] = fg[i].mY + (fg[i].width / 2.0f);
+		figure[i][1][2] = 0.0f;
+		//leftbottom	(rightbottom)
+		figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
+		figure[i][2][1] = fg[i].mY - (fg[i].width / 2.0f);
+		figure[i][2][2] = 0.0f;
+		break;
+	}
+	}
+}
 
 // 대각선 이동
 void TimerFunction1(int value)
@@ -547,74 +636,10 @@ void TimerFunction1(int value)
 				fg[i].dy = -fg[i].dy;  // Y 방향 반전
 				fg[i].dir = 0;
 			}
+
 			//회전 및 좌표 적용(구조체 좌표 -> 실제 삼각형 좌표)
-			switch (fg[i].dir)
-			{
-			case 0:	//North
-			{
-				//top			(top)
-				figure[i][0][0] = fg[i].mX;
-				figure[i][0][1] = fg[i].mY + (fg[i].height / 2.0f);
-				figure[i][0][2] = 0.0f;
-				//leftbottom	(leftbottom)
-				figure[i][1][0] = fg[i].mX - (fg[i].width / 2.0f);
-				figure[i][1][1] = fg[i].mY - (fg[i].height / 2.0f);
-				figure[i][1][2] = 0.0f;
-				//rightbottom	(rightbottom)
-				figure[i][2][0] = fg[i].mX + (fg[i].width / 2.0f);
-				figure[i][2][1] = fg[i].mY - (fg[i].height / 2.0f);
-				figure[i][2][2] = 0.0f;
-				break;
-			}
-			case 1:	//East
-			{
-				//leftbottom	(lefttop)
-				figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
-				figure[i][0][1] = fg[i].mY + (fg[i].width / 2.0f);
-				figure[i][0][2] = 0.0f;
-				//rightbottom	(leftbottom)
-				figure[i][1][0] = fg[i].mX - (fg[i].height / 2.0f);
-				figure[i][1][1] = fg[i].mY - (fg[i].width / 2.0f);
-				figure[i][1][2] = 0.0f;
-				//top			(right)
-				figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
-				figure[i][2][1] = fg[i].mY;
-				figure[i][2][2] = 0.0f;
-				break;
-			}
-			case 2:	//South
-			{
-				//leftbottom	(righttop)
-				figure[i][1][0] = fg[i].mX + (fg[i].width / 2.0f);
-				figure[i][1][1] = fg[i].mY + (fg[i].height / 2.0f);
-				figure[i][1][2] = 0.0f;
-				//rightbottom	(lefttop)
-				figure[i][2][0] = fg[i].mX - (fg[i].width / 2.0f);
-				figure[i][2][1] = fg[i].mY + (fg[i].height / 2.0f);
-				figure[i][2][2] = 0.0f;
-				//top			(bottom)
-				figure[i][0][0] = fg[i].mX;
-				figure[i][0][1] = fg[i].mY - (fg[i].height / 2.0f);
-				figure[i][0][2] = 0.0f;
-				break;
-			}
-			case 3:	//West
-			{
-				//top			(left)
-				figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
-				figure[i][0][1] = fg[i].mY;
-				figure[i][0][2] = 0.0f;
-				//rightbottom	(righttop)
-				figure[i][1][0] = fg[i].mX + (fg[i].height / 2.0f);
-				figure[i][1][1] = fg[i].mY + (fg[i].width / 2.0f);
-				figure[i][1][2] = 0.0f;
-				//leftbottom	(rightbottom)
-				figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
-				figure[i][2][1] = fg[i].mY - (fg[i].width / 2.0f);
-				figure[i][2][2] = 0.0f;
-				break;
-			}
-			}
+			updateFigurePos(i);
+
 			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 			glBufferSubData(GL_ARRAY_BUFFER, i * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), figure[i]);
 		}
@@ -684,73 +709,7 @@ void TimerFunction2(int value)
 			}
 
 			// 회전 및 좌표 적용(구조체 좌표 -> 실제 삼각형 좌표)
-			switch (fg[i].dir)
-			{
-			case 0:	//North
-			{
-				//top			(top)
-				figure[i][0][0] = fg[i].mX;
-				figure[i][0][1] = fg[i].mY + (fg[i].height / 2.0f);
-				figure[i][0][2] = 0.0f;
-				//leftbottom	(leftbottom)
-				figure[i][1][0] = fg[i].mX - (fg[i].width / 2.0f);
-				figure[i][1][1] = fg[i].mY - (fg[i].height / 2.0f);
-				figure[i][1][2] = 0.0f;
-				//rightbottom	(rightbottom)
-				figure[i][2][0] = fg[i].mX + (fg[i].width / 2.0f);
-				figure[i][2][1] = fg[i].mY - (fg[i].height / 2.0f);
-				figure[i][2][2] = 0.0f;
-				break;
-			}
-			case 1:	//East
-			{
-				//leftbottom	(lefttop)
-				figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
-				figure[i][0][1] = fg[i].mY + (fg[i].width / 2.0f);
-				figure[i][0][2] = 0.0f;
-				//rightbottom	(leftbottom)
-				figure[i][1][0] = fg[i].mX - (fg[i].height / 2.0f);
-				figure[i][1][1] = fg[i].mY - (fg[i].width / 2.0f);
-				figure[i][1][2] = 0.0f;
-				//top			(right)
-				figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
-				figure[i][2][1] = fg[i].mY;
-				figure[i][2][2] = 0.0f;
-				break;
-			}
-			case 2:	//South
-			{
-				//leftbottom	(righttop)
-				figure[i][1][0] = fg[i].mX + (fg[i].width / 2.0f);
-				figure[i][1][1] = fg[i].mY + (fg[i].height / 2.0f);
-				figure[i][1][2] = 0.0f;
-				//rightbottom	(lefttop)
-				figure[i][2][0] = fg[i].mX - (fg[i].width / 2.0f);
-				figure[i][2][1] = fg[i].mY + (fg[i].height / 2.0f);
-				figure[i][2][2] = 0.0f;
-				//top			(bottom)
-				figure[i][0][0] = fg[i].mX;
-				figure[i][0][1] = fg[i].mY - (fg[i].height / 2.0f);
-				figure[i][0][2] = 0.0f;
-				break;
-			}
-			case 3:	//West
-			{
-				//top			(left)
-				figure[i][0][0] = fg[i].mX - (fg[i].height / 2.0f);
-				figure[i][0][1] = fg[i].mY;
-				figure[i][0][2] = 0.0f;
-				//rightbottom	(righttop)
-				figure[i][1][0] = fg[i].mX + (fg[i].height / 2.0f);
-				figure[i][1][1] = fg[i].mY + (fg[i].width / 2.0f);
-				figure[i][1][2] = 0.0f;
-				//leftbottom	(rightbottom)
-				figure[i][2][0] = fg[i].mX + (fg[i].height / 2.0f);
-				figure[i][2][1] = fg[i].mY - (fg[i].width / 2.0f);
-				figure[i][2][2] = 0.0f;
-				break;
-			}
-			}
+			updateFigurePos(i);
 			
 			// VBO 업데이트
 			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -764,5 +723,91 @@ void TimerFunction2(int value)
 // 사각 스파이럴
 void TimerFunction3(int value)
 {
+	if (timer_3 == true)
+	{
+		for (int i = 0; i < figureCount; i++)
+		{
+			// 벽에 부딪히지 않는 한 현재 방향으로 이동
+			// 4번째 회전마다 가상의 벽을 만들어 더 좁게 돈다.
 
+			// 가상의 벽이 줄어들 때는 vertexCount에 따라 감소, 팽창할 때는 증가
+			if (fg[i].shrink)
+			{
+				fg[i].virtualWall = 1.0f - (0.1f * (int)(fg[i].vertexCount / 4));
+			}
+			else
+			{
+				fg[i].virtualWall = 0.2f + (0.1f * (int)(fg[i].vertexCount / 4));
+			}
+			// 벽이 너무 좁아지면 다시 커지게 설정 (0.2 이하로 줄어들면 팽창)
+			if (fg[i].virtualWall < 0.2f)
+			{
+				fg[i].shrink = false;
+				fg[i].vertexCount = 0;
+			}
+			// 벽이 다시 커지다가 원래 크기로 돌아오면 다시 줄어들게 설정
+			else if (fg[i].virtualWall > 1.0f)
+			{
+				fg[i].shrink = true;
+				fg[i].vertexCount = 0;
+			}
+
+			switch (fg[i].dir)
+			{
+			case 0:  // North (위쪽으로 이동)
+			{
+				fg[i].mY += fg[i].dy;
+				if (fg[i].mY + (fg[i].height / 2) >= fg[i].virtualWall)
+				{
+					fg[i].mY = fg[i].virtualWall - fg[i].height / 2 - 0.001f;
+					fg[i].dir = 1;  // 동쪽으로 방향 전환
+					fg[i].vertexCount++;  // 회전 횟수 증가
+				}
+				break;
+			}
+			case 1:  // East (오른쪽으로 이동)
+			{
+				fg[i].mX += fg[i].dx;
+				if (fg[i].mX + (fg[i].width / 2) >= fg[i].virtualWall)
+				{
+					fg[i].mX = fg[i].virtualWall - fg[i].width / 2 - 0.001f;
+					fg[i].dir = 2;  // 남쪽으로 방향 전환
+					fg[i].vertexCount++;
+				}
+				break;
+			}
+			case 2:  // South (아래쪽으로 이동)
+			{
+				fg[i].mY -= fg[i].dy;
+				if (fg[i].mY - (fg[i].height / 2) <= -fg[i].virtualWall)
+				{
+					fg[i].mY = -fg[i].virtualWall + fg[i].height / 2 + 0.001f;
+					fg[i].dir = 3;  // 서쪽으로 방향 전환
+					fg[i].vertexCount++;
+				}
+				break;
+			}
+			case 3:  // West (왼쪽으로 이동)
+			{
+				fg[i].mX -= fg[i].dx;
+				if (fg[i].mX - (fg[i].width / 2) <= -fg[i].virtualWall)
+				{
+					fg[i].mX = -fg[i].virtualWall + fg[i].width / 2 + 0.001f;
+					fg[i].dir = 0;  // 북쪽으로 방향 전환
+					fg[i].vertexCount++;
+				}
+				break;
+			}
+			}
+
+			updateFigurePos(i);
+
+			// VBO 업데이트
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, i * 9 * sizeof(GLfloat), 9 * sizeof(GLfloat), figure[i]);
+		}
+		glutPostRedisplay();  // 화면 재출력
+		glutTimerFunc(5, TimerFunction3, 1);  // 약 60fps 간격으로 타이머 재설정
+	}
 }
+
