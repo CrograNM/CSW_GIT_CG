@@ -433,8 +433,7 @@ void drawNewTriangle(float mX, float mY)
 
     typeArray[figureCount] = figureType;
     std::cout << "Draw triangle : " << quardrant << "_사분면" << std::endl;
-    // 두개의 삼각형 좌표로 사각형 생성
-    //왼쪽 삼각형 
+  
     figure[figureCount][0][0] = mX;
     figure[figureCount][0][1] = top;
     figure[figureCount][0][2] = 0.0f;
@@ -475,8 +474,7 @@ void redrawTriangle(float mX, float mY)
 
     typeArray[figureCount] = figureType;
     std::cout << "Draw triangle : " << quardrant << "_사분면" << std::endl;
-    // 두개의 삼각형 좌표로 사각형 생성
-    //왼쪽 삼각형 
+    
     figure[figureCount][0][0] = mX;
     figure[figureCount][0][1] = top;
     figure[figureCount][0][2] = 0.0f;
