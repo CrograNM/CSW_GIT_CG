@@ -233,7 +233,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 }
 void Mouse(int button, int state, int x, int y)
 {
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
     {
         // 마우스 클릭 위치를 GL 좌표로 변환
         float mX = Win_to_GL_X(x);
