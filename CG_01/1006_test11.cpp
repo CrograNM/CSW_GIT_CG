@@ -43,8 +43,7 @@ float Win_to_GL_Y(int y)
 }
 
 // 도형 관련 함수들
-void initFigure();
-void moveFigureRand(char dir);
+void initFigure(); // 모든 사분면에 선, 삼각형, 사각형, 오각형 세팅
 
 // 사분면 그리기
 GLfloat divLine[4][3] = {
@@ -54,15 +53,23 @@ GLfloat divLine[4][3] = {
 	{0.0f, 1.0f, 0.0f}
 };
 
-// 최대 10개의 도형을 저장할 변수
-#define MAX_FIGURE 10
+// 총 5개의 도형을 그린다. -> 사분면당 총 넷 + 단독 도형 하나
+#define MAX_FIGURE 5
 #define FIGURE_SIZE 0.02f
 
-GLfloat figure[MAX_FIGURE][6][3];
-GLfloat colorData[MAX_FIGURE][6][3];
+typedef struct FIGURE
+{
+	bool exist;		//존재여부 : 단독 or 모든 사분면
+	int fType;		//도형타입 : 선, 삼각형, 사각형, 오각형
+}FIGURE;
+FIGURE fg[5]; //0: 단독도형,		1,2,3,4 : 1,2,3,4사분면 도형
+
+GLfloat figure[MAX_FIGURE][9][3];		// 최대 오각형까지 그려야 하므로 삼각형 3개가 필요함.(3x3)
+GLfloat colorData[MAX_FIGURE][9][3];
+
 int figureCount = 0;
-int figureType = 1;					// 1:point,  2:line,  3:tri,  4:rect
-int typeArray[MAX_FIGURE] = { 0, };	// 1:point,  2:line,  3:tri,  4:rect
+int figureType = 1;						
+int typeArray[MAX_FIGURE] = { 0, };		
 
 // 필요 변수 선언
 GLint width, height;
@@ -75,7 +82,6 @@ GLuint vao[2], vbo[3];							//--- VAO, VBO
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
-void Mouse(int button, int state, int x, int y);
 
 char* filetobuf(const char* file);
 void make_vertexShaders();
@@ -114,7 +120,6 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutDisplayFunc(drawScene);					//--- 출력 콜백함수의 지정
 	glutReshapeFunc(Reshape);					//--- 다시 그리기 콜백함수 지정
 	glutKeyboardFunc(Keyboard);
-	glutMouseFunc(Mouse);
 	glutMainLoop();								//--- 이벤트 처리 시작
 }
 
@@ -136,27 +141,11 @@ GLvoid drawScene()
 
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
 	glBindVertexArray(vao[0]);
-	for (int i = 0; i < figureCount; i++)
+	for (int i = 0; i < MAX_FIGURE; i++)
 	{
-		int vertexCount;
-		switch (typeArray[i])
+		if (fg[i].exist == true)
 		{
-		case 1:
-			vertexCount = 6;
-			glDrawArrays(GL_TRIANGLES, i * 6, vertexCount);
-			break;
-		case 2:
-			vertexCount = 2;
-			glDrawArrays(GL_LINES, i * 6, vertexCount);
-			break;
-		case 3:
-			vertexCount = 3;
-			glDrawArrays(GL_TRIANGLES, i * 6, vertexCount);
-			break;
-		case 4:
-			vertexCount = 6;
-			glDrawArrays(GL_TRIANGLES, i * 6, vertexCount);
-			break;
+			glDrawArrays(GL_TRIANGLES, i * 9, 9);	//최대 오각형을 그리므로 삼각형 3개 필요 -> '9'
 		}
 	}
 	glutSwapBuffers(); // 화면에 출력하기
@@ -175,221 +164,8 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
 		break;
 	}
-	case 'p':
-	{
-		std::cout << "--point mod--\n";
-		figureType = 1;
-		break;
-	}
-	case 'l':
-	{
-		std::cout << "--line mod--\n";
-		figureType = 2;
-		break;
-	}
-	case 't':
-	{
-		std::cout << "--tri mod--\n";
-		figureType = 3;
-		break;
-	}
-	case 'r':
-	{
-		std::cout << "--rect mod--\n";
-		figureType = 4;
-		break;
-	}
-	case 'c':
-	{
-		std::cout << "--Clear client--\n";
-		figureCount = 0;
-		figureType = 1;
-		initFigure();
-		break;
-	}
-	case 'w': case 'a': case 's': case 'd':
-	{
-		moveFigureRand(key);
-		break;
-	}
 	}
 	glutPostRedisplay(); //--- refresh
-}
-void Mouse(int button, int state, int x, int y)
-{
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && figureCount < 10)
-	{
-		// 마우스 클릭 위치를 GL 좌표로 변환
-		float mX = Win_to_GL_X(x);
-		float mY = Win_to_GL_Y(y);
-
-		float left = mX - FIGURE_SIZE * 3;
-		float right = mX + FIGURE_SIZE * 3;
-		float top = mY + FIGURE_SIZE * 4;
-		float bottom = mY - FIGURE_SIZE * 4;
-
-		if (figureType == 1)
-		{
-			typeArray[figureCount] = 1;
-			std::cout << "Draw : point\n";
-			left = mX - FIGURE_SIZE * 3 / 4;
-			right = mX + FIGURE_SIZE * 3 / 4;
-			top = mY + FIGURE_SIZE * 4 / 4;
-			bottom = mY - FIGURE_SIZE * 4 / 4;
-			// 두개의 삼각형 좌표로 사각형 생성
-			//왼쪽 삼각형 
-			figure[figureCount][0][0] = left;
-			figure[figureCount][0][1] = top;
-			figure[figureCount][0][2] = 0.0f;
-
-			figure[figureCount][1][0] = left;
-			figure[figureCount][1][1] = bottom;
-			figure[figureCount][1][2] = 0.0f;
-
-			figure[figureCount][2][0] = right;
-			figure[figureCount][2][1] = bottom;
-			figure[figureCount][2][2] = 0.0f;
-
-			//오른쪽 삼각형
-			figure[figureCount][3][0] = left;
-			figure[figureCount][3][1] = top;
-			figure[figureCount][3][2] = 0.0f;
-
-			figure[figureCount][4][0] = right;
-			figure[figureCount][4][1] = top;
-			figure[figureCount][4][2] = 0.0f;
-
-			figure[figureCount][5][0] = right;
-			figure[figureCount][5][1] = bottom;
-			figure[figureCount][5][2] = 0.0f;
-
-			for (int i = 0; i < 6; i++)
-			{
-				colorData[figureCount][i][0] = 1.0f; // R
-				colorData[figureCount][i][1] = 0.0f; // G
-				colorData[figureCount][i][2] = 0.0f; // B
-			}
-		}
-		else if (figureType == 2)
-		{
-			typeArray[figureCount] = 2;
-			std::cout << "Draw : line\n";
-			// 두개의 버텍스로 라인 생성 
-			figure[figureCount][0][0] = left;
-			figure[figureCount][0][1] = top;
-			figure[figureCount][0][2] = 0.0f;
-
-			figure[figureCount][1][0] = right;
-			figure[figureCount][1][1] = bottom;
-			figure[figureCount][1][2] = 0.0f;
-
-			figure[figureCount][2][0] = 0;
-			figure[figureCount][2][1] = 0;
-			figure[figureCount][2][2] = 0;
-
-			figure[figureCount][3][0] = 0;
-			figure[figureCount][3][1] = 0;
-			figure[figureCount][3][2] = 0;
-
-			figure[figureCount][4][0] = 0;
-			figure[figureCount][4][1] = 0;
-			figure[figureCount][4][2] = 0;
-
-			figure[figureCount][5][0] = 0;
-			figure[figureCount][5][1] = 0;
-			figure[figureCount][5][2] = 0;
-
-			for (int i = 0; i < 6; i++)
-			{
-				colorData[figureCount][i][0] = 0.0f; // R
-				colorData[figureCount][i][1] = 1.0f; // G
-				colorData[figureCount][i][2] = 0.0f; // B
-			}
-		}
-		else if (figureType == 3)
-		{
-			typeArray[figureCount] = 3;
-			std::cout << "Draw : tri\n";
-			// 클릭한 좌표를 중심으로 삼각형의 정점 좌표 설정
-			figure[figureCount][0][0] = left;  // 왼쪽 아래
-			figure[figureCount][0][1] = bottom;
-			figure[figureCount][0][2] = 0.0f;
-
-			figure[figureCount][1][0] = right;  // 오른쪽 아래
-			figure[figureCount][1][1] = bottom;
-			figure[figureCount][1][2] = 0.0f;
-
-			figure[figureCount][2][0] = mX;         // 위쪽 중앙
-			figure[figureCount][2][1] = top;
-			figure[figureCount][2][2] = 0.0f;
-
-			// 나머지 초기화
-			figure[figureCount][3][0] = 0;
-			figure[figureCount][3][1] = 0;
-			figure[figureCount][3][2] = 0;
-
-			figure[figureCount][4][0] = 0;
-			figure[figureCount][4][1] = 0;
-			figure[figureCount][4][2] = 0;
-
-			figure[figureCount][5][0] = 0;
-			figure[figureCount][5][1] = 0;
-			figure[figureCount][5][2] = 0;
-
-			for (int i = 0; i < 6; i++)
-			{
-				colorData[figureCount][i][0] = 0.0f; // R
-				colorData[figureCount][i][1] = 0.0f; // G
-				colorData[figureCount][i][2] = 1.0f; // B
-			}
-		}
-		else if (figureType == 4)
-		{
-			typeArray[figureCount] = 4;
-			std::cout << "Draw : rect\n";
-			// 두개의 삼각형 좌표로 사각형 생성
-			//왼쪽 삼각형 
-			figure[figureCount][0][0] = left;
-			figure[figureCount][0][1] = top;
-			figure[figureCount][0][2] = 0.0f;
-
-			figure[figureCount][1][0] = left;
-			figure[figureCount][1][1] = bottom;
-			figure[figureCount][1][2] = 0.0f;
-
-			figure[figureCount][2][0] = right;
-			figure[figureCount][2][1] = bottom;
-			figure[figureCount][2][2] = 0.0f;
-
-			//오른쪽 삼각형
-			figure[figureCount][3][0] = left;
-			figure[figureCount][3][1] = top;
-			figure[figureCount][3][2] = 0.0f;
-
-			figure[figureCount][4][0] = right;
-			figure[figureCount][4][1] = top;
-			figure[figureCount][4][2] = 0.0f;
-
-			figure[figureCount][5][0] = right;
-			figure[figureCount][5][1] = bottom;
-			figure[figureCount][5][2] = 0.0f;
-
-			for (int i = 0; i < 6; i++)
-			{
-				colorData[figureCount][i][0] = 1.0f; // R
-				colorData[figureCount][i][1] = 0.0f; // G
-				colorData[figureCount][i][2] = 1.0f; // B
-			}
-		}
-		// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
-
-		figureCount++;			// 삼각형 개수 증가	
-		glutPostRedisplay();	// 화면 갱신
-	}
 }
 
 char* filetobuf(const char* file)
@@ -505,7 +281,7 @@ void initFigure()
 {
 	for (int i = 0; i < MAX_FIGURE; i++)
 	{
-		for (int j = 0; j < 6; j++)
+		for (int j = 0; j < 9; j++)
 		{
 			for (int k = 0; k < 3; k++)
 			{
@@ -515,56 +291,4 @@ void initFigure()
 		}
 		typeArray[i] = 0;
 	}
-}
-void moveFigureRand(char dir)
-{
-	std::cout << "move random : " << dir << std::endl;
-	int randIndex = rand() % figureCount;
-	float v = 0.02f;
-	switch (dir)
-	{
-	case 'w':
-	{
-		figure[randIndex][0][1] += v;
-		figure[randIndex][1][1] += v;
-		figure[randIndex][2][1] += v;
-		figure[randIndex][3][1] += v;
-		figure[randIndex][4][1] += v;
-		figure[randIndex][5][1] += v;
-		break;
-	}
-	case 'a':
-	{
-		figure[randIndex][0][0] -= v;
-		figure[randIndex][1][0] -= v;
-		figure[randIndex][2][0] -= v;
-		figure[randIndex][3][0] -= v;
-		figure[randIndex][4][0] -= v;
-		figure[randIndex][5][0] -= v;
-		break;
-	}
-	case 's':
-	{
-		figure[randIndex][0][1] -= v;
-		figure[randIndex][1][1] -= v;
-		figure[randIndex][2][1] -= v;
-		figure[randIndex][3][1] -= v;
-		figure[randIndex][4][1] -= v;
-		figure[randIndex][5][1] -= v;
-		break;
-	}
-	case 'd':
-	{
-		figure[randIndex][0][0] += v;
-		figure[randIndex][1][0] += v;
-		figure[randIndex][2][0] += v;
-		figure[randIndex][3][0] += v;
-		figure[randIndex][4][0] += v;
-		figure[randIndex][5][0] += v;
-		break;
-	}
-	}
-	// VBO에 새로운 삼각형 좌표 추가
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, (figureCount + 1) * 18 * sizeof(GLfloat), figure, GL_STATIC_DRAW);
 }
