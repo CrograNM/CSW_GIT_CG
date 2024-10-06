@@ -46,6 +46,14 @@ float Win_to_GL_Y(int y)
 void initFigure();
 void moveFigureRand(char dir);
 
+// 사분면 그리기
+GLfloat divLine[4][3] = {
+	{-1.0f, 0.0f, 0.0f},
+	{1.0f, 0.0f, 0.0f},
+	{0.0f, -1.0f, 0.0f},
+	{0.0f, 1.0f, 0.0f}
+};
+
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 10
 #define FIGURE_SIZE 0.02f
@@ -61,7 +69,7 @@ GLint width, height;
 GLchar* vertexSource, * fragmentSource;		//--- 소스코드 저장 변수
 GLuint vertexShader, fragmentShader;		//--- 세이더 객체
 GLuint shaderProgramID;						//--- 셰이더 프로그램
-GLuint vao, vbo[2];							//--- VAO, VBO
+GLuint vao[2], vbo[3];							//--- VAO, VBO
 
 // 사용자 정의 함수
 GLvoid drawScene(GLvoid);
@@ -121,8 +129,13 @@ GLvoid drawScene()
 
 	glUseProgram(shaderProgramID);
 
+
+	// 가로, 세로 이등분 선 그리기
+	glBindVertexArray(vao[1]);
+	glDrawArrays(GL_LINES, 0, 4);
+
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는것)
-	glBindVertexArray(vao);
+	glBindVertexArray(vao[0]);
 	for (int i = 0; i < figureCount; i++)
 	{
 		int vertexCount;
@@ -464,23 +477,28 @@ void make_shaderProgram()
 }
 void InitBuffer()
 {
-	glGenVertexArrays(1, &vao);		//--- VAO 를 지정하고 할당하기
-	glBindVertexArray(vao);			//--- VAO를 바인드하기
-	glGenBuffers(2, vbo);			//--- 2개의 VBO를 지정하고 할당하기
+	// 0: 도형 좌표, 1: 색상 데이터, 2: 이등분 선 좌표
+	glGenVertexArrays(2, vao);
+	glGenBuffers(3, vbo);
 
-	//--- 1번째 VBO 설정 : 좌표값
+	// 도형 및 색상 데이터용 VAO, VBO 초기화
+	glBindVertexArray(vao[0]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat), figure, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(figure), figure, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	//--- 2번째 VBO 설정 : 색상
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat), colorData, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(colorData), colorData, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(1);
 
-	//vbo[0], vbo[1]에 해당 정점들의 위치와 색상이 저장되었다.
+	// 이등분 선 좌표용 VAO, VBO 초기화
+	glBindVertexArray(vao[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(divLine), divLine, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+	glEnableVertexAttribArray(0);
 }
 
 void initFigure()

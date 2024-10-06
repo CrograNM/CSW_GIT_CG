@@ -46,16 +46,16 @@ float Win_to_GL_Y(int y)
 void initFigure();
 int quardrant=0;  //사분면 변수 선언
 
-void initFigure_1();    //1사분면  (우상단)
+//void initFigure_1();    //1사분면  (우상단)
 int figureCount_1 = 0;  //max 3
 
-void initFigure_2();    //2사분면  (우하단)
+//void initFigure_2();    //2사분면  (우하단)
 int figureCount_2 = 0;
 
-void initFigure_3();    //3사분면  (좌하단)
+//void initFigure_3();    //3사분면  (좌하단)
 int figureCount_3 = 0;
 
-void initFigure_4();    //4사분면  (좌상단)
+//void initFigure_4();    //4사분면  (좌상단)
 int figureCount_4 = 0;
 
 void drawNewTriangle(float mX, float mY);   //오른쪽 클릭
@@ -337,7 +337,7 @@ void Mouse(int button, int state, int x, int y)
 GLvoid InitBuffer()
 {
     // 0: 도형 좌표, 1: 색상 데이터, 2: 이등분 선 좌표
-    glGenVertexArrays(3, vao);
+    glGenVertexArrays(2, vao);
     glGenBuffers(3, vbo);
 
     // 도형 및 색상 데이터용 VAO, VBO 초기화
