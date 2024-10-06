@@ -67,7 +67,7 @@ float mY[5] =	{0.0f,		0.5f,	-0.5f,	-0.5f,	 0.5f};
 typedef struct FIGURE
 {
 	bool exist;		//존재여부 : 단독 or 모든 사분면
-	//int fType;	//도형타입 : 선, 삼각형, 사각형, 오각형
+	int type;		//도형타입 : 2선, 3삼각형, 4사각형, 5오각형
 }FIGURE;
 FIGURE fg[5];		//fg[사분면], 1~4사분면, 0:중앙 
 
@@ -139,9 +139,6 @@ GLvoid drawScene()
 
 	glUseProgram(shaderProgramID);
 
-	glLineWidth(2);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
 	// 가로, 세로 이등분 선 그리기
 	glBindVertexArray(vao[1]);
 	glDrawArrays(GL_LINES, 0, 4);
@@ -153,11 +150,19 @@ GLvoid drawScene()
 	{
 		if (fg[i].exist == true)  // 도형이 존재하는 경우에만 그리기
 		{
+			if (fg[i].type == 2)
+			{
+				glLineWidth(2);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			}
+			else
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}
 			// 각 도형의 인덱스를 기반으로 삼각형 그리기
 			glDrawArrays(GL_TRIANGLES, i*15, 15);  // 총 5개의 삼각형을 그리기 위해 15개의 인덱스 사용
 		}
 	}
-
 	glutSwapBuffers();  // 화면에 출력하기
 }
 
@@ -314,8 +319,6 @@ void initFigure()
 	initQuardrant(2);
 	initQuardrant(3);
 	initQuardrant(4);
-
-	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
 }
 void initQuardrant(int quardrant)
 {
@@ -330,6 +333,7 @@ void initQuardrant(int quardrant)
 	{
 	case 0:
 	{	//0사분면 : 선
+		fg[quardrant].type = 2;
 		//0번 정점(중심점)
 		X[0] = mX[quardrant];
 		Y[0] = mY[quardrant];		
@@ -352,6 +356,7 @@ void initQuardrant(int quardrant)
 	}
 	case 1:
 	{	//1사분면 : 삼각형
+		fg[quardrant].type = 3;
 		//0번 
 		X[0] = mX[quardrant];
 		Y[0] = mY[quardrant];
@@ -374,6 +379,7 @@ void initQuardrant(int quardrant)
 	}
 	case 2:
 	{	//2사분면 : 오각형
+		fg[quardrant].type = 5;
 		//0번 
 		X[0] = mX[quardrant];
 		Y[0] = mY[quardrant];
@@ -385,17 +391,18 @@ void initQuardrant(int quardrant)
 		Y[2] = mY[quardrant] - FIGURE_SIZE;
 		//3번 
 		X[3] = mX[quardrant];
-		Y[3] = mY[quardrant] + FIGURE_SIZE;
+		Y[3] = mY[quardrant] + FIGURE_SIZE + 0.05f;;
 		//4번 
-		X[4] = mX[quardrant] - FIGURE_SIZE;
-		Y[4] = mY[quardrant] + FIGURE_SIZE;
+		X[4] = mX[quardrant] - FIGURE_SIZE - 0.03f;
+		Y[4] = mY[quardrant] + FIGURE_SIZE - 0.05f;
 		//5번 
-		X[5] = mX[quardrant] + FIGURE_SIZE;
-		Y[5] = mY[quardrant] + FIGURE_SIZE;
+		X[5] = mX[quardrant] + FIGURE_SIZE + 0.03f;
+		Y[5] = mY[quardrant] + FIGURE_SIZE - 0.05f;
 		break;
 	}
 	case 3:
 	{	//3사분면 : 사각형
+		fg[quardrant].type = 4;
 		//0번 
 		X[0] = mX[quardrant];
 		Y[0] = mY[quardrant];
@@ -418,6 +425,7 @@ void initQuardrant(int quardrant)
 	}
 	case 4:
 	{	//4사분면 : 선
+		fg[quardrant].type = 2;
 		//0번 
 		X[0] = mX[quardrant];
 		Y[0] = mY[quardrant];
@@ -496,7 +504,7 @@ void initQuardrant(int quardrant)
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random3 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 15; i++)
 	{
 		colorData[quardrant][i][0] = random1; // R
 		colorData[quardrant][i][1] = random2; // G
