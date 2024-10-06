@@ -98,6 +98,13 @@ void make_fragmentShaders();
 void make_shaderProgram();
 GLvoid InitBuffer();
 
+// 타이머 관련
+int timer_1 = false;
+float timerCount = 0.0f;
+#define FULLTIME 100
+#define TIMER_VELOCITY 50
+void TimerFunction1(int value);
+
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
 	srand(time(0));
@@ -146,11 +153,13 @@ GLvoid drawScene()
 	//--- 사용할 VAO 불러오기 (VAO에 VBO의 값들이 모두 저장되어 있는 것)
 	glBindVertexArray(vao[0]);
 
+	glLineWidth(2);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	for (int i = 0; i < MAX_FIGURE; i++)
 	{
 		if (fg[i].exist == true)  // 도형이 존재하는 경우에만 그리기
 		{
-			if (fg[i].type == 2)
+			/*if (fg[i].type == 2)
 			{
 				glLineWidth(2);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -158,7 +167,7 @@ GLvoid drawScene()
 			else
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			}
+			}*/
 			// 각 도형의 인덱스를 기반으로 삼각형 그리기
 			glDrawArrays(GL_TRIANGLES, i*15, 15);  // 총 5개의 삼각형을 그리기 위해 15개의 인덱스 사용
 		}
@@ -178,6 +187,23 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	{
 		std::cout << "--Quit--\n";
 		glutLeaveMainLoop(); // OpenGL 메인 루프 종료
+		break;
+	}
+	case '1':
+	{
+		if (timer_1 == false)
+		{
+			timerCount = 0;
+			std::cout << "timer_1 ON\n";
+			timer_1 = true;
+			glutTimerFunc(TIMER_VELOCITY, TimerFunction1, 1);
+		}
+		else
+		{	
+			//타이머가 true일 때 실행 안 됨.
+			//std::cout << "timer_1 OFF\n";
+			//timer_1 = false;
+		}
 		break;
 	}
 	}
@@ -338,8 +364,8 @@ void initQuardrant(int quardrant)
 		X[0] = mX[quardrant];
 		Y[0] = mY[quardrant];		
 		//1번 정점
-		X[1] =  mX[quardrant] - FIGURE_SIZE;
-		Y[1] =  mY[quardrant] - FIGURE_SIZE;
+		X[1] = mX[quardrant] - FIGURE_SIZE;
+		Y[1] = mY[quardrant] - FIGURE_SIZE;
 		//2번 정점
 		X[2] = mX[quardrant] + FIGURE_SIZE;
 		Y[2] = mY[quardrant] + FIGURE_SIZE;
@@ -501,6 +527,7 @@ void initQuardrant(int quardrant)
 		figure[quardrant][14][x] = X[5];
 		figure[quardrant][14][y] = Y[5];
 	}
+	/*
 	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
 	float random3 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
@@ -509,11 +536,136 @@ void initQuardrant(int quardrant)
 		colorData[quardrant][i][0] = random1; // R
 		colorData[quardrant][i][1] = random2; // G
 		colorData[quardrant][i][2] = random3; // B
-	}
+	}*/
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, quardrant * (TRI_COUNT * 9) * sizeof(GLfloat), (TRI_COUNT * 9) * sizeof(GLfloat), figure[quardrant]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferSubData(GL_ARRAY_BUFFER, quardrant * (TRI_COUNT * 9) * sizeof(GLfloat), (TRI_COUNT * 9) * sizeof(GLfloat), colorData[quardrant]);
+}
+
+//타이머
+//int timerCount = 0;
+//#define FULLTIME 100
+void TimerFunction1(int value)
+{
+	// 모든 도형이 변한다
+	// 모든 도형이 FULLTIME(100)번의 동작으로 변화를 마치게
+	// -> 이동식 = (도착 - 출발) x (timerCount / FULLTIME)
+	// -> 정점 = (출발점) + ((도착) - (출발)) x (timerCount / FULLTIME)
+	// FULLTIME 번이 지나기 전에는 타이머 중복 스타트 x -> 키보드 입력 막기
+	// FULLTIME 번의 동작이 끝나면 도형 타입을 변화시킴.
+	if (timer_1 == true)
+	{
+		int x = 0;
+		int y = 1;
+		if (timerCount <= FULLTIME)
+		{
+			timerCount += 1.0f;
+			for (int i = 0; i < MAX_FIGURE; i++)
+			{
+				switch (fg[i].type)
+				{
+				case 2: // 선 -> 삼각형
+				{
+					// 2,3,4,5 정점 이동
+					// -> 정점 = (출발점) + ((도착) - (출발)) x (timerCount / FULLTIME)
+					// 정점 2 : 2,7인덱스 -> 삼각형의 오른쪽 아래로 이동 (y만 변한다)
+					figure[i][2][y] = (mY[i] + FIGURE_SIZE) + ((mY[i] - FIGURE_SIZE) - (mY[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+					figure[i][7][y] = (mY[i] + FIGURE_SIZE) + ((mY[i] - FIGURE_SIZE) - (mY[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+					// 정점 3,4,5 : 10,13, 5,11, 8,14인덱스 -> 삼각형의 위로 이동 (y만 변한다)
+					figure[i][10][y] = (mY[i]) + ((mY[i] + FIGURE_SIZE) - (mY[i])) * (timerCount / FULLTIME);
+					figure[i][13][y] = (mY[i]) + ((mY[i] + FIGURE_SIZE) - (mY[i])) * (timerCount / FULLTIME);
+
+					figure[i][5][y] = (mY[i]) + ((mY[i] + FIGURE_SIZE) - (mY[i])) * (timerCount / FULLTIME);
+					figure[i][11][y] =(mY[i]) + ((mY[i] + FIGURE_SIZE) - (mY[i])) * (timerCount / FULLTIME);
+
+					figure[i][8][y] = (mY[i]) + ((mY[i] + FIGURE_SIZE) - (mY[i])) * (timerCount / FULLTIME);
+					figure[i][14][y] =(mY[i]) + ((mY[i] + FIGURE_SIZE) - (mY[i])) * (timerCount / FULLTIME);
+					break;
+				}
+				case 3: // 삼각형 -> 사각형
+				{
+					// 4,5 정점 이동 (x만 변한다)
+					// 정점 4 : 5,11 -> 사각형의 왼쪽으로 이동 
+					figure[i][5][x] = mX[i] + ((mX[i] - FIGURE_SIZE) - mX[i]) * (timerCount / FULLTIME);
+					figure[i][11][x] = mX[i] + ((mX[i] - FIGURE_SIZE) - mX[i]) * (timerCount / FULLTIME);
+					// 정점 5 : 8,14 -> 사각형의 오른쪽으로 이동
+					figure[i][8][x] = mX[i] + ((mX[i] + FIGURE_SIZE) - mX[i]) * (timerCount / FULLTIME);
+					figure[i][14][x] = mX[i] + ((mX[i] + FIGURE_SIZE) - mX[i]) * (timerCount / FULLTIME);
+					break;
+				}
+				case 4: // 사각형 -> 오각형
+				{
+					// 정점 3,4,5 : 10,13, 5,11, 8,14인덱스 -> 삼각형의 위로 이동 (x y 모두 변함, 정점 3은 y만 변함)
+					// // -> 정점 = (출발점) + ((도착) - (출발)) x (timerCount / FULLTIME)
+					//figure[i][10][x] = mX[i] + ((mY[i] + FIGURE_SIZE) - mX[i]) * (timerCount / FULLTIME);
+					//figure[i][13][x] = mX[i] + ((mY[i] + FIGURE_SIZE) - mX[i]) * (timerCount / FULLTIME);
+					figure[i][5][x] = (mX[i] - FIGURE_SIZE) + ((mX[i] - FIGURE_SIZE - 0.03f) - (mX[i] - FIGURE_SIZE)) * (timerCount / FULLTIME);
+					figure[i][11][x] = (mX[i] - FIGURE_SIZE) + ((mX[i] - FIGURE_SIZE - 0.03f) - (mX[i] - FIGURE_SIZE)) * (timerCount / FULLTIME);
+
+					figure[i][8][x] = (mX[i] + FIGURE_SIZE) + ((mX[i] + FIGURE_SIZE + 0.03f) - (mX[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+					figure[i][14][x] = (mX[i] + FIGURE_SIZE) + ((mX[i] + FIGURE_SIZE + 0.03f) - (mX[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+
+					figure[i][10][y] = (mY[i] + FIGURE_SIZE) + ((mY[i] + FIGURE_SIZE + 0.05f) - (mY[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+					figure[i][13][y] = (mY[i] + FIGURE_SIZE) + ((mY[i] + FIGURE_SIZE + 0.05f) - (mY[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+
+					figure[i][5][y] = (mY[i] + FIGURE_SIZE) + ((mY[i] + FIGURE_SIZE - 0.05f) - (mY[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+					figure[i][11][y] = (mY[i] + FIGURE_SIZE) + ((mY[i] + FIGURE_SIZE - 0.05f) - (mY[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+
+					figure[i][8][y] = (mY[i] + FIGURE_SIZE) + ((mY[i] + FIGURE_SIZE - 0.05f) - (mY[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+					figure[i][14][y] = (mY[i] + FIGURE_SIZE) + ((mY[i] + FIGURE_SIZE - 0.05f) - (mY[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+					break;
+				}
+				case 5: // 오각형 -> 선
+				{
+					// 2,3,4,5 정점 이동
+					// -> 정점 = (출발점) + ((도착) - (출발)) x (timerCount / FULLTIME)
+					// 정점 2 : 2,7 -> 선 정점 2로 이동
+					figure[i][2][x] = (mX[i] + FIGURE_SIZE) + ((mX[i] + FIGURE_SIZE) - (mX[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+					figure[i][7][x] = (mX[i] + FIGURE_SIZE) + ((mX[i] + FIGURE_SIZE) - (mX[i] + FIGURE_SIZE)) * (timerCount / FULLTIME);
+					figure[i][2][y] = (mY[i] - FIGURE_SIZE) + ((mY[i] + FIGURE_SIZE) - (mY[i] - FIGURE_SIZE)) * (timerCount / FULLTIME);
+					figure[i][7][y] = (mY[i] - FIGURE_SIZE) + ((mY[i] + FIGURE_SIZE) - (mY[i] - FIGURE_SIZE)) * (timerCount / FULLTIME);
+					// 정점 3 : 10,13 -> 선 정점 0로 이동
+					figure[i][10][x] = (mX[i]) + ((mX[i]) - (mX[i])) * (timerCount / FULLTIME);
+					figure[i][13][x] = (mX[i]) + ((mX[i]) - (mX[i])) * (timerCount / FULLTIME);
+					figure[i][10][y] = (mY[i] + FIGURE_SIZE + 0.05f) + ((mY[i]) - (mY[i] + FIGURE_SIZE + 0.05f)) * (timerCount / FULLTIME);
+					figure[i][13][y] = (mY[i] + FIGURE_SIZE + 0.05f) + ((mY[i]) - (mY[i] + FIGURE_SIZE + 0.05f)) * (timerCount / FULLTIME);
+					// 정점 4 : 5,11 -> 선 정점 0로 이동 
+					figure[i][5][x] = (mX[i] - FIGURE_SIZE - 0.03f) + ((mX[i]) - (mX[i] - FIGURE_SIZE - 0.03f)) * (timerCount / FULLTIME);
+					figure[i][11][x] = (mX[i] - FIGURE_SIZE - 0.03f) + ((mX[i]) - (mX[i] - FIGURE_SIZE - 0.03f)) * (timerCount / FULLTIME);
+					figure[i][5][y] = (mY[i] + FIGURE_SIZE - 0.05f) + ((mY[i]) - (mY[i] + FIGURE_SIZE - 0.05f)) * (timerCount / FULLTIME);
+					figure[i][11][y] = (mY[i] + FIGURE_SIZE - 0.05f) + ((mY[i]) - (mY[i] + FIGURE_SIZE - 0.05f)) * (timerCount / FULLTIME);
+					// 정점 5 : 8,14 -> 선 정점 0로 이동
+					figure[i][8][x] = (mX[i] + FIGURE_SIZE + 0.03f) + ((mX[i]) - (mX[i] + FIGURE_SIZE + 0.03f)) * (timerCount / FULLTIME);
+					figure[i][14][x] = (mX[i] + FIGURE_SIZE + 0.03f) + ((mX[i]) - (mX[i] + FIGURE_SIZE + 0.03f)) * (timerCount / FULLTIME);
+					figure[i][8][y] = (mY[i] + FIGURE_SIZE - 0.05f) + ((mY[i]) - (mY[i] + FIGURE_SIZE - 0.05f)) * (timerCount / FULLTIME);
+					figure[i][14][y] = (mY[i] + FIGURE_SIZE - 0.05f) + ((mY[i]) - (mY[i] + FIGURE_SIZE - 0.05f)) * (timerCount / FULLTIME);
+					break;
+				}
+				}
+			}
+			if (timerCount >= FULLTIME)
+			{
+				timer_1 = false;
+				for (int i = 0; i < MAX_FIGURE; i++)
+				{
+					fg[i].type++;
+					if (fg[i].type > 5)
+					{
+						fg[i].type = 2;
+					}
+				}
+			}
+			
+			glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE) * (TRI_COUNT * 9) * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+			/*glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+			glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE) * (TRI_COUNT * 9) * sizeof(GLfloat), colorData, GL_STATIC_DRAW);*/
+
+			glutPostRedisplay(); // 화면 다시 그리기
+			glutTimerFunc(TIMER_VELOCITY, TimerFunction1, 1);
+		}
+	}	
 }

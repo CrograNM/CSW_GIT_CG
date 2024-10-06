@@ -1,0 +1,123 @@
+ 
+ 
+ 
+ ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+ 선
+
+ //0번 정점(중심점)
+ X[0] = mX[i];
+ Y[0] = mY[i];		
+ //1번 정점
+ X[1] =  mX[i] - FIGURE_SIZE;
+ Y[1] =  mY[i] - FIGURE_SIZE;
+ //2번 정점
+ X[2] = mX[i] + FIGURE_SIZE;
+ Y[2] = mY[i] + FIGURE_SIZE;
+ //3번 정점
+ X[3] = mX[i];
+ Y[3] = mY[i];	
+ //4번 정점
+ X[4] = mX[i];
+ Y[4] = mY[i];
+ //5번 정점
+ X[5] = mX[i];
+ Y[5] = mY[i];
+ 
+  
+ 
+ ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+ 삼각형
+ 
+ //0번 
+ X[0] = mX[i];
+ Y[0] = mY[i];
+ //1번 
+ X[1] = mX[i] - FIGURE_SIZE;
+ Y[1] = mY[i] - FIGURE_SIZE;
+ //2번 
+ X[2] = mX[i] + FIGURE_SIZE;
+ Y[2] = mY[i] - FIGURE_SIZE;
+ //3번 
+ X[3] = mX[i];
+ Y[3] = mY[i] + FIGURE_SIZE;
+ //4번 
+ X[4] = mX[i];
+ Y[4] = mY[i] + FIGURE_SIZE;
+ //5번 
+ X[5] = mX[i];
+ Y[5] = mY[i] + FIGURE_SIZE;
+ 
+ 
+ 
+ ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+ 사각형
+  
+ //0번 
+ X[0] = mX[i];
+ Y[0] = mY[i];
+ //1번 
+ X[1] = mX[i] - FIGURE_SIZE;
+ Y[1] = mY[i] - FIGURE_SIZE;
+ //2번 
+ X[2] = mX[i] + FIGURE_SIZE;
+ Y[2] = mY[i] - FIGURE_SIZE;
+ //3번 
+ X[3] = mX[i];
+ Y[3] = mY[i] + FIGURE_SIZE;
+ //4번 
+ X[4] = mX[i] - FIGURE_SIZE;
+ Y[4] = mY[i] + FIGURE_SIZE;
+ //5번 
+ X[5] = mX[i] + FIGURE_SIZE;
+ Y[5] = mY[i] + FIGURE_SIZE;
+ 
+ 
+ 
+ ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+ 오각형
+ 
+ //0번 
+ X[0] = mX[i];
+ Y[0] = mY[i];
+ //1번 
+ X[1] = mX[i] - FIGURE_SIZE;
+ Y[1] = mY[i] - FIGURE_SIZE;
+ //2번 
+ X[2] = mX[i] + FIGURE_SIZE;
+ Y[2] = mY[i] - FIGURE_SIZE;
+ //3번 
+ X[3] = mX[i];
+ Y[3] = mY[i] + FIGURE_SIZE + 0.05f;;
+ //4번 
+ X[4] = mX[i] - FIGURE_SIZE - 0.03f;
+ Y[4] = mY[i] + FIGURE_SIZE - 0.05f;
+ //5번 
+ X[5] = mX[i] + FIGURE_SIZE + 0.03f;
+ Y[5] = mY[i] + FIGURE_SIZE - 0.05f;
+ 
+  
+ ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+ 선
+
+ //0번 정점(중심점)
+ X[0] = mX[i];
+ Y[0] = mY[i];		
+
+ //1번 정점
+ X[1] =  mX[i] - FIGURE_SIZE;
+ Y[1] =  mY[i] - FIGURE_SIZE;
+ //2번 정점
+ X[2] = mX[i] + FIGURE_SIZE;
+ Y[2] = mY[i] + FIGURE_SIZE;
+ //3번 정점
+ X[3] = mX[i];
+ Y[3] = mY[i];	
+ //4번 정점
+ X[4] = mX[i];
+ Y[4] = mY[i];
+ //5번 정점
+ X[5] = mX[i];
+ Y[5] = mY[i];
+  
+  
+  

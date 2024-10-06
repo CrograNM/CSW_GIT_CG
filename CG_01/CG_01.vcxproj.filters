@@ -41,5 +41,8 @@
     <None Include="vertex.glsl">
       <Filter>소스 파일</Filter>
     </None>
+    <None Include="1006_test11.text">
+      <Filter>소스 파일</Filter>
+    </None>
   </ItemGroup>
 </Project>
