@@ -50,7 +50,7 @@ float Win_to_GL_Y(int y)
 void setFigures();				// 점(미니 사각), 선, 삼각형, 사각형, 오각형 3개씩 랜덤 위치에 세팅
 void makeFigureRandPos(int p);	// 꼭지점의 개수를 받아서 해당 도형을 랜덤 위치에 생성
 void updateFigurePos(int index, float mX, float mY);
-void addFigure();
+void addFigure(int index, float mX, float mY);
 
 float calcMouseLineDist(float px, float py, float x1, float y1, float x2, float y2);	//마우스와 선의 거리 계산
 
@@ -66,6 +66,10 @@ typedef struct FIGURE
 
 	float mX;			//중앙점 x
 	float mY;			//중앙점 y
+
+	float dx;
+	float dy;
+	float size;
 }FIGURE;
 
 FIGURE fg[MAX_FIGURE];	// 인덱스 관리 : (0,1,2:점), (3,4,5:선), (6,7,8:삼각), (9,10,11:사각), (12,13,14:오각)
@@ -85,12 +89,6 @@ GLuint vao, vbo[2];								//--- VAO, VBO
 
 bool left_button = false;
 int click_index = 0;
-
-float i_size = FIGURE_SIZE;
-float clicked_size = FIGURE_SIZE;
-
-int temp_index1 = 0;
-int temp_index2 = 0;
 
 // 사용자 정의 함수
 GLvoid drawScene(GLvoid);
@@ -135,8 +133,8 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	else
 		std::cout << "GLEW Initialized\n";
 
-	setFigures();	//15개의 도형 세팅
 	glutTimerFunc(TIMER_VELOCITY, TimerFunction1, 1);	//타이머
+	setFigures();	//15개의 도형 세팅
 
 	//--- 세이더 읽어와서 세이더 프로그램 만들기
 	make_shaderProgram();
@@ -263,40 +261,17 @@ void Mouse(int button, int state, int x, int y)
 		left_button = false;
 		// 클릭된 사각형이 놓인 자리 검사 -> 합치기 -> 배열 빈공간 없애기
 
-		if (fg[click_index].type == 1)
-		{
-			clicked_size = FIGURE_SIZE / 4;
-		}
-		else
-		{
-			clicked_size = FIGURE_SIZE;
-		}
 		for (int i = figureCount - 1; i >= 0; i--)
 		{
 			if (i != click_index && fg[i].exist == true)
 			{
-				if (fg[i].type == 1)
-				{
-					i_size = FIGURE_SIZE / 4;
-				}
-				else
-				{
-					i_size = FIGURE_SIZE;
-				}
 
-				if (fg[click_index].mX - clicked_size < fg[i].mX + i_size  &&
-					fg[click_index].mX + clicked_size > fg[i].mX - i_size  &&
-					fg[click_index].mY - clicked_size < fg[i].mY + i_size  &&
-					fg[click_index].mY + clicked_size > fg[i].mY - i_size )
+				if (fg[click_index].mX - fg[click_index].size < fg[i].mX +  fg[i].size  &&
+					fg[click_index].mX + fg[click_index].size > fg[i].mX -  fg[i].size  &&
+					fg[click_index].mY - fg[click_index].size < fg[i].mY +  fg[i].size  &&
+					fg[click_index].mY + fg[click_index].size > fg[i].mY -  fg[i].size )
 				{
-					// 새로운 도형 생성하는게 아니니까 굳이 함수 안써도 될듯
-					std::cout << "--ADD--"<< std::endl;
-					fg[i].type = (fg[i].type + fg[click_index].type - 1) % 5 + 1;
-					fg[i].isMoving = true;
-					
-					updateFigurePos(i, fg[i].mX, fg[i].mY);
-					
-					fg[click_index].exist = false;
+					addFigure(i, (fg[click_index].mX + fg[i].mX) / 2, (fg[click_index].mY + fg[i].mY) / 2);
 					break;
 				}
 			}
@@ -441,6 +416,11 @@ void setFigures()
 		fg[i].isMoving = false;
 		fg[i].mX = 0.0f;
 		fg[i].mY = 0.0f;
+		
+		fg[i].dx = 1.0f;
+		fg[i].dy = 1.0f;
+
+		fg[i].size = FIGURE_SIZE;
 	}
 	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -476,6 +456,7 @@ void makeFigureRandPos(int p)
 	case 1:
 	{   //점(사각형보다 작게)
 		//0번 
+		fg[figureCount].size = FIGURE_SIZE / 4;
 		X[0] = fg[figureCount].mX;
 		Y[0] = fg[figureCount].mY;
 		//1번 	 
@@ -498,6 +479,7 @@ void makeFigureRandPos(int p)
 	case 2:
 	{	//선
 		//0번 정점(중심점)
+		fg[figureCount].size = FIGURE_SIZE;
 		X[0] = fg[figureCount].mX;
 		Y[0] = fg[figureCount].mY;
 		//1번 정점
@@ -520,6 +502,7 @@ void makeFigureRandPos(int p)
 	case 3:
 	{	//삼각형
 		//0번 
+		fg[figureCount].size = FIGURE_SIZE;
 		X[0] = fg[figureCount].mX;
 		Y[0] = fg[figureCount].mY;
 		//1번 
@@ -542,6 +525,7 @@ void makeFigureRandPos(int p)
 	case 4:
 	{	//사각형
 		//0번 
+		fg[figureCount].size = FIGURE_SIZE;
 		X[0] = fg[figureCount].mX;
 		Y[0] = fg[figureCount].mY;
 		//1번 
@@ -564,6 +548,7 @@ void makeFigureRandPos(int p)
 	case 5:
 	{	//오각형
 		//0번 
+		fg[figureCount].size = FIGURE_SIZE;
 		X[0] = fg[figureCount].mX;
 		Y[0] = fg[figureCount].mY;
 		//1번 
@@ -840,9 +825,27 @@ void updateFigurePos(int index, float mX, float mY)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, index * (TRI_COUNT * 9) * sizeof(GLfloat), (TRI_COUNT * 9) * sizeof(GLfloat), figure[index]);
 }
-void addFigure()
+void addFigure(int index, float mX, float mY)
 {
+	std::cout << "--ADD--" << std::endl;
+	fg[index].type = (fg[index].type + fg[click_index].type - 1) % 5 + 1;
+	updateFigurePos(index, fg[index].mX, fg[index].mY);
 
+	//정점 15개의 색상 데이터에 랜덤한 색상을 모두 입력해준다(단색)
+	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	float random3 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	for (int i = 0; i < (TRI_COUNT * 3); i++)
+	{
+		colorData[index][i][0] = random1; // R
+		colorData[index][i][1] = random2; // G
+		colorData[index][i][2] = random3; // B
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, index * (TRI_COUNT * 9) * sizeof(GLfloat), (TRI_COUNT * 9) * sizeof(GLfloat), colorData[index]);
+
+	fg[click_index].exist = false;
+	fg[index].isMoving = true;
 }
 
 float calcMouseLineDist(float px, float py, float x1, float y1, float x2, float y2)
@@ -859,8 +862,44 @@ float calcMouseLineDist(float px, float py, float x1, float y1, float x2, float 
 
 	return sqrt((px - closestX) * (px - closestX) + (py - closestY) * (py - closestY));
 }
+
+#define VELOCITY 0.01f
 void TimerFunction1(int value)
 {
+	for (int i = 0; i < MAX_FIGURE; i++)
+	{
+		if (fg[i].exist == true && fg[i].isMoving == true)
+		{
+			// 삼각형 이동
+			fg[i].mX += fg[i].dx * VELOCITY;
+			fg[i].mY += fg[i].dy * VELOCITY;
+
+			// 경계에 닿으면 반대 방향으로 변경
+			if (fg[i].mX + fg[i].size > 1.0f)			//오른쪽
+			{
+				fg[i].mX = 1.0f - fg[i].size - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				fg[i].dx = -fg[i].dx;  // X 방향 반전
+			}
+			else if (fg[i].mX - fg[i].size < -1.0f)	//왼쪽
+			{
+				fg[i].mX = -1.0f + fg[i].size + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				fg[i].dx = -fg[i].dx;  // X 방향 반전
+			}
+
+			if (fg[i].mY + fg[i].size > 1.0f)			//위쪽
+			{
+				fg[i].mY = 1.0f - fg[i].size - 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				fg[i].dy = -fg[i].dy;  // Y 방향 반전
+			}
+			else if (fg[i].mY - fg[i].size < -1.0f)	//아래쪽
+			{
+				fg[i].mY = -1.0f + fg[i].size + 0.001f;  // 벽에서 0.001f 떨어지게 조정
+				fg[i].dy = -fg[i].dy;  // Y 방향 반전
+			}
+
+			updateFigurePos(i, fg[i].mX, fg[i].mY);
+		}
+	}
 	glutPostRedisplay(); // 화면 다시 그리기
 	glutTimerFunc(TIMER_VELOCITY, TimerFunction1, 1);
 }
