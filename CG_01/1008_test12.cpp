@@ -371,13 +371,35 @@ void makeFigureRandPos(int p)
 	float X[6];
 	float Y[6];
 
-	fg[figureCount].mX = generateRandomFloat(-1.0f, 1.0f);
-	fg[figureCount].mY = generateRandomFloat(-1.0f, 1.0f);
+	fg[figureCount].mX = generateRandomFloat(-0.9f, 0.9f);
+	fg[figureCount].mY = generateRandomFloat(-0.9f, 0.9f);
 	fg[figureCount].exist = true;
 	fg[figureCount].type = p;
 
 	switch (p)
 	{
+	case 1:
+	{   //점(사각형보다 작게)
+		//0번 
+		X[0] = fg[figureCount].mX;
+		Y[0] = fg[figureCount].mY;
+		//1번 	 
+		X[1] = fg[figureCount].mX - FIGURE_SIZE / 4;
+		Y[1] = fg[figureCount].mY - FIGURE_SIZE / 4;
+		//2번 	 
+		X[2] = fg[figureCount].mX + FIGURE_SIZE / 4;
+		Y[2] = fg[figureCount].mY - FIGURE_SIZE / 4;
+		//3번 	
+		X[3] = fg[figureCount].mX;
+		Y[3] = fg[figureCount].mY + FIGURE_SIZE / 4;
+		//4번 	
+		X[4] = fg[figureCount].mX - FIGURE_SIZE / 4;
+		Y[4] = fg[figureCount].mY + FIGURE_SIZE / 4;
+		//5번 				
+		X[5] = fg[figureCount].mX + FIGURE_SIZE / 4;
+		Y[5] = fg[figureCount].mY + FIGURE_SIZE / 4;
+		break;
+	}
 	case 2:
 	{	//선
 		//0번 정점(중심점)
@@ -543,19 +565,39 @@ void makeFigureRandPos(int p)
 }
 void updateFigurePos(int index, int mX, int mY)
 {
-	// 꼭지점의 개수를 받아서 해당 도형을 랜덤 위치에 생성
-
 	int x = 0;  //가독성을 위한 x
 	int y = 1;  //가독성을 위한 y
 
 	float X[6];
 	float Y[6];
 
-	fg[index].mX = mX;
+	fg[index].mX = mX;	//중앙점에 마우스 좌표 대입
 	fg[index].mY = mY;
 
 	switch (fg[index].type)
 	{
+	case 1:
+	{   //점(사각형보다 작게)
+		//0번 
+		X[0] = fg[index].mX;
+		Y[0] = fg[index].mY;
+		//1번 
+		X[1] = fg[index].mX - FIGURE_SIZE/4;
+		Y[1] = fg[index].mY - FIGURE_SIZE/4;
+		//2번 
+		X[2] = fg[index].mX + FIGURE_SIZE/4;
+		Y[2] = fg[index].mY - FIGURE_SIZE/4;
+		//3번 
+		X[3] = fg[index].mX;
+		Y[3] = fg[index].mY + FIGURE_SIZE/4;
+		//4번 
+		X[4] = fg[index].mX - FIGURE_SIZE/4;
+		Y[4] = fg[index].mY + FIGURE_SIZE/4;
+		//5번 							
+		X[5] = fg[index].mX + FIGURE_SIZE/4;
+		Y[5] = fg[index].mY + FIGURE_SIZE/4;
+		break;
+	}
 	case 2:
 	{   //선
 		//0번 정점(중심점)
