@@ -33,6 +33,9 @@
     <ClCompile Include="1006_test11.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="1008_test12.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.glsl">

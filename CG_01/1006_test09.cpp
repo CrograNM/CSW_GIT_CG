@@ -51,7 +51,7 @@ void redrawTriangle(float mX, float mY);
 // 최대 10개의 도형을 저장할 변수
 #define MAX_FIGURE 4
 #define FIGURE_SIZE 0.02f
-#define VELOCITY 0.01f
+#define VELOCITY 0.01f 
 typedef struct FIGURE
 {
 	float mX;	//중앙점 x
@@ -753,6 +753,7 @@ void TimerFunction2(int value)
 	}
 }
 // 사각 스파이럴
+#define V3 0.03f
 void TimerFunction3(int value)
 {
 	if (timer_3 == true)
@@ -784,7 +785,7 @@ void TimerFunction3(int value)
 			{
 			case 0:  // North (위쪽으로 이동)
 			{
-				fg[i].mY += VELOCITY;
+				fg[i].mY += V3;
 				if (fg[i].mY + (fg[i].height / 2) >= fg[i].virtualWall)
 				{
 					fg[i].mY = fg[i].virtualWall - fg[i].height / 2 - 0.001f;
@@ -795,7 +796,7 @@ void TimerFunction3(int value)
 			}
 			case 1:  // East (오른쪽으로 이동)
 			{
-				fg[i].mX += VELOCITY;
+				fg[i].mX += V3;
 				if (fg[i].mX + (fg[i].height / 2) >= fg[i].virtualWall)
 				{
 					fg[i].mX = fg[i].virtualWall - fg[i].height / 2 - 0.001f;
@@ -806,7 +807,7 @@ void TimerFunction3(int value)
 			}
 			case 2:  // South (아래쪽으로 이동)
 			{
-				fg[i].mY -= VELOCITY;
+				fg[i].mY -= V3;
 				if (fg[i].mY - (fg[i].height / 2) <= -fg[i].virtualWall)
 				{
 					fg[i].mY = -fg[i].virtualWall + fg[i].height / 2 + 0.001f;
@@ -817,7 +818,7 @@ void TimerFunction3(int value)
 			}
 			case 3:  // West (왼쪽으로 이동)
 			{
-				fg[i].mX -= VELOCITY;
+				fg[i].mX -= V3;
 				if (fg[i].mX - (fg[i].height / 2) <= -fg[i].virtualWall)
 				{
 					fg[i].mX = -fg[i].virtualWall + fg[i].height / 2 + 0.001f;
