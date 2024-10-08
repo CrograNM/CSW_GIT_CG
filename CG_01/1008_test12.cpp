@@ -63,7 +63,10 @@ typedef struct FIGURE
 	float mX;			//중앙점 x
 	float mY;			//중앙점 y
 }FIGURE;
-FIGURE fg[5];		//fg[사분면], 1~4사분면, 0:중앙 
+
+FIGURE fg[MAX_FIGURE];	// 인덱스 관리 : (0,1,2:점), (3,4,5:선), (6,7,8:삼각), (9,10,11:사각), (12,13,14:오각)
+int figureCount = 0;	// 순서대로 생성되는 도형 인덱스에 사용 
+
 
 #define TRI_COUNT 5
 GLfloat	figure[MAX_FIGURE][TRI_COUNT * 3][3];	// 중앙점을 이용해, 삼각형 5개를 쓰자
@@ -356,6 +359,19 @@ void setFigures()
 void makeFigureRandPos(int p)
 {
 	// 꼭지점의 개수를 받아서 해당 도형을 랜덤 위치에 생성
+	switch (p)
+	{
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	case 5:
+		break;
+	}
 }
 void addFigure()
 {
