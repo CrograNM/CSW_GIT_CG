@@ -48,7 +48,7 @@ float Win_to_GL_Y(int y)
 // 도형 관련 함수들
 void setFigures();				// 점(미니 사각), 선, 삼각형, 사각형, 오각형 3개씩 랜덤 위치에 세팅
 void makeFigureRandPos(int p);	// 꼭지점의 개수를 받아서 해당 도형을 랜덤 위치에 생성
-void updateFigurePos(int index, int mX, int mY);
+void updateFigurePos(int index, float mX, float mY);
 void addFigure();
 
 // 총 5개의 도형을 그린다. -> 사분면당 총 넷 + 단독 도형 하나
@@ -198,6 +198,7 @@ void Mouse(int button, int state, int x, int y)
 		{
 			//도형을 잡았는지 검사하여 left_button 활성화
 			left_button = true;
+			updateFigurePos(9, mX, mY);
 		}
 		std::cout << "left_button : DOWN" << std::endl;
 	}
@@ -563,7 +564,7 @@ void makeFigureRandPos(int p)
 	//다음 인덱스를 가리켜준다.
 	figureCount++;
 }
-void updateFigurePos(int index, int mX, int mY)
+void updateFigurePos(int index, float mX, float mY)
 {
 	int x = 0;  //가독성을 위한 x
 	int y = 1;  //가독성을 위한 y
