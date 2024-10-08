@@ -124,7 +124,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	else
 		std::cout << "GLEW Initialized\n";
 
-	//setFigures();	//15개의 도형 세팅
+	setFigures();	//15개의 도형 세팅
 
 	//--- 세이더 읽어와서 세이더 프로그램 만들기
 	make_shaderProgram();
@@ -359,20 +359,188 @@ void setFigures()
 void makeFigureRandPos(int p)
 {
 	// 꼭지점의 개수를 받아서 해당 도형을 랜덤 위치에 생성
+
+	int x = 0;	//가독성을 위한 x
+	int y = 1;	//가독성을 위한 y
+
+	float X[6];
+	float Y[6];
+
+	fg[figureCount].mX = generateRandomFloat(-1.0f, 1.0f);
+	fg[figureCount].mY = generateRandomFloat(-1.0f, 1.0f);
+	fg[figureCount].exist = true;
+	fg[figureCount].type = p;
+
 	switch (p)
 	{
-	case 1:
-		break;
 	case 2:
-		break;
-	case 3:
-		break;
-	case 4:
-		break;
-	case 5:
+	{	//선
+		fg[0].type = 2;
+		//0번 정점(중심점)
+		X[0] = fg[figureCount].mX;
+		Y[0] = fg[figureCount].mY;
+		//1번 정점
+		X[1] = fg[figureCount].mX - FIGURE_SIZE;
+		Y[1] = fg[figureCount].mY - FIGURE_SIZE;
+		//2번 정점
+		X[2] = fg[figureCount].mX + FIGURE_SIZE;
+		Y[2] = fg[figureCount].mY + FIGURE_SIZE;
+		//3번 정점
+		X[3] = fg[figureCount].mX;
+		Y[3] = fg[figureCount].mY;
+		//4번 정점
+		X[4] = fg[figureCount].mX;
+		Y[4] = fg[figureCount].mY;
+		//5번 정점
+		X[5] = fg[figureCount].mX;
+		Y[5] = fg[figureCount].mY;
 		break;
 	}
+	case 3:
+	{	//삼각형
+		fg[0].type = 3;
+		//0번 
+		X[0] = fg[figureCount].mX;
+		Y[0] = fg[figureCount].mY;
+		//1번 
+		X[1] = fg[figureCount].mX - FIGURE_SIZE;
+		Y[1] = fg[figureCount].mY - FIGURE_SIZE;
+		//2번 
+		X[2] = fg[figureCount].mX + FIGURE_SIZE;
+		Y[2] = fg[figureCount].mY - FIGURE_SIZE;
+		//3번 
+		X[3] = fg[figureCount].mX;
+		Y[3] = fg[figureCount].mY + FIGURE_SIZE;
+		//4번 
+		X[4] = fg[figureCount].mX;
+		Y[4] = fg[figureCount].mY + FIGURE_SIZE;
+		//5번 
+		X[5] = fg[figureCount].mX;
+		Y[5] = fg[figureCount].mY + FIGURE_SIZE;
+		break;
+	}
+	case 4:
+	{	//사각형
+		fg[0].type = 4;
+		//0번 
+		X[0] = fg[figureCount].mX;
+		Y[0] = fg[figureCount].mY;
+		//1번 
+		X[1] = fg[figureCount].mX - FIGURE_SIZE;
+		Y[1] = fg[figureCount].mY - FIGURE_SIZE;
+		//2번 
+		X[2] = fg[figureCount].mX + FIGURE_SIZE;
+		Y[2] = fg[figureCount].mY - FIGURE_SIZE;
+		//3번 
+		X[3] = fg[figureCount].mX;
+		Y[3] = fg[figureCount].mY + FIGURE_SIZE;
+		//4번 
+		X[4] = fg[figureCount].mX - FIGURE_SIZE;
+		Y[4] = fg[figureCount].mY + FIGURE_SIZE;
+		//5번 
+		X[5] = fg[figureCount].mX + FIGURE_SIZE;
+		Y[5] = fg[figureCount].mY + FIGURE_SIZE;
+		break;
+	}
+	case 5:
+	{	//오각형
+		fg[0].type = 5;
+		//0번 
+		X[0] = fg[figureCount].mX;
+		Y[0] = fg[figureCount].mY;
+		//1번 
+		X[1] = fg[figureCount].mX - FIGURE_SIZE;
+		Y[1] = fg[figureCount].mY - FIGURE_SIZE;
+		//2번 
+		X[2] = fg[figureCount].mX + FIGURE_SIZE;
+		Y[2] = fg[figureCount].mY - FIGURE_SIZE;
+		//3번 
+		X[3] = fg[figureCount].mX;
+		Y[3] = fg[figureCount].mY + FIGURE_SIZE + (FIGURE_SIZE / 2.0f);
+		//4번 
+		X[4] = fg[figureCount].mX - FIGURE_SIZE - (FIGURE_SIZE / 3.0f);
+		Y[4] = fg[figureCount].mY + FIGURE_SIZE - (FIGURE_SIZE / 2.0f);
+		//5번 
+		X[5] = fg[figureCount].mX + FIGURE_SIZE + (FIGURE_SIZE / 3.0f);
+		Y[5] = fg[figureCount].mY + FIGURE_SIZE - (FIGURE_SIZE / 2.0f);
+		break;
+	}
+	}
+
+	//정점 15개의 위치에 각 인덱스를 대입한다. (삼각형 5개 * 정점 3개 = 정점 15개)
+	if (true)
+	{
+		// 012인덱스
+		figure[figureCount][0][x] = X[0];
+		figure[figureCount][0][y] = Y[0];
+			   
+		figure[figureCount][1][x] = X[1];
+		figure[figureCount][1][y] = Y[1];
+			   
+		figure[figureCount][2][x] = X[2];
+		figure[figureCount][2][y] = Y[2];
+
+		// 014인덱스
+		figure[figureCount][3][x] = X[0];
+		figure[figureCount][3][y] = Y[0];
+			 
+		figure[figureCount][4][x] = X[1];
+		figure[figureCount][4][y] = Y[1];
+			   
+		figure[figureCount][5][x] = X[4];
+		figure[figureCount][5][y] = Y[4];
+
+		// 025인덱스
+		figure[figureCount][6][x] = X[0];
+		figure[figureCount][6][y] = Y[0];
+			   
+		figure[figureCount][7][x] = X[2];
+		figure[figureCount][7][y] = Y[2];
+			  
+		figure[figureCount][8][x] = X[5];
+		figure[figureCount][8][y] = Y[5];
+
+		// 034인덱스
+		figure[figureCount][9][x] = X[0];
+		figure[figureCount][9][y] = Y[0];
+			   
+		figure[figureCount][10][x] = X[3];
+		figure[figureCount][10][y] = Y[3];
+			  
+		figure[figureCount][11][x] = X[4];
+		figure[figureCount][11][y] = Y[4];
+
+		// 035인덱스
+		figure[figureCount][12][x] = X[0];
+		figure[figureCount][12][y] = Y[0];
+			  
+		figure[figureCount][13][x] = X[3];
+		figure[figureCount][13][y] = Y[3];
+			   
+		figure[figureCount][14][x] = X[5];
+		figure[figureCount][14][y] = Y[5];
+	}
+
+	//정점 15개의 색상 데이터에 랜덤한 색상을 모두 입력해준다(단색)
+	float random1 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	float random2 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	float random3 = generateRandomFloat(0.0f, 1.0f); //0~1의 값을 고정시킴
+	for (int i = 0; i < (TRI_COUNT * 3); i++)
+	{
+		colorData[figureCount][i][0] = random1; // R
+		colorData[figureCount][i][1] = random2; // G
+		colorData[figureCount][i][2] = random3; // B
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, figureCount * (TRI_COUNT * 9) * sizeof(GLfloat), (TRI_COUNT * 9) * sizeof(GLfloat), figure[figureCount]);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, figureCount* (TRI_COUNT * 9) * sizeof(GLfloat), (TRI_COUNT * 9) * sizeof(GLfloat), colorData[figureCount]);
+	
+	//다음 인덱스를 가리켜준다.
+	figureCount++;
 }
+
 void addFigure()
 {
 
