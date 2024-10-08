@@ -256,6 +256,33 @@ void Mouse(int button, int state, int x, int y)
 		left_button = false;
 		// 클릭된 사각형이 놓인 자리 검사 -> 합치기 -> 배열 빈공간 없애기
 		//std::cout << "left_button : UP" << std::endl;
+		int i_size = FIGURE_SIZE;
+		int clicked_size = FIGURE_SIZE;
+		if (fg[click_index].type == 1)
+		{
+			clicked_size = FIGURE_SIZE / 4;
+		}
+		for (int i = figureCount - 1; i >= 0; i--)
+		{
+			if (i != click_index && fg[i].exist == true)
+			{
+				if (fg[i].type == 1)
+				{
+					i_size = FIGURE_SIZE / 4;
+				}
+				else
+				{
+					i_size = FIGURE_SIZE;
+				}
+				if (fg[click_index].mX - clicked_size < fg[i].mX + i_size  &&
+					fg[click_index].mX + clicked_size > fg[i].mX - i_size  &&
+					fg[click_index].mY - clicked_size < fg[i].mY + i_size  &&
+					fg[click_index].mY + clicked_size > fg[i].mY - i_size )
+				{
+					// 새로운 도형 생성하는게 아니니까
+				}
+			}
+		}
 	}
 	glutPostRedisplay(); // refresh
 }
