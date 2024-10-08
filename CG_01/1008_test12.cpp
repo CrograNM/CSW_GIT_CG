@@ -52,6 +52,8 @@ void makeFigureRandPos(int p);	// 꼭지점의 개수를 받아서 해당 도형
 void updateFigurePos(int index, float mX, float mY);
 void addFigure();
 
+float calcMouseLineDist(float px, float py, float x1, float y1, float x2, float y2);	//마우스와 선의 거리 계산
+
 // 총 5개의 도형을 그린다. -> 사분면당 총 넷 + 단독 도형 하나
 #define MAX_FIGURE 15
 #define FIGURE_SIZE 0.05f
@@ -216,13 +218,19 @@ void Mouse(int button, int state, int x, int y)
 						break;
 					}
 					case 2:
-						if (fg[i].mX - (FIGURE_SIZE) < mX && mX < fg[i].mX + (FIGURE_SIZE) &&
-							fg[i].mY - (FIGURE_SIZE) < mY && mY < fg[i].mY + (FIGURE_SIZE))
+					{
+						float distance = calcMouseLineDist(mX, mY,
+							fg[i].mX - FIGURE_SIZE, fg[i].mY - FIGURE_SIZE,
+							fg[i].mX + FIGURE_SIZE, fg[i].mY + FIGURE_SIZE);
+
+						// 거리 기준값 설정 (예: 5.0)
+						if (distance < 0.03f)
 						{
 							click_index = i;
 							left_button = true;
 						}
 						break;
+					}
 					case 3: case 4: case 5:
 					{
 						if (fg[i].mX - (FIGURE_SIZE) < mX && mX < fg[i].mX + (FIGURE_SIZE) &&
@@ -790,4 +798,19 @@ void updateFigurePos(int index, float mX, float mY)
 void addFigure()
 {
 
+}
+
+float calcMouseLineDist(float px, float py, float x1, float y1, float x2, float y2)
+{
+	//점과 선의 거리를 측정하는 함수 
+	float dx = x2 - x1; // 2 * FIGURE_SIZE
+	float dy = y2 - y1; // 2 * FIGURE_SIZE
+
+	float t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+	t = fmax(0, fmin(1, t)); // t를 0과 1 사이로 클램핑
+
+	float closestX = x1 + t * dx;
+	float closestY = y1 + t * dy;
+
+	return sqrt((px - closestX) * (px - closestX) + (py - closestY) * (py - closestY));
 }
