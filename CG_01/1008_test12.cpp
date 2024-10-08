@@ -60,7 +60,7 @@ GLfloat divLine[4][3] = {
 
 // 총 5개의 도형을 그린다. -> 사분면당 총 넷 + 단독 도형 하나
 #define MAX_FIGURE 5
-#define FIGURE_SIZE 0.1f
+#define FIGURE_SIZE 0.05f
 
 // 각 사분면의 중앙값			1		 2		 3		 4		(각 인덱스가 해당 사분면)
 float mX[5] = { 0.0f,		0.5f,	 0.5f,	-0.5f,	-0.5f };
@@ -506,13 +506,13 @@ void initQuardrant(int quardrant)
 		Y[2] = mY[quardrant] - FIGURE_SIZE;
 		//3번 
 		X[3] = mX[quardrant];
-		Y[3] = mY[quardrant] + FIGURE_SIZE + 0.05f;;
+		Y[3] = mY[quardrant] + FIGURE_SIZE + (FIGURE_SIZE / 2.0f);
 		//4번 
-		X[4] = mX[quardrant] - FIGURE_SIZE - 0.03f;
-		Y[4] = mY[quardrant] + FIGURE_SIZE - 0.05f;
+		X[4] = mX[quardrant] - FIGURE_SIZE - (FIGURE_SIZE / 3.0f);
+		Y[4] = mY[quardrant] + FIGURE_SIZE - (FIGURE_SIZE / 2.0f);
 		//5번 
-		X[5] = mX[quardrant] + FIGURE_SIZE + 0.03f;
-		Y[5] = mY[quardrant] + FIGURE_SIZE - 0.05f;
+		X[5] = mX[quardrant] + FIGURE_SIZE + (FIGURE_SIZE / 3.0f);
+		Y[5] = mY[quardrant] + FIGURE_SIZE - (FIGURE_SIZE / 2.0f);
 		break;
 	}
 	case 3:
@@ -725,13 +725,13 @@ void initMidFigure(int type)
 		Y[2] = mY[0] - FIGURE_SIZE;
 		//3번 
 		X[3] = mX[0];
-		Y[3] = mY[0] + FIGURE_SIZE + 0.05f;;
+		Y[3] = mY[0] + FIGURE_SIZE + (FIGURE_SIZE / 2.0f);
 		//4번 
-		X[4] = mX[0] - FIGURE_SIZE - 0.03f;
-		Y[4] = mY[0] + FIGURE_SIZE - 0.05f;
+		X[4] = mX[0] - FIGURE_SIZE - (FIGURE_SIZE / 3.0f);
+		Y[4] = mY[0] + FIGURE_SIZE - (FIGURE_SIZE / 2.0f);
 		//5번 
-		X[5] = mX[0] + FIGURE_SIZE + 0.03f;
-		Y[5] = mY[0] + FIGURE_SIZE - 0.05f;
+		X[5] = mX[0] + FIGURE_SIZE + (FIGURE_SIZE / 3.0f);
+		Y[5] = mY[0] + FIGURE_SIZE - (FIGURE_SIZE / 2.0f);
 		break;
 	}
 	}
