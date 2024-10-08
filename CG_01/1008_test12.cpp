@@ -51,7 +51,7 @@ void makeFigureRandPos(int p);	// 꼭지점의 개수를 받아서 해당 도형
 void addFigure();
 
 // 총 5개의 도형을 그린다. -> 사분면당 총 넷 + 단독 도형 하나
-#define MAX_FIGURE 5
+#define MAX_FIGURE 15
 #define FIGURE_SIZE 0.05f
 
 typedef struct FIGURE
@@ -59,11 +59,14 @@ typedef struct FIGURE
 	bool exist;			//출력 및 존재 여부
 	bool isMoving;		//애니메이션 여부
 	int type;			//도형타입 : 1점, 2선, 3삼각형, 4사각형, 5오각형
+
+	float mX;			//중앙점 x
+	float mY;			//중앙점 y
 }FIGURE;
 FIGURE fg[5];		//fg[사분면], 1~4사분면, 0:중앙 
 
 #define TRI_COUNT 5
-GLfloat	figure[MAX_FIGURE][TRI_COUNT * 3][3];	// 중앙값을 이용해, 삼각형 5개를 쓰자
+GLfloat	figure[MAX_FIGURE][TRI_COUNT * 3][3];	// 중앙점을 이용해, 삼각형 5개를 쓰자
 GLfloat	colorData[MAX_FIGURE][TRI_COUNT * 3][3];
 
 // 필요 변수 선언
@@ -315,4 +318,46 @@ void InitBuffer()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(colorData), colorData, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(1);
+}
+
+void setFigures()
+{
+	// 점(미니 사각), 선, 삼각형, 사각형, 오각형 3개씩 랜덤 위치에 세팅
+	// init Figure
+	for (int i = 0; i < MAX_FIGURE; i++)
+	{
+		for (int j = 0; j < (TRI_COUNT*3); j++)
+		{
+			for (int k = 0; k < 3; k++)
+			{
+				figure[i][j][k] = 0.0f;		//도형 위치 : (초기값) 3개 버텍스 모두 (x0, y0, z0)
+				colorData[i][j][k] = 0.0f;	//도형 색상 : (초기값) 검은색
+			}
+		}
+		fg[i].type = 2;
+		fg[i].exist = false;
+		fg[i].isMoving = false;
+		fg[i].mX = 0.0f;
+		fg[i].mY = 0.0f;
+	}
+	// VBO에 새로운 삼각형 좌표 및 색상 데이터 추가
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE) * (TRI_COUNT * 9) * sizeof(GLfloat), figure, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, (MAX_FIGURE) * (TRI_COUNT * 9) * sizeof(GLfloat), colorData, GL_STATIC_DRAW);
+
+	for (int i = 1; i < 5 + 1; i++)
+	{
+		makeFigureRandPos(i);	//1~5 : 점 ~ 오각형 3개씩 생성
+		makeFigureRandPos(i);
+		makeFigureRandPos(i);
+	}
+}
+void makeFigureRandPos(int p)
+{
+	// 꼭지점의 개수를 받아서 해당 도형을 랜덤 위치에 생성
+}
+void addFigure()
+{
+
 }
