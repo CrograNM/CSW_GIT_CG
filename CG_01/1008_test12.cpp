@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include <gl/glew.h>			
 #include <gl/freeglut.h>
@@ -81,6 +82,7 @@ GLuint shaderProgramID;							//--- 셰이더 프로그램
 GLuint vao, vbo[2];								//--- VAO, VBO
 
 bool left_button = false;
+int click_index = 0;
 
 // 사용자 정의 함수
 GLvoid drawScene(GLvoid);
@@ -197,16 +199,55 @@ void Mouse(int button, int state, int x, int y)
 		if (left_button == false)
 		{
 			//도형을 잡았는지 검사하여 left_button 활성화
-			left_button = true;
-			updateFigurePos(9, mX, mY);
+			for (int i = figureCount - 1; i >= 0; i--)
+			{
+				if (fg[i].exist == true)
+				{
+					switch (fg[i].type)
+					{
+					case 1:
+					{
+						if (fg[i].mX - (FIGURE_SIZE / 4) < mX && mX < fg[i].mX + (FIGURE_SIZE / 4) &&
+							fg[i].mY - (FIGURE_SIZE / 4) < mY && mY < fg[i].mY + (FIGURE_SIZE / 4))
+						{
+							click_index = i;
+							left_button = true;
+						}
+						break;
+					}
+					case 2:
+						if (fg[i].mX - (FIGURE_SIZE) < mX && mX < fg[i].mX + (FIGURE_SIZE) &&
+							fg[i].mY - (FIGURE_SIZE) < mY && mY < fg[i].mY + (FIGURE_SIZE))
+						{
+							click_index = i;
+							left_button = true;
+						}
+						break;
+					case 3: case 4: case 5:
+					{
+						if (fg[i].mX - (FIGURE_SIZE) < mX && mX < fg[i].mX + (FIGURE_SIZE) &&
+							fg[i].mY - (FIGURE_SIZE) < mY && mY < fg[i].mY + (FIGURE_SIZE))
+						{
+							click_index = i;
+							left_button = true;
+						}
+						break;
+					}
+					}
+				}
+				if (left_button == true)
+				{
+					break;
+				}
+			}
 		}
-		std::cout << "left_button : DOWN" << std::endl;
+		//std::cout << "left_button : DOWN" << std::endl;
 	}
 	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 	{
 		left_button = false;
 		// 클릭된 사각형이 놓인 자리 검사 -> 합치기 -> 배열 빈공간 없애기
-		std::cout << "left_button : UP" << std::endl;
+		//std::cout << "left_button : UP" << std::endl;
 	}
 	glutPostRedisplay(); // refresh
 }
@@ -219,7 +260,7 @@ void Motion(int x, int y)
 		float mY = Win_to_GL_Y(y);
 
 		//마우스 좌표에 따라 해당 도형 이동 -> 중점에 마우스 좌표 대입
-
+		updateFigurePos(click_index, mX, mY);
 		glutPostRedisplay(); // refresh
 	}
 }
