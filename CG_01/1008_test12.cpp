@@ -380,7 +380,6 @@ void makeFigureRandPos(int p)
 	{
 	case 2:
 	{	//선
-		fg[0].type = 2;
 		//0번 정점(중심점)
 		X[0] = fg[figureCount].mX;
 		Y[0] = fg[figureCount].mY;
@@ -403,7 +402,6 @@ void makeFigureRandPos(int p)
 	}
 	case 3:
 	{	//삼각형
-		fg[0].type = 3;
 		//0번 
 		X[0] = fg[figureCount].mX;
 		Y[0] = fg[figureCount].mY;
@@ -426,7 +424,6 @@ void makeFigureRandPos(int p)
 	}
 	case 4:
 	{	//사각형
-		fg[0].type = 4;
 		//0번 
 		X[0] = fg[figureCount].mX;
 		Y[0] = fg[figureCount].mY;
@@ -449,7 +446,6 @@ void makeFigureRandPos(int p)
 	}
 	case 5:
 	{	//오각형
-		fg[0].type = 5;
 		//0번 
 		X[0] = fg[figureCount].mX;
 		Y[0] = fg[figureCount].mY;
@@ -547,7 +543,165 @@ void makeFigureRandPos(int p)
 }
 void updateFigurePos(int index, int mX, int mY)
 {
+	// 꼭지점의 개수를 받아서 해당 도형을 랜덤 위치에 생성
 
+	int x = 0;  //가독성을 위한 x
+	int y = 1;  //가독성을 위한 y
+
+	float X[6];
+	float Y[6];
+
+	fg[index].mX = mX;
+	fg[index].mY = mY;
+
+	switch (fg[index].type)
+	{
+	case 2:
+	{   //선
+		//0번 정점(중심점)
+		X[0] = fg[index].mX;
+		Y[0] = fg[index].mY;
+		//1번 정점
+		X[1] = fg[index].mX - FIGURE_SIZE;
+		Y[1] = fg[index].mY - FIGURE_SIZE;
+		//2번 정점
+		X[2] = fg[index].mX + FIGURE_SIZE;
+		Y[2] = fg[index].mY + FIGURE_SIZE;
+		//3번 정점
+		X[3] = fg[index].mX;
+		Y[3] = fg[index].mY;
+		//4번 정점
+		X[4] = fg[index].mX;
+		Y[4] = fg[index].mY;
+		//5번 정점
+		X[5] = fg[index].mX;
+		Y[5] = fg[index].mY;
+		break;
+	}
+	case 3:
+	{   //삼각형
+		//0번 
+		X[0] = fg[index].mX;
+		Y[0] = fg[index].mY;
+		//1번 
+		X[1] = fg[index].mX - FIGURE_SIZE;
+		Y[1] = fg[index].mY - FIGURE_SIZE;
+		//2번 
+		X[2] = fg[index].mX + FIGURE_SIZE;
+		Y[2] = fg[index].mY - FIGURE_SIZE;
+		//3번 
+		X[3] = fg[index].mX;
+		Y[3] = fg[index].mY + FIGURE_SIZE;
+		//4번 
+		X[4] = fg[index].mX;
+		Y[4] = fg[index].mY + FIGURE_SIZE;
+		//5번 
+		X[5] = fg[index].mX;
+		Y[5] = fg[index].mY + FIGURE_SIZE;
+		break;
+	}
+	case 4:
+	{   //사각형
+		//0번 
+		X[0] = fg[index].mX;
+		Y[0] = fg[index].mY;
+		//1번 
+		X[1] = fg[index].mX - FIGURE_SIZE;
+		Y[1] = fg[index].mY - FIGURE_SIZE;
+		//2번 
+		X[2] = fg[index].mX + FIGURE_SIZE;
+		Y[2] = fg[index].mY - FIGURE_SIZE;
+		//3번 
+		X[3] = fg[index].mX;
+		Y[3] = fg[index].mY + FIGURE_SIZE;
+		//4번 
+		X[4] = fg[index].mX - FIGURE_SIZE;
+		Y[4] = fg[index].mY + FIGURE_SIZE;
+		//5번 
+		X[5] = fg[index].mX + FIGURE_SIZE;
+		Y[5] = fg[index].mY + FIGURE_SIZE;
+		break;
+	}
+	case 5:
+	{   //오각형
+		//0번 
+		X[0] = fg[index].mX;
+		Y[0] = fg[index].mY;
+		//1번 
+		X[1] = fg[index].mX - FIGURE_SIZE;
+		Y[1] = fg[index].mY - FIGURE_SIZE;
+		//2번 
+		X[2] = fg[index].mX + FIGURE_SIZE;
+		Y[2] = fg[index].mY - FIGURE_SIZE;
+		//3번 
+		X[3] = fg[index].mX;
+		Y[3] = fg[index].mY + FIGURE_SIZE + (FIGURE_SIZE / 2.0f);
+		//4번 
+		X[4] = fg[index].mX - FIGURE_SIZE - (FIGURE_SIZE / 3.0f);
+		Y[4] = fg[index].mY + FIGURE_SIZE - (FIGURE_SIZE / 2.0f);
+		//5번 
+		X[5] = fg[index].mX + FIGURE_SIZE + (FIGURE_SIZE / 3.0f);
+		Y[5] = fg[index].mY + FIGURE_SIZE - (FIGURE_SIZE / 2.0f);
+		break;
+	}
+	}
+
+	//정점 15개의 위치에 각 인덱스를 대입한다. (삼각형 5개 * 정점 3개 = 정점 15개)
+	if (true)
+	{
+		// 012인덱스
+		figure[index][0][x] = X[0];
+		figure[index][0][y] = Y[0];
+
+		figure[index][1][x] = X[1];
+		figure[index][1][y] = Y[1];
+
+		figure[index][2][x] = X[2];
+		figure[index][2][y] = Y[2];
+
+		// 014인덱스
+		figure[index][3][x] = X[0];
+		figure[index][3][y] = Y[0];
+
+		figure[index][4][x] = X[1];
+		figure[index][4][y] = Y[1];
+
+		figure[index][5][x] = X[4];
+		figure[index][5][y] = Y[4];
+
+		// 025인덱스
+		figure[index][6][x] = X[0];
+		figure[index][6][y] = Y[0];
+
+		figure[index][7][x] = X[2];
+		figure[index][7][y] = Y[2];
+
+		figure[index][8][x] = X[5];
+		figure[index][8][y] = Y[5];
+
+		// 034인덱스
+		figure[index][9][x] = X[0];
+		figure[index][9][y] = Y[0];
+
+		figure[index][10][x] = X[3];
+		figure[index][10][y] = Y[3];
+
+		figure[index][11][x] = X[4];
+		figure[index][11][y] = Y[4];
+
+		// 035인덱스
+		figure[index][12][x] = X[0];
+		figure[index][12][y] = Y[0];
+
+		figure[index][13][x] = X[3];
+		figure[index][13][y] = Y[3];
+
+		figure[index][14][x] = X[5];
+		figure[index][14][y] = Y[5];
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, index * (TRI_COUNT * 9) * sizeof(GLfloat), (TRI_COUNT * 9) * sizeof(GLfloat), figure[index]);
 }
 void addFigure()
 {
