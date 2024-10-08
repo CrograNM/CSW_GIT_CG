@@ -86,6 +86,12 @@ GLuint vao, vbo[2];								//--- VAO, VBO
 bool left_button = false;
 int click_index = 0;
 
+float i_size = FIGURE_SIZE;
+float clicked_size = FIGURE_SIZE;
+
+int temp_index1 = 0;
+int temp_index2 = 0;
+
 // 사용자 정의 함수
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
@@ -255,12 +261,14 @@ void Mouse(int button, int state, int x, int y)
 	{
 		left_button = false;
 		// 클릭된 사각형이 놓인 자리 검사 -> 합치기 -> 배열 빈공간 없애기
-		//std::cout << "left_button : UP" << std::endl;
-		int i_size = FIGURE_SIZE;
-		int clicked_size = FIGURE_SIZE;
+
 		if (fg[click_index].type == 1)
 		{
 			clicked_size = FIGURE_SIZE / 4;
+		}
+		else
+		{
+			clicked_size = FIGURE_SIZE;
 		}
 		for (int i = figureCount - 1; i >= 0; i--)
 		{
@@ -274,12 +282,21 @@ void Mouse(int button, int state, int x, int y)
 				{
 					i_size = FIGURE_SIZE;
 				}
+
 				if (fg[click_index].mX - clicked_size < fg[i].mX + i_size  &&
 					fg[click_index].mX + clicked_size > fg[i].mX - i_size  &&
 					fg[click_index].mY - clicked_size < fg[i].mY + i_size  &&
 					fg[click_index].mY + clicked_size > fg[i].mY - i_size )
 				{
-					// 새로운 도형 생성하는게 아니니까
+					// 새로운 도형 생성하는게 아니니까 굳이 함수 안써도 될듯
+					std::cout << "--ADD--"<< std::endl;
+					fg[i].type = (fg[i].type + fg[click_index].type - 1) % 5 + 1;
+					fg[i].isMoving = true;
+					
+					updateFigurePos(i, fg[i].mX, fg[i].mY);
+					
+					fg[click_index].exist = false;
+					break;
 				}
 			}
 		}
