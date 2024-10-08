@@ -136,6 +136,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 		std::cout << "GLEW Initialized\n";
 
 	setFigures();	//15개의 도형 세팅
+	glutTimerFunc(TIMER_VELOCITY, TimerFunction1, 1);	//타이머
 
 	//--- 세이더 읽어와서 세이더 프로그램 만들기
 	make_shaderProgram();
@@ -857,4 +858,9 @@ float calcMouseLineDist(float px, float py, float x1, float y1, float x2, float 
 	float closestY = y1 + t * dy;
 
 	return sqrt((px - closestX) * (px - closestX) + (py - closestY) * (py - closestY));
+}
+void TimerFunction1(int value)
+{
+	glutPostRedisplay(); // 화면 다시 그리기
+	glutTimerFunc(TIMER_VELOCITY, TimerFunction1, 1);
 }
