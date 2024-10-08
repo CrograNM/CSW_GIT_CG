@@ -28,22 +28,22 @@ float generateRandomFloat(float min, float max)
 	return dis(gen);
 }
 
-// 좌표 변환 함수
+// 좌표 변환 함수(클라이언트 크기가 변경되는것에 주의)
 int GL_to_Win_X(float x)
 {
-	return (x + 1) * (clientWidth / 2.0f);  // 2.0f로 실수 나눗셈
+	return (x + 1) * (glutGet(GLUT_WINDOW_WIDTH) / 2.0f);  // 2.0f로 실수 나눗셈
 }
 int GL_to_Win_Y(float y)
 {
-	return (1 - y) * (clientHeight / 2.0f);  // 2.0f로 실수 나눗셈
+	return (1 - y) * (glutGet(GLUT_WINDOW_HEIGHT) / 2.0f);  // 2.0f로 실수 나눗셈
 }
 float Win_to_GL_X(int x)
 {
-	return (x / (float)clientWidth) * 2 - 1;  // 정수 나눗셈 방지
+	return (x / (float)glutGet(GLUT_WINDOW_WIDTH)) * 2 - 1;  // 정수 나눗셈 방지
 }
 float Win_to_GL_Y(int y)
 {
-	return 1 - (y / (float)clientHeight) * 2;  // 정수 나눗셈 방지
+	return 1 - (y / (float)glutGet(GLUT_WINDOW_HEIGHT)) * 2;  // 정수 나눗셈 방지
 }
 
 // 도형 관련 함수들
@@ -868,7 +868,7 @@ void TimerFunction1(int value)
 {
 	for (int i = 0; i < MAX_FIGURE; i++)
 	{
-		if (fg[i].exist == true && fg[i].isMoving == true)
+		if (i != click_index && fg[i].exist == true && fg[i].isMoving == true)
 		{
 			// 삼각형 이동
 			fg[i].mX += fg[i].dx * VELOCITY;
