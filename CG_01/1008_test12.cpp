@@ -198,11 +198,13 @@ void Mouse(int button, int state, int x, int y)
 			//도형을 잡았는지 검사하여 left_button 활성화
 			left_button = true;
 		}
+		std::cout << "left_button : DOWN" << std::endl;
 	}
 	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 	{
 		left_button = false;
 		// 클릭된 사각형이 놓인 자리 검사 -> 합치기 -> 배열 빈공간 없애기
+		std::cout << "left_button : UP" << std::endl;
 	}
 	glutPostRedisplay(); // refresh
 }
@@ -325,6 +327,7 @@ void InitBuffer()
 
 void setFigures()
 {
+	std::cout << "--set Figures--\n";
 	// 점(미니 사각), 선, 삼각형, 사각형, 오각형 3개씩 랜덤 위치에 세팅
 	// init Figure
 	for (int i = 0; i < MAX_FIGURE; i++)
@@ -358,6 +361,7 @@ void setFigures()
 }
 void makeFigureRandPos(int p)
 {
+	std::cout << "Make Figure p: " << p << std::endl;
 	// 꼭지점의 개수를 받아서 해당 도형을 랜덤 위치에 생성
 
 	int x = 0;	//가독성을 위한 x
